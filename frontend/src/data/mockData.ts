@@ -1,0 +1,453 @@
+import { Product, ProductCategory, BrandSettings, BlogPost } from '../types';
+
+export const INITIAL_BRAND_SETTINGS: BrandSettings = {
+  brand_name: 'Mediherbz',
+  tagline: 'For Young & Vibrant Look',
+  logo_url: '/brand/mediherbz-logo.png',
+  logo_footer_url: '/brand/logo-footer.png',
+  favicon_url: '/brand/favicon-32x32.png',
+  primary_color: '#18833B',
+  deep_green: '#12632F',
+  lime_color: '#A6C928',
+  orange_color: '#F28A13',
+  cream_bg: '#FAF9F2',
+  contact_email: 'care@mediherbz.com',
+  support_phone: '+91 98765 43210',
+  address: 'Mediherbz Herbal Wellness Laboratories, Herbal Park, Kerala, India',
+  currency: 'INR',
+  currency_symbol: '₹',
+  social_links: {
+    instagram: 'https://instagram.com/mediherbz',
+    facebook: 'https://facebook.com/mediherbz',
+    youtube: 'https://youtube.com/@mediherbz',
+    whatsapp: 'https://wa.me/919876543210',
+  },
+  announcement_bar: {
+    enabled: true,
+    text: '🌿 100% Certified Organic & Ayurvedic Formulations • Free Shipping in India on orders above ₹999!',
+    link: '/shop',
+  },
+};
+
+export const INITIAL_CATEGORIES: ProductCategory[] = [
+  { id: 1, name: 'Herbal Supplements', slug: 'herbal-supplements', count: 12, description: 'Daily organic supplements for stamina, immunity, and vitality.' },
+  { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products', count: 18, description: 'Classical Ayurvedic Rasayanas crafted with sacred Himalayan herbs.' },
+  { id: 3, name: 'Herbal Skin Care', slug: 'herbal-skin-care', count: 15, description: 'Natural radiance creams, serums, and scrubs for youthful, glowing skin.' },
+  { id: 4, name: 'Herbal Hair Care', slug: 'herbal-hair-care', count: 10, description: 'Root-nourishing herbal cleansers, masks, and follicle stimulants.' },
+  { id: 5, name: 'Herbal Oils', slug: 'herbal-oils', count: 14, description: 'Cold-pressed botanical oils infused with Ayurvedic herbal extracts.' },
+  { id: 6, name: 'Herbal Powders', slug: 'herbal-powders', count: 9, description: 'Single herb micronized pure powders for holistic daily wellness.' },
+  { id: 7, name: 'Herbal Teas', slug: 'herbal-teas', count: 8, description: 'Aromatic therapeutic infusions designed for relaxation, detox & digestion.' },
+  { id: 8, name: 'Natural Beauty', slug: 'natural-beauty', count: 11, description: 'Non-toxic, chemical-free botanical cosmetic treatments.' },
+  { id: 9, name: 'Organic Products', slug: 'organic-products', count: 16, description: 'Eco-harvested, pesticide-free pure organic wellness goods.' },
+  { id: 10, name: 'Wellness Essentials', slug: 'wellness-essentials', count: 7, description: 'Daily natural necessities for a balanced mind and body.' },
+  { id: 11, name: 'Herbal Kits & Combos', slug: 'herbal-kits-combos', count: 6, description: 'Curated herbal bundles offering comprehensive care at great value.' },
+];
+
+export const INITIAL_PRODUCTS: Product[] = [
+  {
+    id: 101,
+    name: 'Kesh Ratna Herbal Hair Vitalizer Oil',
+    slug: 'kesh-ratna-herbal-hair-vitalizer-oil',
+    price: 649,
+    regular_price: 799,
+    sale_price: 649,
+    on_sale: true,
+    discount_percentage: 19,
+    short_description: 'Potent Ayurvedic cold-pressed oil with Bhringraj, Brahmi, and Amla for thick, youthful hair.',
+    description: 'Mediherbz Kesh Ratna Hair Oil is formulated using classical Kshir Pak Vidhi. 21 vital herbs are slowly simmered in pure sesame and virgin coconut milk to deliver deep root nutrition, halt premature graying, and stimulate dormant follicles.',
+    categories: [
+      { id: 4, name: 'Herbal Hair Care', slug: 'herbal-hair-care' },
+      { id: 5, name: 'Herbal Oils', slug: 'herbal-oils' }
+    ],
+    images: [
+      { id: 1, src: 'https://images.unsplash.com/photo-1608248597359-009f485dbbc9?auto=format&fit=crop&w=800&q=80', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
+      { id: 2, src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80', alt: 'Botanical ingredients herbs' }
+    ],
+    rating: 4.9,
+    rating_count: 142,
+    in_stock: true,
+    stock_quantity: 45,
+    sku: 'MED-OIL-KR100',
+    type: 'variable',
+    variations: [
+      { id: 1011, name: '100 ml Bottle', price: 649, regular_price: 799, sale_price: 649, in_stock: true, stock_quantity: 25, attributes: { size: '100 ml' } },
+      { id: 1012, name: '200 ml Bottle (Best Value)', price: 1199, regular_price: 1499, sale_price: 1199, in_stock: true, stock_quantity: 20, attributes: { size: '200 ml' } }
+    ],
+    herbal_fields: {
+      botanical_name: 'Eclipta alba & Bacopa monnieri Infusion',
+      common_name: 'Bhringraj & Brahmi Hair Revitalizer',
+      ingredients: ['Bhringraj (Eclipta alba)', 'Brahmi (Bacopa monnieri)', 'Amla (Phyllanthus emblica)', 'Neem Leaf extract', 'Cold Pressed Sesame Oil', 'Virgin Coconut Oil', 'Rosemary Essential Oil'],
+      composition: 'Each 10ml contains: Bhringraj extract 200mg, Brahmi extract 150mg, Amla extract 150mg, Sesame base q.s.',
+      product_origin: 'Kerala, India',
+      product_form: 'Infused Herbal Oil',
+      net_quantity: '100 ml / 200 ml',
+      directions_for_use: 'Apply 5-10 ml to scalp and hair shafts. Gently massage with fingertips in circular motions for 10 minutes. Leave overnight or for at least 1 hour before washing with a mild herbal shampoo.',
+      recommended_usage: 'Use 3 times weekly for optimal results.',
+      storage_instructions: 'Store in a cool, dry place away from direct sunlight. Do not refrigerate.',
+      precautions: 'For external use only. Perform a 24-hour patch test before full application.',
+      allergen_info: 'Contains Sesame Oil. Free from mineral oil, parabens, sulphates and synthetic dyes.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-08-15',
+      expiry_date: '2028-08-14',
+      batch_number: 'KR260815',
+      licence_number: 'AYUSH-DL-2024-KRL-8821',
+      certifications: ['GMP Certified', '100% Natural Ayurvedic Formulation', 'Cruelty Free', 'No Mineral Oil'],
+    },
+    featured: true,
+    bestseller: true,
+    new_arrival: false
+  },
+  {
+    id: 102,
+    name: 'Kumkumadi Radiance Youth Elixir Serum',
+    slug: 'kumkumadi-radiance-youth-elixir-serum',
+    price: 1250,
+    regular_price: 1499,
+    sale_price: 1250,
+    on_sale: true,
+    discount_percentage: 17,
+    short_description: 'Pure Saffron (Kesar), Sandalwood & Lotus flower facial oil for ageless, glowing skin.',
+    description: 'A miraculous 100% natural Ayurvedic beauty face oil crafted with precious Kashmiri saffron (crocus sativus), red sandalwood, and 26 sacred botanicals to illuminate the skin tone, reduce pigmentation, and deliver a young & vibrant look.',
+    categories: [
+      { id: 3, name: 'Herbal Skin Care', slug: 'herbal-skin-care' },
+      { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
+    ],
+    images: [
+      { id: 3, src: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80', alt: 'Kumkumadi Oil Bottle with dropper' },
+      { id: 4, src: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80', alt: 'Kashmiri Saffron threads' }
+    ],
+    rating: 5.0,
+    rating_count: 98,
+    in_stock: true,
+    stock_quantity: 32,
+    sku: 'MED-SKN-KM30',
+    type: 'simple',
+    herbal_fields: {
+      botanical_name: 'Crocus sativus & Pterocarpus santalinus Oil',
+      common_name: 'Kumkumadi Tailam',
+      ingredients: ['Pure Kashmiri Saffron (Kumkuma)', 'Red Sandalwood (Rakta Chandana)', 'Blue Lotus (Ulpala)', 'Manjistha (Rubia cordifolia)', 'Goat Milk (Aja Ksheera)', 'Sesame Oil base'],
+      composition: 'Classical Ashtanga Hridayam formulation. Pure herbal extract blend 100%.',
+      product_origin: 'Kashmir & Kerala, India',
+      product_form: 'Facial Oil Serum',
+      net_quantity: '30 ml',
+      directions_for_use: 'Cleanse face thoroughly. Take 3-4 drops onto palms, warm slightly, and press gently into face and neck in upward strokes. Leave on overnight.',
+      recommended_usage: 'Nightly application before bedtime.',
+      storage_instructions: 'Keep in the amber glass bottle away from heat and light.',
+      precautions: 'Avoid contact with eyes. If irritation occurs, discontinue use.',
+      allergen_info: 'Contains dairy (Goat Milk). Free of silicones, artificial fragrance, and preservatives.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-09-01',
+      expiry_date: '2028-08-31',
+      batch_number: 'KM260901',
+      licence_number: 'AYUSH-DL-2024-KRL-8822',
+      certifications: ['AYUSH Premium Mark', 'GMP Certified', '100% Ayurvedic Herbals'],
+    },
+    featured: true,
+    bestseller: true,
+    new_arrival: false
+  },
+  {
+    id: 103,
+    name: 'Pure Ashwagandha KSM-66 Vitality Capsules',
+    slug: 'pure-ashwagandha-ksm-66-vitality-capsules',
+    price: 899,
+    regular_price: 999,
+    sale_price: 899,
+    on_sale: true,
+    discount_percentage: 10,
+    short_description: 'High-potency organic root extract providing stress relief, stamina, and restful sleep.',
+    description: 'Mediherbz Organic Ashwagandha utilizes world-renowned full-spectrum root extract (Withania somnifera) standardized to 5% withanolides. Helps soothe chronic stress, boost cognitive clarity, and foster resilient stamina.',
+    categories: [
+      { id: 1, name: 'Herbal Supplements', slug: 'herbal-supplements' },
+      { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
+    ],
+    images: [
+      { id: 5, src: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80', alt: 'Ashwagandha supplement bottle' }
+    ],
+    rating: 4.8,
+    rating_count: 215,
+    in_stock: true,
+    stock_quantity: 80,
+    sku: 'MED-SUP-ASH60',
+    type: 'simple',
+    herbal_fields: {
+      botanical_name: 'Withania somnifera Root Extract',
+      common_name: 'Indian Ginseng / Ashwagandha',
+      ingredients: ['Standardized Organic Ashwagandha Root Extract (600mg)', 'Organic Black Pepper Extract (BioPerine 5mg)', 'Vegetarian Cellulose Capsule Shell'],
+      composition: 'Each veg capsule contains: Withania somnifera 600mg (std. to 5% Withanolides)',
+      product_origin: 'Rajasthan, India',
+      product_form: 'Vegetarian Capsules',
+      net_quantity: '60 Veg Capsules (1 Month Supply)',
+      directions_for_use: 'Take 1 capsule twice daily with warm milk or water after meals, or as advised by your healthcare practitioner.',
+      recommended_usage: '2 capsules daily.',
+      storage_instructions: 'Store below 25°C in a dry place. Keep bottle tightly closed.',
+      precautions: 'Not recommended during pregnancy. Consult your physician if taking sedatives or thyroid medications.',
+      allergen_info: 'Gluten-free, Non-GMO, 100% Vegan.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-07-20',
+      expiry_date: '2028-07-19',
+      batch_number: 'ASH260720',
+      licence_number: 'FSSAI-LIC-10022044001920',
+      certifications: ['FSSAI Approved', 'GMP Certified', 'USDA Organic Equivalent', 'Vegan'],
+    },
+    featured: true,
+    bestseller: false,
+    new_arrival: true
+  },
+  {
+    id: 104,
+    name: 'Triphala Bio-Cleanse Digestive Infusion Powder',
+    slug: 'triphala-bio-cleanse-digestive-infusion-powder',
+    price: 399,
+    regular_price: 499,
+    sale_price: 399,
+    on_sale: true,
+    discount_percentage: 20,
+    short_description: 'Equal proportions of Amla, Haritaki, and Bibhitaki for gentle colon detox and digestive balance.',
+    description: 'The cornerstone of ancient Ayurvedic internal cleansing. Mediherbz Triphala powder is stone-ground from shade-dried wild-crafted fruits to retain living enzymes, bio-flavonoids, and vitamin C.',
+    categories: [
+      { id: 6, name: 'Herbal Powders', slug: 'herbal-powders' },
+      { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
+    ],
+    images: [
+      { id: 6, src: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80', alt: 'Triphala powder jar' }
+    ],
+    rating: 4.7,
+    rating_count: 83,
+    in_stock: true,
+    stock_quantity: 60,
+    sku: 'MED-PWD-TRP200',
+    type: 'simple',
+    herbal_fields: {
+      botanical_name: 'Emblica officinalis, Terminalia chebula, Terminalia bellirica',
+      common_name: 'Three Sacred Fruits (Triphala Churna)',
+      ingredients: ['Amalaki (Phyllanthus emblica)', 'Bibhitaki (Terminalia bellirica)', 'Haritaki (Terminalia chebula)'],
+      composition: '1:1:1 equal weight fruit pericarp powder',
+      product_origin: 'Madhya Pradesh Forests, India',
+      product_form: 'Fine Micronized Powder',
+      net_quantity: '200 grams',
+      directions_for_use: 'Mix 1 teaspoon (approx 3-5g) with a glass of warm water at bedtime.',
+      recommended_usage: 'Once daily at bedtime.',
+      storage_instructions: 'Keep moisture-free in the zip-lock container.',
+      precautions: 'Do not use during acute diarrhea or dysentery.',
+      allergen_info: 'No allergens. 100% pure raw botanical powder.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-08-10',
+      expiry_date: '2028-08-09',
+      batch_number: 'TRP260810',
+      licence_number: 'AYUSH-DL-2024-KRL-8823',
+      certifications: ['AYUSH Certified', 'GMP Compliant', 'Wild-Harvested'],
+    },
+    featured: false,
+    bestseller: false,
+    new_arrival: true
+  },
+  {
+    id: 105,
+    name: 'Tulsi Holy Basil Immuno-Teas (25 Herbal Pyramids)',
+    slug: 'tulsi-holy-basil-immuno-teas',
+    price: 449,
+    regular_price: 549,
+    sale_price: 449,
+    on_sale: true,
+    discount_percentage: 18,
+    short_description: 'Trinity of Krishna, Rama, and Vana Tulsi blended with Ceylon cinnamon and fresh ginger.',
+    description: 'Nourish your respiratory system and awaken natural immunity with every soothing cup of Mediherbz Tulsi Infusion. Packed in biodegradable pyramid tea bags allowing full herb expansion.',
+    categories: [
+      { id: 7, name: 'Herbal Teas', slug: 'herbal-teas' },
+      { id: 10, name: 'Wellness Essentials', slug: 'wellness-essentials' }
+    ],
+    images: [
+      { id: 7, src: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80', alt: 'Herbal tea in glass cup with dried herbs' }
+    ],
+    rating: 4.9,
+    rating_count: 114,
+    in_stock: true,
+    stock_quantity: 50,
+    sku: 'MED-TEA-TLS25',
+    type: 'simple',
+    herbal_fields: {
+      botanical_name: 'Ocimum sanctum & Ocimum gratissimum',
+      common_name: 'Holy Basil Infusion',
+      ingredients: ['Krishna Tulsi Leaf (40%)', 'Rama Tulsi Leaf (30%)', 'Vana Tulsi Leaf (15%)', 'Ginger Root (10%)', 'Ceylon Cinnamon (5%)'],
+      composition: '100% Whole Herb Leaves & Spices',
+      product_origin: 'Assam & Nilgiris, India',
+      product_form: 'Pyramid Tea Infusion Bags',
+      net_quantity: '25 Biodegradable Pyramid Bags (50g)',
+      directions_for_use: 'Infuse 1 tea bag in 200ml freshly boiled water (95°C) for 4-5 minutes. Sweeten with raw honey if desired.',
+      recommended_usage: 'Enjoy 2-3 cups daily.',
+      storage_instructions: 'Keep in an airtight tin away from strong spices.',
+      precautions: 'None noted under normal dietary usage.',
+      allergen_info: 'Caffeine-free naturally. Free of synthetic flavoring.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-09-12',
+      expiry_date: '2028-09-11',
+      batch_number: 'TLS260912',
+      licence_number: 'FSSAI-LIC-10022044001925',
+      certifications: ['FSSAI Approved', '100% Biodegradable Bags', 'Organic Certified'],
+    },
+    featured: false,
+    bestseller: true,
+    new_arrival: false
+  },
+  {
+    id: 106,
+    name: 'Sandalwood & Haldi Glow Polishing Ubtan Scrub',
+    slug: 'sandalwood-haldi-glow-polishing-ubtan-scrub',
+    price: 599,
+    regular_price: 699,
+    sale_price: 599,
+    on_sale: true,
+    discount_percentage: 14,
+    short_description: 'Traditional Ayurvedic bridal glow recipe with Wild Kasturi Manjal, Chandan, and Chickpea flour.',
+    description: 'Reclaim radiant, velvety skin with this time-honored traditional Ubtan. Naturally sloughs off dead cells, eliminates tanning, tightens open pores, and imparts an irresistible golden luminescence.',
+    categories: [
+      { id: 3, name: 'Herbal Skin Care', slug: 'herbal-skin-care' },
+      { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
+    ],
+    images: [
+      { id: 8, src: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80', alt: 'Herbal skincare scrub paste' }
+    ],
+    rating: 4.8,
+    rating_count: 67,
+    in_stock: true,
+    stock_quantity: 40,
+    sku: 'MED-SKN-UBT150',
+    type: 'simple',
+    herbal_fields: {
+      botanical_name: 'Curcuma aromatica & Santalum album',
+      common_name: 'Ayurvedic Radiance Ubtan',
+      ingredients: ['Wild Kasturi Manjal (Curcuma aromatica)', 'Pure Sandalwood Powder (Santalum album)', 'Besan (Chickpea Flour)', 'Rose Petal Powder', 'Neem Leaves', 'Vetiver (Khus)'],
+      composition: 'Traditional Ayurvedic formulation',
+      product_origin: 'Mysore & Kerala, India',
+      product_form: 'Fine Exfoliating Powder Blend',
+      net_quantity: '150 grams',
+      directions_for_use: 'Mix 2 tablespoons with pure rose water, yogurt or raw milk to form a smooth paste. Apply onto face & body, allow to dry 80%, gently massage off with lukewarm water.',
+      recommended_usage: 'Use 2-3 times per week.',
+      storage_instructions: 'Keep dry, avoid moisture entering container.',
+      precautions: 'Do not use on open cuts or active cystic acne.',
+      allergen_info: 'Free from SLS, parabens, and micro-plastics.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-08-25',
+      expiry_date: '2028-08-24',
+      batch_number: 'UBT260825',
+      licence_number: 'AYUSH-DL-2024-KRL-8824',
+      certifications: ['AYUSH Approved', 'Cruelty Free', 'Plastic-Free Formulation'],
+    },
+    featured: true,
+    bestseller: false,
+    new_arrival: false
+  },
+  {
+    id: 107,
+    name: 'Total Youth & Glow Complete Herbal Combo Kit',
+    slug: 'total-youth-glow-complete-herbal-combo-kit',
+    price: 2199,
+    regular_price: 2797,
+    sale_price: 2199,
+    on_sale: true,
+    discount_percentage: 21,
+    short_description: 'Complete 3-step ritual: Kesh Ratna Oil + Kumkumadi Serum + Ubtan Scrub in a luxury wooden gift box.',
+    description: 'Transform your daily regimen with our flagship wellness trio. Designed specifically to revive tired skin, restore voluminous hair, and nurture a vibrant youthful glow from within.',
+    categories: [
+      { id: 11, name: 'Herbal Kits & Combos', slug: 'herbal-kits-combos' },
+      { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
+    ],
+    images: [
+      { id: 9, src: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80', alt: 'Luxury spa herbal kit combo' }
+    ],
+    rating: 5.0,
+    rating_count: 52,
+    in_stock: true,
+    stock_quantity: 20,
+    sku: 'MED-KIT-YTH01',
+    type: 'bundle',
+    herbal_fields: {
+      botanical_name: 'Ayurvedic Tri-Synergy Regimen',
+      common_name: 'Mediherbz Youthful Radiance Collection',
+      ingredients: ['Kesh Ratna Oil (100ml)', 'Kumkumadi Serum (30ml)', 'Glow Ubtan (150g)'],
+      composition: 'Triple botanical powerhouse combination',
+      product_origin: 'India',
+      product_form: 'Complete Regimen Kit',
+      net_quantity: '1 Kit (3 Full Size Products)',
+      directions_for_use: 'Follow individual product usage guidelines included in the box.',
+      recommended_usage: 'Complete daily and weekly regimen.',
+      storage_instructions: 'Keep in the protective keepsake gift box.',
+      precautions: 'Check individual products for patch test guidance.',
+      allergen_info: 'See individual product listings.',
+      manufacturer: 'Mediherbz Bio-Herbals Pvt Ltd',
+      country_of_origin: 'India',
+      manufacturing_date: '2026-09-10',
+      expiry_date: '2028-08-31',
+      batch_number: 'KIT260910',
+      licence_number: 'AYUSH-DL-2024-KRL-8825',
+      certifications: ['GMP Certified', 'AYUSH Approved Formulations', 'Eco-Friendly Luxury Gift Pack'],
+    },
+    featured: true,
+    bestseller: true,
+    new_arrival: true
+  }
+];
+
+export const INITIAL_BLOGS: BlogPost[] = [
+  {
+    id: 1,
+    title: 'The Ancient Secret of Kumkumadi: How Kashmiri Saffron Restores Natural Glow',
+    slug: 'secret-of-kumkumadi-kashmiri-saffron-glow',
+    excerpt: 'Discover the science and sacred Ayurvedic origins of Kumkumadi Tailam, the revered botanical oil that combats dullness and promotes cellular renewal.',
+    content: `
+      <p>Kumkumadi Tailam has been celebrated in classic Ayurvedic treatises such as the <em>Ashtanga Hridayam</em> for over a thousand years. Regarded as 'liquid gold' for the complexion, this unique botanical preparation brings together the purity of Kashmiri saffron, red sandalwood, and over twenty-four potent herbal extracts.</p>
+      <h3>Why Kashmiri Saffron is Unrivaled</h3>
+      <p>The crocin content in pure high-altitude Kashmiri saffron gives it extraordinary anti-inflammatory and antioxidant properties. When combined with cooling sandalwood and nourishing goat milk, it balances pitta dosha, soothing redness and deeply revitalizing UV-stressed skin.</p>
+      <h3>How to Incorporate Kumkumadi Into Your Night Ritual</h3>
+      <p>A few warm drops massaged into damp skin before sleep works synergistically with the skin's circadian repair cycle, allowing you to wake up to a supple, luminous, and youthful radiance without relying on synthetic chemicals.</p>
+    `,
+    featured_image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80',
+    date: 'October 15, 2026',
+    author: 'Dr. Ananya Sharma (B.A.M.S.)',
+    category: 'Natural Beauty',
+    tags: ['Kumkumadi', 'Ayurveda', 'Skincare', 'Saffron'],
+    read_time: '4 min read'
+  },
+  {
+    id: 2,
+    title: 'Bhringraj: The King of Hair Herbs and the Kshir Pak Vidhi Process',
+    slug: 'bhringraj-king-of-hair-herbs-kshir-pak-vidhi',
+    excerpt: 'Why modern chemical serums fall short compared to traditional slow-cooked herbal hair oils infused via ancient Ayurvedic milk-decoction methods.',
+    content: `
+      <p>In Sanskrit, Bhringraj translates to 'the ruler of bees', referencing its ability to attract and revitalize life. In Ayurvedic trichology, it is revered as the undisputed king for strengthening hair follicles from root to tip.</p>
+      <h3>The Art of Kshir Pak Vidhi</h3>
+      <p>Unlike industrial oils made by simply adding artificial fragrance to mineral oil, authentic Mediherbz hair vitalizers are crafted through Kshir Pak Vidhi. Fresh botanical herbs are simmered gently with milk and pure sesame oil for over 72 hours until all water evaporates and only the herb-infused lipid core remains.</p>
+    `,
+    featured_image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+    date: 'October 22, 2026',
+    author: 'Vaidya R. K. Namboodiri',
+    category: 'Hair Care',
+    tags: ['Hair Care', 'Bhringraj', 'Ayurvedic Oils'],
+    read_time: '5 min read'
+  },
+  {
+    id: 3,
+    title: 'Ashwagandha for Modern Stress: Grounding the Mind and Boosting Vitality',
+    slug: 'ashwagandha-modern-stress-grounding-vitality',
+    excerpt: 'An adaptogenic guide to regulating cortisol, enhancing stamina, and cultivating balanced daily energy without caffeine crashes.',
+    content: `
+      <p>Living in today’s hyper-connected, high-demand world constantly activates our sympathetic nervous system. In Ayurvedic medicine, this manifests as an aggravated Vata dosha—leading to restless sleep, mental fatigue, and diminished physical resilience.</p>
+      <h3>How Adaptogens Function</h3>
+      <p>Ashwagandha (Withania somnifera) is classified as a Rasayana, an herb that fosters longevity and systemic revitalization. Modern clinical studies confirm its efficacy in regulating serum cortisol levels and supporting deep restorative REM sleep.</p>
+    `,
+    featured_image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
+    date: 'October 28, 2026',
+    author: 'Dr. Ananya Sharma (B.A.M.S.)',
+    category: 'Herbal Living',
+    tags: ['Supplements', 'Stress Relief', 'Adaptogens'],
+    read_time: '6 min read'
+  }
+];
+

@@ -1,0 +1,24 @@
+{
+  "short_name": "Mediherbz",
+  "name": "Mediherbz Herbal Products - For Young & Vibrant Look",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#FAF9F2",
+  "theme_color": "#18833B",
+  "display": "standalone",
+  "orientation": "portrait"
+}
+
