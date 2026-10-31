@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Shield, HeartPulse, Award, CheckCircle, Clock } from 'lucide-react';
+import { ArrowRight, Shield, HeartPulse, Award, CheckCircle, Clock } from 'lucide-react';
+import { HeroSlider } from '../components/home/HeroSlider';
 import { ProductCard } from '../components/product/ProductCard';
 import { Product, ProductCategory, BlogPost } from '../types';
 import { api } from '../api/client';
@@ -34,102 +35,8 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-20">
-      {/* Hero Banner Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#12632F] via-[#18833B] to-[#12632F] text-white py-16 sm:py-24">
-        {/* Subtle decorative leaf watermarks */}
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#A6C928_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Left Copy */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 bg-[#A6C928]/20 border border-[#A6C928]/40 px-3.5 py-1.5 rounded-full text-xs font-bold text-[#A6C928] tracking-wide uppercase">
-                <Sparkles className="w-3.5 h-3.5" />
-                Pure Ayurvedic Formulations
-              </div>
-              
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight font-serif leading-[1.15]">
-                For Young &amp; <span className="text-[#A6C928]">Vibrant</span> Look.
-              </h1>
-              
-              <p className="text-base sm:text-lg text-emerald-100 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
-                Discover authentic botanicals, classical Kshir Pak hair oils, Kashmiri saffron youth elixirs, and organic adaptogens formulated to rejuvenate your natural beauty and holistic vitality.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
-                <Link
-                  to="/shop"
-                  className="w-full sm:w-auto px-8 py-4 bg-[#A6C928] hover:bg-[#b8dd32] text-[#12632F] font-extrabold rounded-2xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-base"
-                >
-                  Explore Herbal Shop <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  to="/about"
-                  className="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-2xl transition-all text-base text-center"
-                >
-                  Our Botanical Heritage
-                </Link>
-              </div>
-
-              {/* Key Trust highlights */}
-              <div className="grid grid-cols-3 gap-4 pt-8 border-t border-white/10 text-left">
-                <div>
-                  <p className="text-2xl font-black text-[#A6C928]">100%</p>
-                  <p className="text-xs text-emerald-200">Wild-Harvested Herbs</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-[#A6C928]">0%</p>
-                  <p className="text-xs text-emerald-200">Parabens &amp; Sulfates</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-[#A6C928]">AYUSH</p>
-                  <p className="text-xs text-emerald-200">Govt. Verified Labs</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Hero Product Card Showcase */}
-            <div className="lg:col-span-5 relative flex justify-center">
-              <div className="relative w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl text-[#26352A] border-4 border-white/20 transform rotate-1 hover:rotate-0 transition-transform duration-500">
-                <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-stone-100 mb-5">
-                  <img
-                    src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80"
-                    alt="Kumkumadi Facial Elixir"
-                    className="w-full h-full object-cover"
-                  />
-                  <span className="absolute top-3 left-3 bg-[#18833B] text-white text-xs font-bold px-3 py-1 rounded-full">
-                    Signature Formulation
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#18833B] uppercase tracking-wider">Natural Beauty</span>
-                    <span className="text-sm font-extrabold text-[#F28A13]">★★★★★ (5.0)</span>
-                  </div>
-                  <h3 className="text-lg font-bold">Kumkumadi Radiance Youth Elixir Serum</h3>
-                  <p className="text-xs text-stone-500 line-clamp-2">
-                    Precious Kashmiri Saffron, Red Sandalwood &amp; Blue Lotus cold-infused for glowing, ageless skin.
-                  </p>
-                  <div className="flex items-center justify-between pt-3 border-t border-stone-100">
-                    <div>
-                      <span className="text-xl font-black text-[#18833B]">₹1,250</span>
-                      <span className="text-xs text-stone-400 line-through ml-2">₹1,499</span>
-                    </div>
-                    <Link
-                      to="/product/kumkumadi-radiance-youth-elixir-serum"
-                      className="px-4 py-2 bg-[#18833B] hover:bg-[#12632F] text-white text-xs font-bold rounded-xl transition-colors"
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
+      {/* Big Hero Slider */}
+      <HeroSlider />
 
       {/* Shop By Herbal Category */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
