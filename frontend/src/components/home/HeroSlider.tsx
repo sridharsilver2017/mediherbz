@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight, ShieldCheck, Leaf, HeartPulse } from 'lucide-react';
+import { Product } from '../../types';
 
 interface Slide {
   id: number;
@@ -111,25 +112,47 @@ const HERO_SLIDES: Slide[] = [
   },
 ];
 
-export const HeroSlider: React.FC = () => {
+interface HeroSliderProps {
+  products?: Product[];
+}
+
+export const HeroSlider: React.FC<HeroSliderProps> = ({ products }) => {
   const [current, setCurrent] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
+  // If live products from WordPress exist, enrich slide productCards with live data and WordPress media uploads
+  const slides = HERO_SLIDES.map((slide, idx) => {
+    if (!products || products.length === 0) return slide;
+    const match = products.find((p) => p.slug === slide.productCard.link.replace('/product/', '')) || products[idx % products.length];
+    if (!match) return slide;
+    return {
+      ...slide,
+      productCard: {
+        ...slide.productCard,
+        title: match.name,
+        price: `₹${match.price}`,
+        regularPrice: `₹${match.regular_price}`,
+        image: match.images[0]?.src || slide.productCard.image,
+        link: `/product/${match.slug}`,
+      },
+    };
+  });
+
   useEffect(() => {
     if (!autoPlay) return;
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+      setCurrent((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, [autoPlay]);
+  }, [autoPlay, slides.length]);
 
   const prevSlide = () => {
-    setCurrent((prev) => (prev - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   const nextSlide = () => {
-    setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
+    setCurrent((prev) => (prev + 1) % slides.length);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -148,7 +171,7 @@ export const HeroSlider: React.FC = () => {
     setTouchStart(null);
   };
 
-  const slide = HERO_SLIDES[current];
+  const slide = slides[current] || HERO_SLIDES[0];
 
   return (
     <div
@@ -313,7 +336,7 @@ export const HeroSlider: React.FC = () => {
 
       {/* Slide Indicator Dots & Progress Bars */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2.5">
-        {HERO_SLIDES.map((s, idx) => (
+        {slides.map((s, idx) => (
           <button
             key={s.id}
             onClick={() => setCurrent(idx)}

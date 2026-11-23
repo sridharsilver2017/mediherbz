@@ -10,15 +10,14 @@ class Mediherbz_Security {
     }
 
     public function setup_cors() {
-        $settings = get_option('mediherbz_brand_settings', array());
-        $allowed  = array_map('trim', explode(',', $settings['cors_origins'] ?? 'http://localhost:3000,https://www.mediherbz.com'));
-
         $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-        if (in_array($origin, $allowed, true)) {
+        if ($origin) {
             header("Access-Control-Allow-Origin: $origin");
             header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
             header('Access-Control-Allow-Credentials: true');
             header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+        } else {
+            header("Access-Control-Allow-Origin: *");
         }
 
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'OPTIONS') {

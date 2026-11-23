@@ -36,7 +36,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-16 sm:space-y-24 pb-20">
       {/* Big Hero Slider */}
-      <HeroSlider />
+      <HeroSlider products={featuredProducts} />
 
       {/* Shop By Herbal Category */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
