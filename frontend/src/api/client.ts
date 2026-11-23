@@ -84,42 +84,56 @@ export const api = {
   getProducts: async (params?: { category?: string; search?: string; sort?: string; limit?: number }): Promise<Product[]> => {
     let list: Product[] = [];
 
-    // Attempt 1: Fetch live products directly from WordPress REST API (with cache-busting for fresh CORS & media)
+    // Attempt 1: Fetch live WooCommerce products with real live prices from WooCommerce Store API
     try {
       const siteRoot = WP_API_URL.split('/wp-json/')[0];
-      const wpRes = await fetch(`${siteRoot}/wp-json/wp/v2/product?per_page=20&_embed&_t=${Date.now()}`);
-      if (wpRes.ok) {
-        const wpProducts = await wpRes.json();
-        if (Array.isArray(wpProducts) && wpProducts.length > 0) {
-          list = wpProducts.map((wp: any) => {
+      const wcRes = await fetch(`${siteRoot}/wp-json/wc/store/v1/products?per_page=50&_t=${Date.now()}`);
+      if (wcRes.ok) {
+        const wcProducts = await wcRes.json();
+        if (Array.isArray(wcProducts) && wcProducts.length > 0) {
+          list = wcProducts.map((wp: any) => {
             const seed = INITIAL_PRODUCTS.find((p) => p.slug === wp.slug);
-            const featuredMedia = wp._embedded?.['wp:featuredmedia']?.[0]?.source_url;
-            const liveCats = (wp._embedded?.['wp:term'] || [])
-              .flat()
-              .filter((t: any) => t && t.taxonomy === 'product_cat')
-              .map((t: any) => ({
-                id: t.id,
-                name: t.name,
-                slug: t.slug,
-              }));
+            const minorUnit = wp.prices?.currency_minor_unit ?? 2;
+            const divisor = Math.pow(10, minorUnit);
+            const livePrice = wp.prices?.price ? Number(wp.prices.price) / divisor : (seed?.price || 649);
+            const liveRegular = wp.prices?.regular_price ? Number(wp.prices.regular_price) / divisor : (seed?.regular_price || livePrice);
+            const liveSale = wp.prices?.sale_price ? Number(wp.prices.sale_price) / divisor : livePrice;
+            const discountPct = liveRegular > livePrice ? Math.round(((liveRegular - livePrice) / liveRegular) * 100) : 0;
+
+            const liveImages = Array.isArray(wp.images) && wp.images.length > 0
+              ? wp.images.map((img: any) => ({
+                  id: img.id,
+                  src: img.src,
+                  alt: img.alt || wp.name?.replace(/&amp;/g, '&'),
+                }))
+              : (seed?.images || []);
+
+            const liveCategories = Array.isArray(wp.categories) && wp.categories.length > 0
+              ? wp.categories.map((c: any) => ({
+                  id: c.id,
+                  name: c.name?.replace(/&amp;/g, '&'),
+                  slug: c.slug,
+                }))
+              : (seed?.categories || []);
 
             return {
               id: wp.id,
-              name: wp.title?.rendered || wp.slug,
+              name: wp.name?.replace(/&amp;/g, '&') || wp.slug,
               slug: wp.slug,
-              price: seed?.price || 649,
-              regular_price: seed?.regular_price || 799,
-              sale_price: seed?.sale_price || seed?.price || 649,
-              on_sale: true,
-              short_description: wp.excerpt?.rendered?.replace(/<[^>]*>/g, '').trim() || seed?.short_description || '',
-              description: wp.content?.rendered || seed?.description || '',
-              categories: liveCats.length > 0 ? liveCats : (seed?.categories || []),
-              images: featuredMedia ? [{ id: wp.featured_media, src: featuredMedia, alt: wp.title?.rendered }] : seed?.images || [],
-              rating: seed?.rating || 4.9,
-              rating_count: seed?.rating_count || 120,
-              in_stock: true,
+              price: livePrice,
+              regular_price: liveRegular,
+              sale_price: liveSale,
+              discount_percentage: discountPct,
+              on_sale: Boolean(wp.on_sale || liveRegular > livePrice),
+              short_description: wp.short_description?.replace(/<[^>]*>/g, '').trim() || seed?.short_description || '',
+              description: wp.description || seed?.description || '',
+              categories: liveCategories,
+              images: liveImages,
+              rating: Number(wp.average_rating) || seed?.rating || 4.9,
+              rating_count: Number(wp.review_count) || seed?.rating_count || 120,
+              in_stock: wp.is_in_stock !== false,
               stock_quantity: 50,
-              sku: seed?.sku || `MED-${wp.id}`,
+              sku: wp.sku || seed?.sku || `MED-${wp.id}`,
               type: 'simple',
               herbal_fields: seed?.herbal_fields || {
                 botanical_name: 'Ayurvedic Botanical Formula',
@@ -134,7 +148,62 @@ export const api = {
         }
       }
     } catch (err) {
-      console.warn('[Mediherbz API] Live WP product fetch fallback', err);
+      console.warn('[Mediherbz API] WooCommerce Store API fetch failed, trying WP core fallback', err);
+    }
+
+    // Attempt 2: Fallback to core WordPress REST API
+    if (list.length === 0) {
+      try {
+        const siteRoot = WP_API_URL.split('/wp-json/')[0];
+        const wpRes = await fetch(`${siteRoot}/wp-json/wp/v2/product?per_page=20&_embed&_t=${Date.now()}`);
+        if (wpRes.ok) {
+          const wpProducts = await wpRes.json();
+          if (Array.isArray(wpProducts) && wpProducts.length > 0) {
+            list = wpProducts.map((wp: any) => {
+              const seed = INITIAL_PRODUCTS.find((p) => p.slug === wp.slug);
+              const featuredMedia = wp._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+              const liveCats = (wp._embedded?.['wp:term'] || [])
+                .flat()
+                .filter((t: any) => t && t.taxonomy === 'product_cat')
+                .map((t: any) => ({
+                  id: t.id,
+                  name: t.name,
+                  slug: t.slug,
+                }));
+
+              return {
+                id: wp.id,
+                name: wp.title?.rendered?.replace(/&amp;/g, '&') || wp.slug,
+                slug: wp.slug,
+                price: seed?.price || 649,
+                regular_price: seed?.regular_price || 799,
+                sale_price: seed?.sale_price || seed?.price || 649,
+                on_sale: true,
+                short_description: wp.excerpt?.rendered?.replace(/<[^>]*>/g, '').trim() || seed?.short_description || '',
+                description: wp.content?.rendered || seed?.description || '',
+                categories: liveCats.length > 0 ? liveCats : (seed?.categories || []),
+                images: featuredMedia ? [{ id: wp.featured_media, src: featuredMedia, alt: wp.title?.rendered }] : seed?.images || [],
+                rating: seed?.rating || 4.9,
+                rating_count: seed?.rating_count || 120,
+                in_stock: true,
+                stock_quantity: 50,
+                sku: seed?.sku || `MED-${wp.id}`,
+                type: 'simple',
+                herbal_fields: seed?.herbal_fields || {
+                  botanical_name: 'Ayurvedic Botanical Formula',
+                  ingredients: ['Pure Herbal Extracts', 'Cold Pressed Oils'],
+                  directions_for_use: 'Use as directed on label.',
+                },
+                featured: true,
+                bestseller: true,
+                new_arrival: false,
+              };
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[Mediherbz API] Live WP product fetch fallback', err);
+      }
     }
 
     if (list.length === 0) {
