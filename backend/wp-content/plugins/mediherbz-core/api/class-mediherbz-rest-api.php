@@ -59,6 +59,13 @@ class Mediherbz_REST_API {
             'callback'            => array($this, 'seed_demo_data'),
             'permission_callback' => '__return_true',
         ));
+
+        // Auto-link all uploaded media images to products and posts
+        register_rest_route($this->namespace, '/link-images', array(
+            'methods'             => array('GET', 'POST'),
+            'callback'            => array($this, 'link_images_to_products'),
+            'permission_callback' => '__return_true',
+        ));
     }
 
     public function get_health() {
@@ -439,6 +446,63 @@ class Mediherbz_REST_API {
             'message'          => 'Demo data successfully seeded into WordPress!',
             'products_created' => $created_products,
             'posts_created'    => $created_posts,
+        ));
+    }
+
+    public function link_images_to_products($request) {
+        $secret = $request->get_param('key');
+        if ($secret !== 'mediherbz2026') {
+            return new WP_Error('unauthorized', 'Pass key=mediherbz2026 to link media images.', array('status' => 403));
+        }
+
+        // Map product slugs to media slugs
+        $map = array(
+            'kesh-ratna-herbal-hair-vitalizer-oil'       => 'product-kesh-ratna-hair-oil',
+            'kumkumadi-radiance-youth-elixir-serum'      => 'product-kumkumadi-radiance-elixir',
+            'ashwagandha-ksm66-organic-vitality-capsules' => 'product-ashwagandha-capsules',
+            'triphala-bio-active-micronized-churna'       => 'product-triphala-churna',
+            'himalayan-tulsi-ginger-herbal-infusion-tea' => 'product-tulsi-ginger-tea',
+            'sandalwood-turmeric-radiance-ubtan-paste'   => 'product-sandalwood-turmeric-ubtan',
+            'total-youth-glow-complete-herbal-combo-kit' => 'product-total-youth-combo-kit',
+        );
+
+        // Map blog slugs to media slugs
+        $blog_map = array(
+            'secret-of-kumkumadi-kashmiri-saffron-glow' => 'ingredient-kashmiri-saffron',
+            'bhringraj-king-of-hair-herbs-kshir-pak-vidhi' => 'ingredient-herbal-leaves-ayurveda',
+            'ashwagandha-modern-stress-grounding-vitality' => 'product-ashwagandha-capsules',
+        );
+
+        $results = array();
+
+        // 1. Link Products
+        foreach ($map as $prod_slug => $img_slug) {
+            $product_post = get_page_by_path($prod_slug, OBJECT, 'product');
+            $media_post = get_page_by_path($img_slug, OBJECT, 'attachment');
+
+            if ($product_post && $media_post) {
+                set_post_thumbnail($product_post->ID, $media_post->ID);
+                $results[] = "Linked {$img_slug} (ID {$media_post->ID}) to product {$prod_slug} (ID {$product_post->ID})";
+            } else {
+                $results[] = "Could not link {$img_slug} to {$prod_slug} (Product: " . ($product_post ? 'found' : 'missing') . ", Media: " . ($media_post ? 'found' : 'missing') . ")";
+            }
+        }
+
+        // 2. Link Blog Posts
+        foreach ($blog_map as $b_slug => $img_slug) {
+            $b_post = get_page_by_path($b_slug, OBJECT, 'post');
+            $media_post = get_page_by_path($img_slug, OBJECT, 'attachment');
+
+            if ($b_post && $media_post) {
+                set_post_thumbnail($b_post->ID, $media_post->ID);
+                $results[] = "Linked {$img_slug} (ID {$media_post->ID}) to post {$b_slug} (ID {$b_post->ID})";
+            }
+        }
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'message' => 'All product and blog featured images linked successfully!',
+            'details' => $results,
         ));
     }
 }
