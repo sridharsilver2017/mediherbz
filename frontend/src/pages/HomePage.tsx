@@ -5,15 +5,23 @@ import { HeroSlider } from '../components/home/HeroSlider';
 import { ProductCard } from '../components/product/ProductCard';
 import { Product, ProductCategory, BlogPost } from '../types';
 import { api } from '../api/client';
+import { INITIAL_PRODUCTS, INITIAL_CATEGORIES, INITIAL_BLOGS } from '../data/mockData';
 
 export const HomePage: React.FC = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [bestsellers, setBestsellers] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [blogs, setBlogs] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(() =>
+    INITIAL_PRODUCTS.filter((p) => p.featured)
+  );
+  const [bestsellers, setBestsellers] = useState<Product[]>(() =>
+    INITIAL_PRODUCTS.filter((p) => p.bestseller)
+  );
+  const [categories, setCategories] = useState<ProductCategory[]>(() =>
+    INITIAL_CATEGORIES.filter((c) => (c.count || 0) > 0)
+  );
+  const [blogs, setBlogs] = useState<BlogPost[]>(INITIAL_BLOGS);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadData() {
       try {
         const [feat, best, cats, blgs] = await Promise.all([
@@ -22,15 +30,18 @@ export const HomePage: React.FC = () => {
           api.getCategories(),
           api.getBlogs(),
         ]);
-        setFeaturedProducts(feat);
-        setBestsellers(best);
-        setCategories(cats);
-        setBlogs(blgs);
+        if (isMounted) {
+          if (feat && feat.length > 0) setFeaturedProducts(feat);
+          if (best && best.length > 0) setBestsellers(best);
+          if (cats && cats.length > 0) setCategories(cats);
+          if (blgs && blgs.length > 0) setBlogs(blgs);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     loadData();
+    return () => { isMounted = false; };
   }, []);
 
   return (

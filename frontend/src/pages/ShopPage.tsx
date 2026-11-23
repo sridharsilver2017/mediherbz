@@ -4,21 +4,30 @@ import { Filter, SlidersHorizontal, ArrowUpDown, X } from 'lucide-react';
 import { ProductCard } from '../components/product/ProductCard';
 import { Product, ProductCategory } from '../types';
 import { api } from '../api/client';
+import { INITIAL_PRODUCTS, INITIAL_CATEGORIES } from '../data/mockData';
 
 export const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-
   const selectedCategory = searchParams.get('category') || 'all';
   const searchQuery = searchParams.get('search') || '';
   const currentSort = searchParams.get('sort') || 'default';
 
+  const [products, setProducts] = useState<Product[]>(() => {
+    let list = [...INITIAL_PRODUCTS];
+    if (selectedCategory !== 'all') {
+      list = list.filter((p) => p.categories.some((c) => c.slug === selectedCategory));
+    }
+    return list;
+  });
+  const [categories, setCategories] = useState<ProductCategory[]>(() =>
+    INITIAL_CATEGORIES.filter((c) => (c.count || 0) > 0)
+  );
+  const [loading, setLoading] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
   useEffect(() => {
+    let isMounted = true;
     async function loadData() {
-      setLoading(true);
       try {
         const [cats, prods] = await Promise.all([
           api.getCategories(),
@@ -28,13 +37,16 @@ export const ShopPage: React.FC = () => {
             sort: currentSort,
           }),
         ]);
-        setCategories(cats);
-        setProducts(prods);
+        if (isMounted) {
+          if (cats && cats.length > 0) setCategories(cats);
+          if (prods) setProducts(prods);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     loadData();
+    return () => { isMounted = false; };
   }, [selectedCategory, searchQuery, currentSort]);
 
   const handleCategoryChange = (slug: string) => {

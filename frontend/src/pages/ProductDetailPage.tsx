@@ -3,38 +3,42 @@ import { useParams, Link } from 'react-router-dom';
 import { Star, ShieldCheck, Truck, RefreshCw, Heart, Plus, Minus, ShoppingBag, FileText, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Product, ProductVariation } from '../types';
 import { api } from '../api/client';
+import { INITIAL_PRODUCTS } from '../data/mockData';
 import { useCartStore } from '../store/cartStore';
 import { useWishlistStore } from '../store/wishlistStore';
 
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
+  const initialMatch = slug ? INITIAL_PRODUCTS.find((p) => p.slug === slug) : null;
+  const [product, setProduct] = useState<Product | null>(initialMatch || null);
   const [selectedVariation, setSelectedVariation] = useState<ProductVariation | undefined>(undefined);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState<'details' | 'ingredients' | 'usage' | 'compliance'>('details');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialMatch);
 
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
 
   useEffect(() => {
+    let isMounted = true;
     async function loadProduct() {
       if (!slug) return;
-      setLoading(true);
+      if (!product) setLoading(true);
       try {
         const item = await api.getProductBySlug(slug);
-        if (item) {
+        if (isMounted && item) {
           setProduct(item);
-          if (item.variations && item.variations.length > 0) {
+          if (item.variations && item.variations.length > 0 && !selectedVariation) {
             setSelectedVariation(item.variations[0]);
           }
         }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     loadProduct();
+    return () => { isMounted = false; };
   }, [slug]);
 
   if (loading) {
