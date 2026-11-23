@@ -60,7 +60,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 5, name: 'Herbal Oils', slug: 'herbal-oils' }
     ],
     images: [
-      { id: 1, src: 'https://images.unsplash.com/photo-1608248597359-009f485dbbc9?auto=format&fit=crop&w=800&q=80', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
+      { id: 1, src: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=800&q=80', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
       { id: 2, src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80', alt: 'Botanical ingredients herbs' }
     ],
     rating: 4.9,

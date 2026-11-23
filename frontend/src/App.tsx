@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { CartDrawer } from './components/cart/CartDrawer';
+import { ScrollToTop } from './components/common/ScrollToTop';
+import { BackToTopButton } from './components/common/BackToTopButton';
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -17,6 +19,7 @@ import { ContactPage } from './pages/ContactPage';
 export function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-[#FAF9F2] text-[#26352A]">
         <Header />
         <main className="flex-1">
@@ -45,6 +48,7 @@ export function App() {
         </main>
         <Footer />
         <CartDrawer />
+        <BackToTopButton />
       </div>
     </Router>
   );

@@ -14,7 +14,8 @@ interface Slide {
   primaryCtaLink: string;
   secondaryCtaText: string;
   secondaryCtaLink: string;
-  bgGradient: string;
+  bgGradient: string; // fallback gradient classes
+  bgImage: string; // URL or path to background image
   floatingBadge: string;
   productCard: {
     title: string;
@@ -27,6 +28,7 @@ interface Slide {
     badge: string;
   };
 }
+
 
 const HERO_SLIDES: Slide[] = [
   {
@@ -42,6 +44,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'Explore All Formulations',
     secondaryCtaLink: '/shop',
     bgGradient: 'from-[#0e4822] via-[#12632F] to-[#18833B]',
+    bgImage: '/hero/banner-wellness.jpg',
     floatingBadge: '100% Wild Saffron Infused',
     productCard: {
       title: 'Kumkumadi Radiance Youth Elixir Serum',
@@ -67,6 +70,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'View Hair Care Range',
     secondaryCtaLink: '/shop?category=herbal-hair-care',
     bgGradient: 'from-[#0b3b1c] via-[#13592c] to-[#1c783c]',
+    bgImage: '',
     floatingBadge: '72hr Slow Kshir Pak Vidhi',
     productCard: {
       title: 'Kesh Ratna Herbal Hair Vitalizer Oil',
@@ -74,7 +78,7 @@ const HERO_SLIDES: Slide[] = [
       rating: '★★★★★ 4.9 (142 reviews)',
       price: '₹649',
       regularPrice: '₹799',
-      image: 'https://images.unsplash.com/photo-1608248597359-009f485dbbc9?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=800&q=80',
       link: '/product/kesh-ratna-herbal-hair-vitalizer-oil',
       badge: 'Best Seller',
     },
@@ -92,6 +96,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'Browse Kits & Bundles',
     secondaryCtaLink: '/shop?category=herbal-kits-combos',
     bgGradient: 'from-[#194e2a] via-[#1c6936] to-[#258a47]',
+    bgImage: '',
     floatingBadge: 'Complete 3-Step Ritual',
     productCard: {
       title: 'Total Youth & Glow Complete Herbal Combo',
@@ -130,14 +135,19 @@ export const HeroSlider: React.FC = () => {
 
   return (
     <div
-      className="relative overflow-hidden min-h-[580px] lg:min-h-[640px] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
+      className="relative overflow-hidden min-h-[530px] h-[calc(80vh-116px)] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
       onMouseEnter={() => setAutoPlay(false)}
       onMouseLeave={() => setAutoPlay(true)}
     >
-      {/* Background with dynamic smooth gradient */}
+      {/* Background with dynamic smooth gradient / image */}
       <div
-        className={`absolute inset-0 bg-gradient-to-r ${slide.bgGradient} transition-colors duration-1000`}
+        className={`absolute inset-0 ${slide.bgImage ? '' : `bg-gradient-to-r ${slide.bgGradient}`} transition-all duration-1000`}
+        style={slide.bgImage ? { backgroundImage: `url(${slide.bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : {}}
       />
+
+      {/* Dark Ambient Overlay for optimal contrast & text readability */}
+      <div className="absolute inset-0 bg-black/55 backdrop-brightness-75 pointer-events-none transition-opacity duration-700" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent pointer-events-none" />
 
       {/* Decorative Botanical Pattern Overlay */}
       <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#A6C928_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
@@ -300,3 +310,4 @@ export const HeroSlider: React.FC = () => {
     </div>
   );
 };
+
