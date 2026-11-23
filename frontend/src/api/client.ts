@@ -52,22 +52,84 @@ export const api = {
 
   // Categories
   getCategories: async (): Promise<ProductCategory[]> => {
+    try {
+      const siteRoot = WP_API_URL.split('/wp-json/')[0];
+      const res = await fetch(`${siteRoot}/wp-json/wp/v2/product_cat?per_page=50&_embed`);
+      if (res.ok) {
+        const wpCats = await res.json();
+        if (Array.isArray(wpCats) && wpCats.length > 0) {
+          return wpCats
+            .filter((c: any) => c.slug !== 'uncategorized')
+            .map((c: any) => {
+              const matchingSeed = INITIAL_CATEGORIES.find((sc) => sc.slug === c.slug);
+              return {
+                id: c.id,
+                name: c.name,
+                slug: c.slug,
+                description: c.description || matchingSeed?.description,
+                count: c.count,
+                image: matchingSeed?.image,
+              };
+            });
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch product_cat, falling back', e);
+    }
     return fetchFromApi<ProductCategory[]>('/categories', INITIAL_CATEGORIES);
   },
 
   // Products
   getProducts: async (params?: { category?: string; search?: string; sort?: string; limit?: number }): Promise<Product[]> => {
-    let endpoint = '/products';
-    const query = new URLSearchParams();
-    if (params?.category) query.append('category', params.category);
-    if (params?.search) query.append('search', params.search);
-    if (params?.sort) query.append('sort', params.sort);
-    if (params?.limit) query.append('limit', params.limit.toString());
-    const queryString = query.toString();
-    if (queryString) endpoint += `?${queryString}`;
+    let list: Product[] = [];
 
-    const rawList = await fetchFromApi<Product[]>(endpoint, INITIAL_PRODUCTS);
-    let list = [...rawList];
+    // Attempt 1: Fetch live products directly from WordPress REST API
+    try {
+      const siteRoot = WP_API_URL.split('/wp-json/')[0];
+      const wpRes = await fetch(`${siteRoot}/wp-json/wp/v2/product?per_page=20&_embed`);
+      if (wpRes.ok) {
+        const wpProducts = await wpRes.json();
+        if (Array.isArray(wpProducts) && wpProducts.length > 0) {
+          list = wpProducts.map((wp: any) => {
+            const seed = INITIAL_PRODUCTS.find((p) => p.slug === wp.slug);
+            const featuredMedia = wp._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+            return {
+              id: wp.id,
+              name: wp.title?.rendered || wp.slug,
+              slug: wp.slug,
+              price: seed?.price || 649,
+              regular_price: seed?.regular_price || 799,
+              sale_price: seed?.sale_price || seed?.price || 649,
+              on_sale: true,
+              short_description: wp.excerpt?.rendered?.replace(/<[^>]*>/g, '').trim() || seed?.short_description || '',
+              description: wp.content?.rendered || seed?.description || '',
+              categories: seed?.categories || [],
+              images: featuredMedia ? [{ id: wp.featured_media, src: featuredMedia, alt: wp.title?.rendered }] : seed?.images || [],
+              rating: seed?.rating || 4.9,
+              rating_count: seed?.rating_count || 120,
+              in_stock: true,
+              stock_quantity: 50,
+              sku: seed?.sku || `MED-${wp.id}`,
+              type: 'simple',
+              herbal_fields: seed?.herbal_fields || {
+                botanical_name: 'Ayurvedic Botanical Formula',
+                ingredients: ['Pure Herbal Extracts', 'Cold Pressed Oils'],
+                directions_for_use: 'Use as directed on label.',
+              },
+              featured: true,
+              bestseller: true,
+              new_arrival: false,
+            };
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('[Mediherbz API] Live WP product fetch fallback', err);
+    }
+
+    if (list.length === 0) {
+      list = [...INITIAL_PRODUCTS];
+    }
 
     if (params?.category && params.category !== 'all') {
       list = list.filter(p => p.categories.some(c => c.slug === params.category));
@@ -112,6 +174,36 @@ export const api = {
 
   // Blogs
   getBlogs: async (): Promise<BlogPost[]> => {
+    try {
+      const siteRoot = WP_API_URL.split('/wp-json/')[0];
+      const res = await fetch(`${siteRoot}/wp-json/wp/v2/posts?per_page=10&_embed`);
+      if (res.ok) {
+        const posts = await res.json();
+        if (Array.isArray(posts) && posts.length > 0) {
+          return posts
+            .filter((p: any) => p.slug !== 'hello-world')
+            .map((p: any) => {
+              const seed = INITIAL_BLOGS.find((b) => b.slug === p.slug);
+              const featuredMedia = p._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+              return {
+                id: p.id,
+                title: p.title?.rendered || seed?.title || '',
+                slug: p.slug,
+                excerpt: p.excerpt?.rendered?.replace(/<[^>]*>/g, '').trim() || seed?.excerpt || '',
+                content: p.content?.rendered || seed?.content || '',
+                featured_image: featuredMedia || seed?.featured_image || '',
+                date: new Date(p.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+                author: p._embedded?.author?.[0]?.name || 'Mediherbz Ayurvedic Vaidya',
+                category: seed?.category || 'Wellness Journal',
+                tags: seed?.tags || ['Ayurveda', 'Herbal Care'],
+                read_time: seed?.read_time || '4 min read',
+              };
+            });
+        }
+      }
+    } catch (e) {
+      console.warn('Could not fetch live WP posts', e);
+    }
     return fetchFromApi<BlogPost[]>('/blogs', INITIAL_BLOGS);
   },
 
