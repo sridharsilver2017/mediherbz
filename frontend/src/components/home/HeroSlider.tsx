@@ -44,7 +44,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'Explore All Formulations',
     secondaryCtaLink: '/shop',
     bgGradient: 'from-[#0e4822] via-[#12632F] to-[#18833B]',
-    bgImage: '/hero/banner-wellness.jpg',
+    bgImage: '/hero/slide1.png',
     floatingBadge: '100% Wild Saffron Infused',
     productCard: {
       title: 'Kumkumadi Radiance Youth Elixir Serum',
@@ -70,7 +70,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'View Hair Care Range',
     secondaryCtaLink: '/shop?category=herbal-hair-care',
     bgGradient: 'from-[#0b3b1c] via-[#13592c] to-[#1c783c]',
-    bgImage: '',
+    bgImage: '/hero/slide2.png',
     floatingBadge: '72hr Slow Kshir Pak Vidhi',
     productCard: {
       title: 'Kesh Ratna Herbal Hair Vitalizer Oil',
@@ -96,7 +96,7 @@ const HERO_SLIDES: Slide[] = [
     secondaryCtaText: 'Browse Kits & Bundles',
     secondaryCtaLink: '/shop?category=herbal-kits-combos',
     bgGradient: 'from-[#194e2a] via-[#1c6936] to-[#258a47]',
-    bgImage: '',
+    bgImage: '/hero/slide3.png',
     floatingBadge: 'Complete 3-Step Ritual',
     productCard: {
       title: 'Total Youth & Glow Complete Herbal Combo',
@@ -114,6 +114,7 @@ const HERO_SLIDES: Slide[] = [
 export const HeroSlider: React.FC = () => {
   const [current, setCurrent] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   useEffect(() => {
     if (!autoPlay) return;
@@ -131,13 +132,31 @@ export const HeroSlider: React.FC = () => {
     setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    if (diff > 50) {
+      nextSlide();
+    } else if (diff < -50) {
+      prevSlide();
+    }
+    setTouchStart(null);
+  };
+
   const slide = HERO_SLIDES[current];
 
   return (
     <div
-      className="relative overflow-hidden min-h-[530px] h-[calc(80vh-116px)] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
+      className="relative overflow-hidden min-h-[520px] md:min-h-[530px] md:h-[calc(80vh-116px)] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
       onMouseEnter={() => setAutoPlay(false)}
       onMouseLeave={() => setAutoPlay(true)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Background with dynamic smooth gradient / image */}
       <div
@@ -157,72 +176,72 @@ export const HeroSlider: React.FC = () => {
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-[#F28A13]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Slide Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 relative z-10 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           {/* Left Hero Copy */}
-          <div className="lg:col-span-7 space-y-6 text-center lg:text-left animate-fadeIn">
+          <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left animate-fadeIn">
             
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#A6C928]/20 border border-[#A6C928]/40 px-4 py-1.5 rounded-full text-xs font-bold text-[#A6C928] uppercase tracking-wider shadow-xs backdrop-blur-xs">
-              {slide.tagIcon === 'sparkles' && <Sparkles className="w-4 h-4" />}
-              {slide.tagIcon === 'leaf' && <Leaf className="w-4 h-4" />}
-              {slide.tagIcon === 'shield' && <ShieldCheck className="w-4 h-4" />}
+            <div className="inline-flex items-center gap-2 bg-[#A6C928]/20 border border-[#A6C928]/40 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs font-bold text-[#A6C928] uppercase tracking-wider shadow-xs backdrop-blur-xs">
+              {slide.tagIcon === 'sparkles' && <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              {slide.tagIcon === 'leaf' && <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+              {slide.tagIcon === 'shield' && <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
               <span>{slide.tag}</span>
             </div>
 
             {/* Main Headings */}
             <div className="space-y-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-serif tracking-tight leading-[1.12]">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-serif tracking-tight leading-[1.15]">
                 {slide.headingRegular}{' '}
                 <span className="text-[#A6C928] drop-shadow-xs">{slide.headingAccent}</span>
               </h1>
-              <p className="text-xs sm:text-sm font-semibold tracking-wide text-emerald-200 uppercase">
+              <p className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-emerald-200 uppercase">
                 {slide.tagline}
               </p>
             </div>
 
             {/* Description */}
-            <p className="text-sm sm:text-base text-emerald-50/90 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base text-emerald-50/90 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
               {slide.description}
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 sm:pt-2">
               <Link
                 to={slide.primaryCtaLink}
-                className="w-full sm:w-auto px-8 py-4 bg-[#A6C928] hover:bg-[#b8dd32] text-[#12632F] font-black rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-[#A6C928] hover:bg-[#b8dd32] text-[#12632F] font-black rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 <span>{slide.primaryCtaText}</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
               <Link
                 to={slide.secondaryCtaLink}
-                className="w-full sm:w-auto px-7 py-4 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold rounded-2xl transition-all text-sm sm:text-base text-center backdrop-blur-xs"
+                className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold rounded-xl sm:rounded-2xl transition-all text-sm sm:text-base text-center backdrop-blur-xs"
               >
                 {slide.secondaryCtaText}
               </Link>
             </div>
 
             {/* Trust Micro-Metrics */}
-            <div className="grid grid-cols-3 gap-3 sm:gap-6 pt-6 border-t border-white/15 max-w-lg mx-auto lg:mx-0">
-              <div className="text-left">
-                <p className="text-xl sm:text-2xl font-black text-[#A6C928]">100%</p>
-                <p className="text-[11px] sm:text-xs text-emerald-200/90 font-medium">Pure Botanicals</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-4 sm:pt-6 border-t border-white/15 max-w-lg mx-auto lg:mx-0">
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-black text-[#A6C928]">100%</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Pure Botanicals</p>
               </div>
-              <div className="text-left">
-                <p className="text-xl sm:text-2xl font-black text-[#A6C928]">AYUSH</p>
-                <p className="text-[11px] sm:text-xs text-emerald-200/90 font-medium">Govt. Verified</p>
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-black text-[#A6C928]">AYUSH</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Govt. Verified</p>
               </div>
-              <div className="text-left">
-                <p className="text-xl sm:text-2xl font-black text-[#A6C928]">Free</p>
-                <p className="text-[11px] sm:text-xs text-emerald-200/90 font-medium">Delivery &gt; ₹999</p>
+              <div className="text-center sm:text-left">
+                <p className="text-lg sm:text-2xl font-black text-[#A6C928]">Free</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Delivery &gt; ₹999</p>
               </div>
             </div>
           </div>
 
-          {/* Right Hero Product Card Showcase */}
-          <div className="lg:col-span-5 relative flex justify-center">
+          {/* Right Hero Product Card Showcase - hidden on mobile screens to give full prominence to hero banner & copy */}
+          <div className="hidden lg:flex lg:col-span-5 relative justify-center">
             <div className="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl text-[#26352A] border-4 border-white/25 transition-all duration-500 hover:scale-[1.02]">
               
               {/* Image with overlay badge */}
@@ -275,10 +294,10 @@ export const HeroSlider: React.FC = () => {
         </div>
       </div>
 
-      {/* Prev / Next Slider Arrows */}
+      {/* Prev / Next Slider Arrows - Hidden on mobile, visible on md+ */}
       <button
         onClick={prevSlide}
-        className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-110"
+        className="hidden md:flex absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-110"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-6 h-6" />
@@ -286,7 +305,7 @@ export const HeroSlider: React.FC = () => {
 
       <button
         onClick={nextSlide}
-        className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white flex items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-110"
+        className="hidden md:flex absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-white/10 hover:bg-white/30 backdrop-blur-md border border-white/20 text-white items-center justify-center transition-all cursor-pointer shadow-lg hover:scale-110"
         aria-label="Next slide"
       >
         <ChevronRight className="w-6 h-6" />

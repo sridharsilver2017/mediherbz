@@ -57,12 +57,23 @@ export const HomePage: React.FC = () => {
             <Link
               key={cat.id}
               to={`/shop?category=${cat.slug}`}
-              className="group p-5 bg-white rounded-2xl border border-stone-200/80 hover:border-[#18833B] hover:shadow-lg transition-all text-center flex flex-col items-center justify-center"
+              className="group p-4 bg-white rounded-2xl border border-stone-200/80 hover:border-[#18833B] hover:shadow-lg transition-all text-center flex flex-col items-center justify-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-[#FAF9F2] group-hover:bg-[#18833B] text-[#18833B] group-hover:text-white flex items-center justify-center transition-all mb-3">
-                <HeartPulse className="w-6 h-6" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden mb-3 border-2 border-stone-100 group-hover:border-[#18833B] group-hover:scale-105 transition-all shadow-xs relative">
+                {cat.image ? (
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#FAF9F2] flex items-center justify-center text-[#18833B]">
+                    <HeartPulse className="w-6 h-6" />
+                  </div>
+                )}
               </div>
-              <h3 className="font-bold text-xs sm:text-sm text-[#26352A] group-hover:text-[#18833B] transition-colors">
+              <h3 className="font-bold text-xs sm:text-sm text-[#26352A] group-hover:text-[#18833B] transition-colors line-clamp-1">
                 {cat.name}
               </h3>
               <span className="text-[11px] text-stone-400 mt-1">
