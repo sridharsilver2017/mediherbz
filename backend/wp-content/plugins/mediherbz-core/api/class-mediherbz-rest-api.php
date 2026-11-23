@@ -105,24 +105,64 @@ class Mediherbz_REST_API {
     }
 
     public function get_products($request) {
-        if (!function_exists('wc_get_products')) {
-            return rest_ensure_response(array());
-        }
-
-        $args = array(
-            'limit'  => $request->get_param('limit') ? intval($request->get_param('limit')) : 20,
-            'status' => 'publish',
-        );
-
-        if ($request->get_param('category')) {
-            $args['category'] = array(sanitize_text_field($request->get_param('category')));
-        }
-
-        $wc_products = wc_get_products($args);
         $result = array();
 
-        foreach ($wc_products as $p) {
-            $result[] = $this->format_wc_product($p);
+        if (function_exists('wc_get_products')) {
+            $args = array(
+                'limit'  => $request->get_param('limit') ? intval($request->get_param('limit')) : 20,
+                'status' => 'publish',
+            );
+
+            if ($request->get_param('category')) {
+                $args['category'] = array(sanitize_text_field($request->get_param('category')));
+            }
+
+            $wc_products = wc_get_products($args);
+            if (!empty($wc_products)) {
+                foreach ($wc_products as $p) {
+                    $result[] = $this->format_wc_product($p);
+                }
+            }
+        }
+
+        // Fallback: If wc_get_products returns empty or not synced yet, query product post type directly
+        if (empty($result)) {
+            $query_args = array(
+                'post_type'      => 'product',
+                'post_status'    => 'publish',
+                'posts_per_page' => $request->get_param('limit') ? intval($request->get_param('limit')) : 20,
+            );
+            $posts = get_posts($query_args);
+            foreach ($posts as $post) {
+                if (function_exists('wc_get_product')) {
+                    $wc_p = wc_get_product($post->ID);
+                    if ($wc_p) {
+                        $result[] = $this->format_wc_product($wc_p);
+                        continue;
+                    }
+                }
+                // Fallback raw post format
+                $img_id = get_post_thumbnail_id($post->ID);
+                $result[] = array(
+                    'id'                => $post->ID,
+                    'name'              => $post->post_title,
+                    'slug'              => $post->post_name,
+                    'price'             => (float) get_post_meta($post->ID, '_price', true) ?: 0,
+                    'regular_price'     => (float) get_post_meta($post->ID, '_regular_price', true) ?: 0,
+                    'sale_price'        => (float) get_post_meta($post->ID, '_sale_price', true) ?: 0,
+                    'on_sale'           => !empty(get_post_meta($post->ID, '_sale_price', true)),
+                    'short_description' => $post->post_excerpt,
+                    'description'       => $post->post_content,
+                    'in_stock'          => get_post_meta($post->ID, '_stock_status', true) !== 'outofstock',
+                    'images'            => $img_id ? array(array('id' => $img_id, 'src' => wp_get_attachment_url($img_id), 'alt' => $post->post_title)) : array(),
+                    'categories'        => array(),
+                    'herbal_fields'     => array(
+                        'botanical_name'      => get_post_meta($post->ID, '_mediherbz_botanical_name', true) ?: '',
+                        'ingredients'         => explode(',', get_post_meta($post->ID, '_mediherbz_ingredients', true) ?: ''),
+                        'directions_for_use'  => get_post_meta($post->ID, '_mediherbz_directions_for_use', true) ?: '',
+                    ),
+                );
+            }
         }
 
         return rest_ensure_response($result);
