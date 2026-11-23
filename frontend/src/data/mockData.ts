@@ -60,8 +60,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 5, name: 'Herbal Oils', slug: 'herbal-oils' }
     ],
     images: [
-      { id: 1, src: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=800&q=80', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
-      { id: 2, src: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80', alt: 'Botanical ingredients herbs' }
+      { id: 1, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kesh-ratna-hair-oil.jpg', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
+      { id: 2, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg', alt: 'Botanical ingredients herbs' }
     ],
     rating: 4.9,
     rating_count: 142,
@@ -114,8 +114,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 3, src: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80', alt: 'Kumkumadi Oil Bottle with dropper' },
-      { id: 4, src: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?auto=format&fit=crop&w=800&q=80', alt: 'Kashmiri Saffron threads' }
+      { id: 3, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg', alt: 'Kumkumadi Oil Bottle with dropper' },
+      { id: 4, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-kashmiri-saffron.jpg', alt: 'Kashmiri Saffron threads' }
     ],
     rating: 5.0,
     rating_count: 98,
@@ -164,7 +164,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
     ],
     images: [
-      { id: 5, src: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80', alt: 'Ashwagandha supplement bottle' }
+      { id: 5, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg', alt: 'Ashwagandha supplement bottle' }
     ],
     rating: 4.8,
     rating_count: 215,
@@ -213,7 +213,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
     ],
     images: [
-      { id: 6, src: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80', alt: 'Triphala powder jar' }
+      { id: 6, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-triphala-churna.jpg', alt: 'Triphala powder jar' }
     ],
     rating: 4.7,
     rating_count: 83,
@@ -262,7 +262,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 10, name: 'Wellness Essentials', slug: 'wellness-essentials' }
     ],
     images: [
-      { id: 7, src: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80', alt: 'Herbal tea in glass cup with dried herbs' }
+      { id: 7, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-tulsi-ginger-tea.jpg', alt: 'Herbal tea in glass cup with dried herbs' }
     ],
     rating: 4.9,
     rating_count: 114,
@@ -311,7 +311,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 8, src: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80', alt: 'Herbal skincare scrub paste' }
+      { id: 8, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-sandalwood-turmeric-ubtan.jpg', alt: 'Herbal skincare scrub paste' }
     ],
     rating: 4.8,
     rating_count: 67,
@@ -360,7 +360,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 9, src: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80', alt: 'Luxury spa herbal kit combo' }
+      { id: 9, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-total-youth-combo-kit.jpg', alt: 'Luxury spa herbal kit combo' }
     ],
     rating: 5.0,
     rating_count: 52,
@@ -408,7 +408,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>How to Incorporate Kumkumadi Into Your Night Ritual</h3>
       <p>A few warm drops massaged into damp skin before sleep works synergistically with the skin's circadian repair cycle, allowing you to wake up to a supple, luminous, and youthful radiance without relying on synthetic chemicals.</p>
     `,
-    featured_image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=800&q=80',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg',
     date: 'October 15, 2026',
     author: 'Dr. Ananya Sharma (B.A.M.S.)',
     category: 'Natural Beauty',
@@ -425,7 +425,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>The Art of Kshir Pak Vidhi</h3>
       <p>Unlike industrial oils made by simply adding artificial fragrance to mineral oil, authentic Mediherbz hair vitalizers are crafted through Kshir Pak Vidhi. Fresh botanical herbs are simmered gently with milk and pure sesame oil for over 72 hours until all water evaporates and only the herb-infused lipid core remains.</p>
     `,
-    featured_image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg',
     date: 'October 22, 2026',
     author: 'Vaidya R. K. Namboodiri',
     category: 'Hair Care',
@@ -442,7 +442,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>How Adaptogens Function</h3>
       <p>Ashwagandha (Withania somnifera) is classified as a Rasayana, an herb that fosters longevity and systemic revitalization. Modern clinical studies confirm its efficacy in regulating serum cortisol levels and supporting deep restorative REM sleep.</p>
     `,
-    featured_image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=800&q=80',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg',
     date: 'October 28, 2026',
     author: 'Dr. Ananya Sharma (B.A.M.S.)',
     category: 'Herbal Living',
