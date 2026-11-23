@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Heart, Search, Menu, X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
 import { INITIAL_CATEGORIES } from '../../data/mockData';
+import { ProductCategory } from '../../types';
+import { api } from '../../api/client';
 
 export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryDropdown, setCategoryDropdown] = useState(false);
+  const [categories, setCategories] = useState<ProductCategory[]>(INITIAL_CATEGORIES);
+
+  useEffect(() => {
+    let isMounted = true;
+    api.getCategories().then((cats) => {
+      if (isMounted && cats && cats.length > 0) {
+        setCategories(cats);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
 
   const navigate = useNavigate();
   const totalCartItems = useCartStore((state) => state.totalItems());
@@ -89,7 +102,7 @@ export const Header: React.FC = () => {
                   <div className="px-4 py-2 border-b border-stone-100 text-xs font-bold text-stone-400 uppercase tracking-wider">
                     Herbal Collections
                   </div>
-                  {INITIAL_CATEGORIES.map((cat) => (
+                  {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       to={`/shop?category=${cat.slug}`}
@@ -204,14 +217,15 @@ export const Header: React.FC = () => {
           </Link>
           <div className="pl-4 space-y-1.5 border-l-2 border-[#A6C928]">
             <p className="text-xs font-bold text-stone-400 uppercase tracking-wider">Categories</p>
-            {INITIAL_CATEGORIES.slice(0, 6).map((c) => (
+            {categories.slice(0, 8).map((c) => (
               <Link
                 key={c.id}
                 to={`/shop?category=${c.slug}`}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-sm text-stone-600 hover:text-[#18833B]"
+                className="flex items-center justify-between text-sm text-stone-600 hover:text-[#18833B] pr-4 py-1"
               >
-                {c.name}
+                <span>{c.name}</span>
+                <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">{c.count}</span>
               </Link>
             ))}
           </div>
