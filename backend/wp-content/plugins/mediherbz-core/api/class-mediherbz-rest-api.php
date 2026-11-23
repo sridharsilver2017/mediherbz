@@ -93,12 +93,20 @@ class Mediherbz_REST_API {
 
         $formatted = array();
         foreach ($terms as $t) {
+            if ($t->slug === 'uncategorized') continue;
+            $thumb_id = get_term_meta($t->term_id, 'thumbnail_id', true);
+            $img_url = $thumb_id ? wp_get_attachment_url($thumb_id) : '';
+            if (!$img_url) {
+                // Check if matching upload file exists
+                $img_url = home_url('/wp-content/uploads/2026/11/category-' . $t->slug . '.jpg');
+            }
             $formatted[] = array(
                 'id'          => $t->term_id,
                 'name'        => $t->name,
                 'slug'        => $t->slug,
                 'count'       => $t->count,
                 'description' => $t->description,
+                'image'       => $img_url,
             );
         }
         return rest_ensure_response($formatted);
@@ -536,6 +544,50 @@ class Mediherbz_REST_API {
             if ($b_post && $media_post) {
                 set_post_thumbnail($b_post->ID, $media_post->ID);
                 $results[] = "Linked {$img_slug} (ID {$media_post->ID}) to post {$b_slug} (ID {$b_post->ID})";
+            }
+        }
+
+        // 3. Link Categories
+        $cat_map = array(
+            'ayurvedic-products'   => array('category-ayurvedic-products'),
+            'herbal-hair-care'     => array('category-herbal-hair-care'),
+            'herbal-kits-combos'   => array('category-herbal-kits-combos'),
+            'herbal-oils'          => array('category-herbal-oils-2', 'category-herbal-oils'),
+            'herbal-powders'       => array('category-herbal-powders'),
+            'herbal-skin-care'     => array('category-herbal-skin-care'),
+            'herbal-supplements'   => array('category-herbal-supplements'),
+            'herbal-teas'          => array('category-herbal-teas'),
+            'natural-beauty'       => array('category-natural-beauty'),
+            'organic-products'     => array('category-organic-products'),
+            'wellness-essentials'  => array('category-wellness-essentials', 'category-wellness-meditation'),
+        );
+
+        foreach ($cat_map as $cat_slug => $img_slugs) {
+            $term = get_term_by('slug', $cat_slug, 'product_cat');
+            if (!$term) continue;
+
+            $media_post = null;
+            foreach ($img_slugs as $img_slug) {
+                $media_post = get_page_by_path($img_slug, OBJECT, 'attachment');
+                if ($media_post) break;
+            }
+
+            if (!$media_post) {
+                // Fallback query by post_title or slug
+                $attachments = get_posts(array(
+                    'post_type'      => 'attachment',
+                    'name'           => 'category-' . $cat_slug,
+                    'posts_per_page' => 1,
+                    'post_status'    => 'inherit',
+                ));
+                if (!empty($attachments)) {
+                    $media_post = $attachments[0];
+                }
+            }
+
+            if ($media_post) {
+                update_term_meta($term->term_id, 'thumbnail_id', $media_post->ID);
+                $results[] = "Linked media ID {$media_post->ID} to category {$cat_slug} (Term ID {$term->term_id})";
             }
         }
 
