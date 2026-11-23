@@ -111,7 +111,7 @@ export const ShopPage: React.FC = () => {
                 >
                   <span>All Categories</span>
                 </button>
-                {categories.map((cat) => (
+                {categories.filter((cat) => (cat.count || 0) > 0).map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => handleCategoryChange(cat.slug)}

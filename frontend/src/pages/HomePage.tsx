@@ -53,7 +53,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {categories.slice(0, 6).map((cat) => (
+          {categories.filter((c) => (c.count || 0) > 0).slice(0, 6).map((cat) => (
             <Link
               key={cat.id}
               to={`/shop?category=${cat.slug}`}

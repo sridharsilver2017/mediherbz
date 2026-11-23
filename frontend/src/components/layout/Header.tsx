@@ -12,13 +12,15 @@ export const Header: React.FC = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryDropdown, setCategoryDropdown] = useState(false);
-  const [categories, setCategories] = useState<ProductCategory[]>(INITIAL_CATEGORIES);
+  const [categories, setCategories] = useState<ProductCategory[]>(() =>
+    INITIAL_CATEGORIES.filter((c) => (c.count || 0) > 0)
+  );
 
   useEffect(() => {
     let isMounted = true;
     api.getCategories().then((cats) => {
       if (isMounted && cats && cats.length > 0) {
-        setCategories(cats);
+        setCategories(cats.filter((c) => (c.count || 0) > 0));
       }
     });
     return () => { isMounted = false; };

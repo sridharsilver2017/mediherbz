@@ -59,7 +59,7 @@ export const api = {
         const wpCats = await res.json();
         if (Array.isArray(wpCats) && wpCats.length > 0) {
           return wpCats
-            .filter((c: any) => c.slug !== 'uncategorized')
+            .filter((c: any) => c.slug !== 'uncategorized' && Number(c.count) > 0)
             .map((c: any) => {
               const matchingSeed = INITIAL_CATEGORIES.find((sc) => sc.slug === c.slug);
               return {
@@ -67,7 +67,7 @@ export const api = {
                 name: c.name,
                 slug: c.slug,
                 description: c.description || matchingSeed?.description,
-                count: c.count,
+                count: Number(c.count),
                 image: matchingSeed?.image || `https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-${c.slug}.jpg`,
               };
             });
@@ -76,7 +76,8 @@ export const api = {
     } catch (e) {
       console.warn('Could not fetch product_cat, falling back', e);
     }
-    return fetchFromApi<ProductCategory[]>('/categories', INITIAL_CATEGORIES);
+    const fallback = await fetchFromApi<ProductCategory[]>('/categories', INITIAL_CATEGORIES);
+    return fallback.filter((c) => (c.count || 0) > 0);
   },
 
   // Products
@@ -93,6 +94,15 @@ export const api = {
           list = wpProducts.map((wp: any) => {
             const seed = INITIAL_PRODUCTS.find((p) => p.slug === wp.slug);
             const featuredMedia = wp._embedded?.['wp:featuredmedia']?.[0]?.source_url;
+            const liveCats = (wp._embedded?.['wp:term'] || [])
+              .flat()
+              .filter((t: any) => t && t.taxonomy === 'product_cat')
+              .map((t: any) => ({
+                id: t.id,
+                name: t.name,
+                slug: t.slug,
+              }));
+
             return {
               id: wp.id,
               name: wp.title?.rendered || wp.slug,
@@ -103,7 +113,7 @@ export const api = {
               on_sale: true,
               short_description: wp.excerpt?.rendered?.replace(/<[^>]*>/g, '').trim() || seed?.short_description || '',
               description: wp.content?.rendered || seed?.description || '',
-              categories: seed?.categories || [],
+              categories: liveCats.length > 0 ? liveCats : (seed?.categories || []),
               images: featuredMedia ? [{ id: wp.featured_media, src: featuredMedia, alt: wp.title?.rendered }] : seed?.images || [],
               rating: seed?.rating || 4.9,
               rating_count: seed?.rating_count || 120,
