@@ -54,7 +54,7 @@ export const api = {
   getCategories: async (): Promise<ProductCategory[]> => {
     try {
       const siteRoot = WP_API_URL.split('/wp-json/')[0];
-      const res = await fetch(`${siteRoot}/wp-json/wp/v2/product_cat?per_page=50&_embed`);
+      const res = await fetch(`${siteRoot}/wp-json/wp/v2/product_cat?per_page=50&_embed&_t=${Date.now()}`);
       if (res.ok) {
         const wpCats = await res.json();
         if (Array.isArray(wpCats) && wpCats.length > 0) {
@@ -68,7 +68,7 @@ export const api = {
                 slug: c.slug,
                 description: c.description || matchingSeed?.description,
                 count: c.count,
-                image: matchingSeed?.image,
+                image: matchingSeed?.image || `https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-${c.slug}.jpg`,
               };
             });
         }
@@ -83,10 +83,10 @@ export const api = {
   getProducts: async (params?: { category?: string; search?: string; sort?: string; limit?: number }): Promise<Product[]> => {
     let list: Product[] = [];
 
-    // Attempt 1: Fetch live products directly from WordPress REST API
+    // Attempt 1: Fetch live products directly from WordPress REST API (with cache-busting for fresh CORS & media)
     try {
       const siteRoot = WP_API_URL.split('/wp-json/')[0];
-      const wpRes = await fetch(`${siteRoot}/wp-json/wp/v2/product?per_page=20&_embed`);
+      const wpRes = await fetch(`${siteRoot}/wp-json/wp/v2/product?per_page=20&_embed&_t=${Date.now()}`);
       if (wpRes.ok) {
         const wpProducts = await wpRes.json();
         if (Array.isArray(wpProducts) && wpProducts.length > 0) {
@@ -176,7 +176,7 @@ export const api = {
   getBlogs: async (): Promise<BlogPost[]> => {
     try {
       const siteRoot = WP_API_URL.split('/wp-json/')[0];
-      const res = await fetch(`${siteRoot}/wp-json/wp/v2/posts?per_page=10&_embed`);
+      const res = await fetch(`${siteRoot}/wp-json/wp/v2/posts?per_page=10&_embed&_t=${Date.now()}`);
       if (res.ok) {
         const posts = await res.json();
         if (Array.isArray(posts) && posts.length > 0) {
