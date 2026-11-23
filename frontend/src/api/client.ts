@@ -1,20 +1,38 @@
 import { Product, ProductCategory, BrandSettings, BlogPost, Order } from '../types';
 import { INITIAL_BRAND_SETTINGS, INITIAL_CATEGORIES, INITIAL_PRODUCTS, INITIAL_BLOGS } from '../data/mockData';
 
-const WP_API_URL = import.meta.env.VITE_WP_API_URL || 'http://localhost:8080/wp-json/mediherbz/v1';
+const WP_API_URL = import.meta.env.VITE_WP_API_URL || 'https://dev-medinerbz.pantheonsite.io/wp-json/mediherbz/v1';
 
 async function fetchFromApi<T>(endpoint: string, fallbackData: T): Promise<T> {
   try {
-    const res = await fetch(`${WP_API_URL}${endpoint}`, {
-      headers: {
-        'Accept': 'application/json',
-      },
+    // 1. Try standard pretty permalink endpoint
+    let res = await fetch(`${WP_API_URL}${endpoint}`, {
+      headers: { 'Accept': 'application/json' },
     });
+
+    // 2. If 404 (due to un-flushed WP permalinks), automatically try ?rest_route= fallback
+    if (res.status === 404 && WP_API_URL.includes('/wp-json/')) {
+      const siteRoot = WP_API_URL.split('/wp-json/')[0];
+      const namespace = WP_API_URL.split('/wp-json/')[1] || 'mediherbz/v1';
+      const fallbackUrl = `${siteRoot}/?rest_route=/${namespace}${endpoint}`;
+      const fallbackRes = await fetch(fallbackUrl, {
+        headers: { 'Accept': 'application/json' },
+      });
+      if (fallbackRes.ok) {
+        const data = await fallbackRes.json();
+        if (Array.isArray(data) && data.length > 0) return data as unknown as T;
+        if (!Array.isArray(data) && data && Object.keys(data).length > 0) return data as unknown as T;
+      }
+    }
+
     if (!res.ok) {
       throw new Error(`API error: ${res.status}`);
     }
     const data = await res.json();
-    return data;
+    if (Array.isArray(data) && data.length === 0 && Array.isArray(fallbackData) && fallbackData.length > 0) {
+      return fallbackData;
+    }
+    return data as T;
   } catch (err) {
     // Graceful fallback to mock data while WordPress backend is offline/booting
     console.warn(`[Mediherbz API] Could not connect to WordPress endpoint ${endpoint}. Using reliable initial seed data.`, err);
