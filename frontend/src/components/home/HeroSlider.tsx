@@ -175,7 +175,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products }) => {
 
   return (
     <div
-      className="relative overflow-hidden min-h-[520px] md:min-h-[530px] md:h-[calc(80vh-116px)] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
+      className="relative overflow-hidden min-h-[520px] sm:min-h-[540px] md:h-[580px] lg:h-[620px] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
       onMouseEnter={() => setAutoPlay(false)}
       onMouseLeave={() => setAutoPlay(true)}
       onTouchStart={handleTouchStart}
@@ -199,72 +199,74 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products }) => {
       <div className="absolute bottom-0 left-10 w-96 h-96 bg-[#F28A13]/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Main Slide Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-20 relative z-10 w-full">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-0 pb-18 sm:pb-20 lg:pb-0 relative z-10 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
-          {/* Left Hero Copy */}
-          <div className="lg:col-span-7 space-y-4 sm:space-y-6 text-center lg:text-left animate-fadeIn">
+          {/* Left Hero Copy - Perfectly Even Vertical Rhythm and Alignment */}
+          <div className="lg:col-span-7 flex flex-col justify-center text-center lg:text-left animate-fadeIn">
             
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 bg-[#A6C928]/20 border border-[#A6C928]/40 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs font-bold text-[#A6C928] uppercase tracking-wider shadow-xs backdrop-blur-xs">
-              {slide.tagIcon === 'sparkles' && <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              {slide.tagIcon === 'leaf' && <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              {slide.tagIcon === 'shield' && <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
-              <span>{slide.tag}</span>
+            <div className="mb-4 sm:mb-5">
+              <span className="inline-flex items-center gap-2 bg-[#A6C928]/20 border border-[#A6C928]/40 px-3.5 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs font-bold text-[#A6C928] uppercase tracking-wider shadow-xs backdrop-blur-xs">
+                {slide.tagIcon === 'sparkles' && <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                {slide.tagIcon === 'leaf' && <Leaf className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                {slide.tagIcon === 'shield' && <ShieldCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
+                <span>{slide.tag}</span>
+              </span>
             </div>
 
             {/* Main Headings */}
-            <div className="space-y-1">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-serif tracking-tight leading-[1.15]">
+            <div className="mb-4">
+              <h1 className="text-3xl sm:text-5xl lg:text-5.5xl xl:text-6xl font-black font-serif tracking-tight leading-[1.12]">
                 {slide.headingRegular}{' '}
                 <span className="text-[#A6C928] drop-shadow-xs">{slide.headingAccent}</span>
               </h1>
-              <p className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wide text-emerald-200 uppercase">
+              <p className="text-[11px] sm:text-xs md:text-sm font-semibold tracking-wider text-emerald-200 uppercase mt-2 sm:mt-2.5">
                 {slide.tagline}
               </p>
             </div>
 
             {/* Description */}
-            <p className="text-xs sm:text-sm md:text-base text-emerald-50/90 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed">
+            <p className="text-xs sm:text-sm md:text-base text-emerald-50/90 max-w-xl mx-auto lg:mx-0 font-normal leading-relaxed mb-6 sm:mb-7">
               {slide.description}
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-1 sm:pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 mb-6 sm:mb-8">
               <Link
                 to={slide.primaryCtaLink}
-                className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-[#A6C928] hover:bg-[#b8dd32] text-[#12632F] font-black rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base"
+                className="w-full sm:w-auto px-7 sm:px-8 py-3.5 sm:py-4 bg-[#A6C928] hover:bg-[#b8dd32] text-[#12632F] font-black rounded-xl sm:rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm sm:text-base cursor-pointer"
               >
                 <span>{slide.primaryCtaText}</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
               <Link
                 to={slide.secondaryCtaLink}
-                className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold rounded-xl sm:rounded-2xl transition-all text-sm sm:text-base text-center backdrop-blur-xs"
+                className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 bg-white/10 hover:bg-white/20 border border-white/25 text-white font-bold rounded-xl sm:rounded-2xl transition-all text-sm sm:text-base text-center backdrop-blur-xs cursor-pointer"
               >
                 {slide.secondaryCtaText}
               </Link>
             </div>
 
             {/* Trust Micro-Metrics */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-4 sm:pt-6 border-t border-white/15 max-w-lg mx-auto lg:mx-0">
-              <div className="text-center sm:text-left">
+            <div className="grid grid-cols-3 gap-2 sm:gap-6 pt-5 sm:pt-6 border-t border-white/20 max-w-lg mx-auto lg:mx-0">
+              <div className="text-center lg:text-left">
                 <p className="text-lg sm:text-2xl font-black text-[#A6C928]">100%</p>
                 <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Pure Botanicals</p>
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center lg:text-left">
                 <p className="text-lg sm:text-2xl font-black text-[#A6C928]">AYUSH</p>
                 <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Govt. Verified</p>
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center lg:text-left">
                 <p className="text-lg sm:text-2xl font-black text-[#A6C928]">Free</p>
                 <p className="text-[10px] sm:text-xs text-emerald-200/90 font-medium">Delivery &gt; ₹999</p>
               </div>
             </div>
           </div>
 
-          {/* Right Hero Product Card Showcase - hidden on mobile screens to give full prominence to hero banner & copy */}
-          <div className="hidden lg:flex lg:col-span-5 relative justify-center">
+          {/* Right Hero Product Card Showcase */}
+          <div className="hidden lg:flex lg:col-span-5 relative justify-center items-center">
             <div className="relative w-full max-w-sm sm:max-w-md bg-white rounded-3xl p-5 sm:p-6 shadow-2xl text-[#26352A] border-4 border-white/25 transition-all duration-500 hover:scale-[1.02]">
               
               {/* Image with overlay badge */}
