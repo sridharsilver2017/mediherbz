@@ -108,13 +108,31 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Legal bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-white/60 gap-3 text-center md:text-left">
-        <p className="font-medium text-white/80">
-          © {new Date().getFullYear()} Mediherbz. All rights reserved. <span className="text-[#A6C928]">For Young &amp; Vibrant Look.</span>
-        </p>
-        <p className="max-w-2xl text-[11px] sm:text-xs text-white/60 leading-relaxed md:text-right">
-          <span className="font-semibold text-white/80">Disclaimer:</span> Ayurvedic descriptions are based on traditional knowledge systems and do not claim to treat, cure, or diagnose chronic diseases without medical consultation.
-        </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 border-t border-white/10 space-y-3 sm:space-y-4 text-xs">
+        {/* Line 1: Copyright on Left & Designed by Advaita Designs on Right */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left text-white/80">
+          <p className="font-medium">
+            © {new Date().getFullYear()} Mediherbz. All rights reserved. <span className="text-[#A6C928]">For Young &amp; Vibrant Look.</span>
+          </p>
+          <p className="text-white/70">
+            Designed by{' '}
+            <a
+              href="https://advaitadesigns.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#A6C928] hover:text-white font-semibold underline underline-offset-2 transition-colors"
+            >
+              Advaita Designs
+            </a>
+          </p>
+        </div>
+
+        {/* Line 2: Traditional Knowledge Medical Disclaimer */}
+        <div className="text-center sm:text-left border-t border-white/5 pt-2 sm:pt-3">
+          <p className="text-[11px] sm:text-xs text-white/55 leading-relaxed">
+            <span className="font-semibold text-white/75">Disclaimer:</span> Ayurvedic descriptions are based on traditional knowledge systems and do not claim to treat, cure, or diagnose chronic diseases without medical consultation.
+          </p>
+        </div>
       </div>
     </footer>
   );
