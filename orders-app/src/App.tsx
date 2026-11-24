@@ -56,7 +56,7 @@ export const App: React.FC = () => {
 
   // Push notifications & chime states
   const [notificationsEnabled, setNotificationsEnabled] = useState(
-    () => getNotificationPermission() === 'granted'
+    () => getNotificationPermission()
   );
   const [newOrderToast, setNewOrderToast] = useState<Order | null>(null);
 
@@ -82,7 +82,7 @@ export const App: React.FC = () => {
           const freshOrders = data.orders.filter((o) => !knownOrderIds.current.has(o.id));
           if (freshOrders.length > 0) {
             const newest = freshOrders[0];
-            // Play sound chime & fire browser push alert
+            // Play sound chime & fire browser/native push alert
             showOrderPushNotification(newest, (ord) => setSelectedOrder(ord));
             setNewOrderToast(newest);
           }
@@ -125,21 +125,52 @@ export const App: React.FC = () => {
     return () => clearInterval(interval);
   }, [auth, fetchOrders]);
 
+  const handleTestChime = () => {
+    playOrderChime();
+    const sampleOrder: Order = orders[0] || ({
+      id: 99999,
+      order_number: 'TEST-101',
+      status: 'processing',
+      total: 1499,
+      subtotal: 1499,
+      shipping_total: 0,
+      discount_total: 0,
+      currency: 'INR',
+      date_created: new Date().toISOString(),
+      customer: {
+        name: 'Priya Sharma (Sample)',
+        first_name: 'Priya',
+        last_name: 'Sharma',
+        email: 'priya@example.com',
+        phone: '+91 98765 43210',
+        address: 'MG Road',
+        city: 'Bengaluru',
+        state: 'Karnataka',
+        postcode: '560001',
+        country: 'IN',
+      },
+      items: [],
+      item_count: 1,
+      shipping_carrier: '',
+      tracking_id: '',
+      tracking_url: '',
+      payment_method: 'cod',
+      payment_method_title: 'Cash on Delivery',
+      is_paid: false,
+    } as Order);
+    showOrderPushNotification(sampleOrder, (ord) => setSelectedOrder(ord));
+  };
+
   const handleToggleNotifications = async () => {
     if (notificationsEnabled) {
-      // If already enabled, offer test chime
-      playOrderChime();
-      alert('🔔 Order notifications and audio chimes are active!');
+      // If already enabled, fire a test notification and chime immediately
+      handleTestChime();
       return;
     }
     const granted = await requestNotificationPermission();
     setNotificationsEnabled(granted);
-  };
-
-  const handleTestChime = () => {
-    playOrderChime();
-    if (orders.length > 0) {
-      showOrderPushNotification(orders[0], (ord) => setSelectedOrder(ord));
+    if (granted) {
+      handleTestChime();
     }
   };
 

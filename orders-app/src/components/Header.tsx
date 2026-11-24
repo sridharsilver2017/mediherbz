@@ -86,13 +86,13 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
 
-          {/* Test Sound Chime Button (visible when enabled) */}
+          {/* Test Sound Chime & Notification Button (visible when enabled) */}
           {notificationsEnabled && (
             <button
               type="button"
               onClick={onTestChime}
-              className="p-1.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition-all cursor-pointer hidden sm:flex items-center justify-center"
-              title="Test store audio chime"
+              className="p-1.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition-all cursor-pointer flex items-center justify-center"
+              title="Test order notification & audio chime"
             >
               <Volume2 className="w-3.5 h-3.5 text-[#18833B]" />
             </button>
