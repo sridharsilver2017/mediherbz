@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   onTestChime,
 }) => {
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-30 shadow-xs">
+    <header className="bg-white/95 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-30 shadow-xs pt-[env(safe-area-inset-top,0px)]">
       <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
         {/* Brand Left */}
         <div className="flex items-center gap-2.5 sm:gap-3">
