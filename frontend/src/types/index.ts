@@ -98,6 +98,13 @@ export interface BrandSettings {
     text: string;
     link?: string;
   };
+  maintenance_mode?: {
+    enabled?: boolean;
+    title?: string;
+    message?: string;
+    expected_back_time?: string;
+    allow_admin_bypass?: boolean;
+  };
 }
 
 export interface CartItem {

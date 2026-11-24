@@ -28,6 +28,13 @@ export const INITIAL_BRAND_SETTINGS: BrandSettings = {
     text: '🌿 Free Shipping in India on Orders Over ₹999 • 100% Ayurvedic & Organic',
     link: '/shop',
   },
+  maintenance_mode: {
+    enabled: false,
+    title: '🌿 We are Refreshing our Herbal Sanctuary',
+    message: 'Mediherbz is currently undergoing scheduled wellness upgrades and inventory replenishment. We will be back online shortly with fresh Ayurvedic harvests!',
+    expected_back_time: 'Back online in a few moments',
+    allow_admin_bypass: true,
+  },
 };
 
 export const INITIAL_CATEGORIES: ProductCategory[] = [

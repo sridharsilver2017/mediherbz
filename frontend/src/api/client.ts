@@ -300,6 +300,7 @@ export const api = {
             ...parsed,
             announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(parsed.announcement_bar || {}) },
             social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(parsed.social_links || {}) },
+            maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(parsed.maintenance_mode || {}) },
           };
         }
       }
@@ -311,6 +312,7 @@ export const api = {
       ...remote,
       announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(remote?.announcement_bar || {}) },
       social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(remote?.social_links || {}) },
+      maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(remote?.maintenance_mode || {}) },
     };
   },
 
