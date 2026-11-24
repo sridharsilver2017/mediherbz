@@ -175,7 +175,7 @@ export const HeroSlider: React.FC<HeroSliderProps> = ({ products }) => {
 
   return (
     <div
-      className="relative overflow-hidden min-h-[520px] sm:min-h-[540px] md:h-[580px] lg:h-[620px] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
+      className="relative overflow-hidden min-h-[560px] sm:min-h-[620px] md:min-h-[660px] md:h-[calc(85vh-90px)] flex items-center bg-stone-900 select-none text-white transition-all duration-700"
       onMouseEnter={() => setAutoPlay(false)}
       onMouseLeave={() => setAutoPlay(true)}
       onTouchStart={handleTouchStart}
