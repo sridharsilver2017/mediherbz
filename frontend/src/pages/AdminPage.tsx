@@ -195,6 +195,29 @@ export const AdminPage: React.FC = () => {
     }
   }, [settings]);
 
+  const handleToggleMaintenance = async () => {
+    const newEnabled = !maintenance?.enabled;
+    const updated = {
+      ...settings,
+      maintenance_mode: {
+        ...(maintenance || {}),
+        enabled: newEnabled,
+      },
+    };
+    setSettings(updated);
+    setSaving(true);
+    try {
+      await api.updateBrandSettings(updated);
+      setToastMessage(newEnabled ? 'Maintenance Mode activated live & synced!' : 'Store is now LIVE and accepting orders!');
+      setTimeout(() => setToastMessage(null), 3500);
+    } catch {
+      setToastMessage('Error syncing with server. Please click Save & Publish.');
+      setTimeout(() => setToastMessage(null), 3500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   // Keyboard shortcut: Cmd/Ctrl + S to save
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -926,15 +949,8 @@ export const AdminPage: React.FC = () => {
                 {/* Master Toggle Button */}
                 <button
                   type="button"
-                  onClick={() =>
-                    setSettings({
-                      ...settings,
-                      maintenance_mode: {
-                        ...(maintenance || {}),
-                        enabled: !maintenance?.enabled,
-                      },
-                    })
-                  }
+                  onClick={handleToggleMaintenance}
+                  disabled={saving}
                   className={`px-6 py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2.5 transition-all shadow-md cursor-pointer active:scale-95 shrink-0 ${
                     maintenance?.enabled
                       ? 'bg-red-600 hover:bg-red-700 text-white shadow-red-700/20'

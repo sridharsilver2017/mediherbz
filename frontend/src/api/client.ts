@@ -290,30 +290,56 @@ async function fetchLiveBlogsNetwork(): Promise<BlogPost[]> {
 export const api = {
   // Brand & General Settings
   getBrandSettings: async (): Promise<BrandSettings> => {
+    let localParsed: Partial<BrandSettings> | null = null;
     try {
       const local = localStorage.getItem('mediherbz_brand_settings');
       if (local) {
-        const parsed = JSON.parse(local);
-        if (parsed && typeof parsed === 'object') {
-          return {
-            ...INITIAL_BRAND_SETTINGS,
-            ...parsed,
-            announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(parsed.announcement_bar || {}) },
-            social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(parsed.social_links || {}) },
-            maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(parsed.maintenance_mode || {}) },
-          };
-        }
+        localParsed = JSON.parse(local);
       }
     } catch {}
 
-    const remote = await fetchFromApi<BrandSettings>('/settings', INITIAL_BRAND_SETTINGS);
-    return {
-      ...INITIAL_BRAND_SETTINGS,
-      ...remote,
-      announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(remote?.announcement_bar || {}) },
-      social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(remote?.social_links || {}) },
-      maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(remote?.maintenance_mode || {}) },
-    };
+    // 1. Fetch live remote settings with cache-busting timestamp & no-cache headers
+    try {
+      const res = await fetch(`${WP_API_URL}/settings?_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+        },
+      });
+      if (res.ok) {
+        const remote = await res.json();
+        if (remote && typeof remote === 'object') {
+          const merged: BrandSettings = {
+            ...INITIAL_BRAND_SETTINGS,
+            ...remote,
+            announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(remote?.announcement_bar || {}) },
+            social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(remote?.social_links || {}) },
+            maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(remote?.maintenance_mode || {}) },
+          };
+          try {
+            localStorage.setItem('mediherbz_brand_settings', JSON.stringify(merged));
+          } catch {}
+          return merged;
+        }
+      }
+    } catch (err) {
+      console.warn('[Mediherbz API] Remote settings fetch fallback:', err);
+    }
+
+    // 2. Local fallback if remote request failed
+    if (localParsed) {
+      return {
+        ...INITIAL_BRAND_SETTINGS,
+        ...localParsed,
+        announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(localParsed.announcement_bar || {}) },
+        social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(localParsed.social_links || {}) },
+        maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(localParsed.maintenance_mode || {}) },
+      };
+    }
+
+    return INITIAL_BRAND_SETTINGS;
   },
 
   updateBrandSettings: async (settings: Partial<BrandSettings>): Promise<BrandSettings> => {
@@ -326,18 +352,23 @@ export const api = {
       console.warn('Failed to persist settings to localStorage', e);
     }
 
-    // Background push to backend if available
+    // Push to backend WordPress endpoint with cache-busting timestamp
     try {
       const token = sessionStorage.getItem('mediherbz_admin_token') || localStorage.getItem('mediherbz_admin_token');
-      fetch(`${WP_API_URL}/settings`, {
+      const res = await fetch(`${WP_API_URL}/settings?_t=${Date.now()}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(updated),
-      }).catch(() => {});
-    } catch {}
+      });
+      if (!res.ok) {
+        console.warn('[Mediherbz API] Settings push returned status:', res.status);
+      }
+    } catch (err) {
+      console.warn('[Mediherbz API] Settings push network error:', err);
+    }
 
     return updated;
   },

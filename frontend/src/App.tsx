@@ -24,13 +24,38 @@ import { INITIAL_BRAND_SETTINGS } from './data/mockData';
 import { api } from './api/client';
 
 const AppContent: React.FC = () => {
-  const [settings, setSettings] = useState<BrandSettings>(() => INITIAL_BRAND_SETTINGS);
+  const [settings, setSettings] = useState<BrandSettings>(() => {
+    try {
+      const local = localStorage.getItem('mediherbz_brand_settings');
+      if (local) {
+        const parsed = JSON.parse(local);
+        return {
+          ...INITIAL_BRAND_SETTINGS,
+          ...parsed,
+          announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(parsed.announcement_bar || {}) },
+          social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(parsed.social_links || {}) },
+          maintenance_mode: { ...INITIAL_BRAND_SETTINGS.maintenance_mode, ...(parsed.maintenance_mode || {}) },
+        };
+      }
+    } catch {}
+    return INITIAL_BRAND_SETTINGS;
+  });
+  const [initialLoading, setInitialLoading] = useState(() => {
+    const isAdmin = window.location.pathname.startsWith('/admin');
+    const hasLocal = Boolean(localStorage.getItem('mediherbz_brand_settings'));
+    return !isAdmin && !hasLocal;
+  });
   const location = useLocation();
 
   useEffect(() => {
     let isMounted = true;
     api.getBrandSettings().then((data) => {
-      if (isMounted && data) setSettings(data);
+      if (isMounted && data) {
+        setSettings(data);
+        setInitialLoading(false);
+      }
+    }).catch(() => {
+      if (isMounted) setInitialLoading(false);
     });
 
     const handleUpdate = (e: Event) => {
@@ -52,6 +77,16 @@ const AppContent: React.FC = () => {
   );
 
   const isMaintenanceActive = Boolean(settings?.maintenance_mode?.enabled);
+
+  // During initial check in Incognito (when localStorage is empty), show brief botanical loader so visitors never see a flash of the store
+  if (initialLoading && !isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F2] flex flex-col items-center justify-center gap-3">
+        <div className="w-9 h-9 border-3 border-[#18833B]/20 border-t-[#18833B] rounded-full animate-spin" />
+        <span className="text-xs font-serif font-black text-emerald-950 tracking-wider uppercase">Mediherbz</span>
+      </div>
+    );
+  }
 
   // If maintenance mode is active AND visitor is NOT on /admin:
   if (isMaintenanceActive && !isAdminRoute) {

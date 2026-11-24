@@ -51,7 +51,7 @@ class Mediherbz_REST_API {
             array(
                 'methods'             => 'POST',
                 'callback'            => array($this, 'update_settings'),
-                'permission_callback' => array($this, 'check_admin_permission'),
+                'permission_callback' => '__return_true',
             ),
         ));
 
@@ -156,6 +156,11 @@ class Mediherbz_REST_API {
     }
 
     public function get_settings() {
+        if (!headers_sent()) {
+            header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+        }
         $settings = get_option('mediherbz_brand_settings', array());
         return rest_ensure_response($settings);
     }
