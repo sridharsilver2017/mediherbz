@@ -29,3 +29,48 @@
     padding: 0;
   }
 }
+
+/* Auto-hiding scrollbars (show only on scroll or hover) */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+/* Show thumb during active scrolling or hover */
+body.is-scrolling ::-webkit-scrollbar-thumb,
+body.is-scrolling::-webkit-scrollbar-thumb,
+*:hover::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.7);
+}
+::-webkit-scrollbar-thumb:active {
+  background: rgba(100, 116, 139, 0.9);
+}
+
+/* Firefox scrollbar auto-hide */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+body.is-scrolling,
+body.is-scrolling *,
+*:hover {
+  scrollbar-color: rgba(148, 163, 184, 0.7) transparent;
+}
+
+/* Complete scrollbar hiding for horizontal tabs/carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
