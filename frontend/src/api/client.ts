@@ -378,17 +378,21 @@ export const api = {
       customPin = localStorage.getItem('mediherbz_admin_pin') || 'srd4usSR@78';
     } catch {}
 
+    const validUsers = ['admin', 'admin@mediherbz.com', 'care@mediherbz.com'];
     const validPasswords = ['srd4usSR@78', customPin];
     const trimmedUser = emailOrUser.toLowerCase().trim();
 
-    if (validPasswords.includes(password.trim())) {
+    if (
+      (validUsers.includes(trimmedUser) || trimmedUser.length > 0) &&
+      validPasswords.includes(password.trim())
+    ) {
       const fallbackData = {
         success: true,
         token: `token_${Date.now()}`,
         user: {
           id: 1,
           email: trimmedUser.includes('@') ? trimmedUser : `${trimmedUser}@mediherbz.com`,
-          display_name: trimmedUser.split('@')[0] || 'Administrator',
+          display_name: trimmedUser === 'admin' ? 'Admin' : trimmedUser.split('@')[0] || 'Administrator',
           role: 'administrator',
         },
       };
