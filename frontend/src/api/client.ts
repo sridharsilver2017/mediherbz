@@ -288,9 +288,48 @@ async function fetchLiveBlogsNetwork(): Promise<BlogPost[]> {
 }
 
 export const api = {
-  // Brand & General
+  // Brand & General Settings
   getBrandSettings: async (): Promise<BrandSettings> => {
+    try {
+      const local = localStorage.getItem('mediherbz_brand_settings');
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (parsed && typeof parsed === 'object') {
+          return { ...INITIAL_BRAND_SETTINGS, ...parsed };
+        }
+      }
+    } catch {}
     return fetchFromApi<BrandSettings>('/settings', INITIAL_BRAND_SETTINGS);
+  },
+
+  updateBrandSettings: async (settings: Partial<BrandSettings>): Promise<BrandSettings> => {
+    const current = await api.getBrandSettings();
+    const updated: BrandSettings = { ...current, ...settings };
+    try {
+      localStorage.setItem('mediherbz_brand_settings', JSON.stringify(updated));
+      window.dispatchEvent(new CustomEvent('mediherbz_settings_updated', { detail: updated }));
+    } catch (e) {
+      console.warn('Failed to persist settings to localStorage', e);
+    }
+
+    // Background push to backend if available
+    try {
+      fetch(`${WP_API_URL}/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      }).catch(() => {});
+    } catch {}
+
+    return updated;
+  },
+
+  resetBrandSettings: async (): Promise<BrandSettings> => {
+    try {
+      localStorage.removeItem('mediherbz_brand_settings');
+      window.dispatchEvent(new CustomEvent('mediherbz_settings_updated', { detail: INITIAL_BRAND_SETTINGS }));
+    } catch {}
+    return INITIAL_BRAND_SETTINGS;
   },
 
   getHealth: async (): Promise<{ status: string; timestamp: string }> => {

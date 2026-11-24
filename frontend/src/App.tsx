@@ -17,6 +17,7 @@ import { BlogPage } from './pages/BlogPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ContactPage } from './pages/ContactPage';
 import { AccountPage } from './pages/AccountPage';
+import { AdminPage } from './pages/AdminPage';
 
 export function App() {
   return (
@@ -40,6 +41,7 @@ export function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogDetailPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route
               path="*"
               element={

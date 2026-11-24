@@ -101,7 +101,19 @@ export const Header: React.FC = () => {
         setAnnouncement(settings.announcement_bar);
       }
     });
-    return () => { isMounted = false; };
+
+    const handleSettingsUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (isMounted && customEvent.detail?.announcement_bar) {
+        setAnnouncement(customEvent.detail.announcement_bar);
+      }
+    };
+    window.addEventListener('mediherbz_settings_updated', handleSettingsUpdate);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('mediherbz_settings_updated', handleSettingsUpdate);
+    };
   }, []);
 
   const navigate = useNavigate();
