@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Truck,
@@ -45,6 +45,15 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
   const [savingTracking, setSavingTracking] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  // Close on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const handleSaveTracking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,15 +104,27 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end md:items-stretch md:justify-end">
+    <div
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end md:items-stretch md:justify-end"
+      onClick={onClose}
+    >
       {/* Container: Bottom sheet on mobile, right drawer on desktop */}
-      <div className="bg-white w-full md:max-w-xl max-h-[92vh] md:max-h-full h-auto md:h-full rounded-t-3xl md:rounded-none shadow-2xl flex flex-col overflow-hidden animate-slideUp md:animate-none">
-        
-        {/* Mobile Pull Handle */}
-        <div className="w-12 h-1.5 bg-stone-300 rounded-full mx-auto my-2.5 md:hidden" />
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-white w-full md:max-w-xl max-h-[92vh] md:max-h-full h-auto md:h-full rounded-t-3xl md:rounded-none shadow-2xl flex flex-col overflow-hidden animate-slideUp md:animate-none"
+      >
+        {/* Mobile Pull Handle (Tappable to close) */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full py-2.5 flex items-center justify-center md:hidden cursor-pointer"
+          title="Tap to close"
+        >
+          <div className="w-12 h-1.5 bg-stone-300 hover:bg-stone-400 rounded-full transition-colors" />
+        </button>
 
         {/* Drawer Header */}
-        <div className="px-5 py-3.5 border-b border-stone-200 flex items-center justify-between bg-stone-50">
+        <div className="px-5 py-3 border-b border-stone-200 flex items-center justify-between bg-stone-50">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-base font-black text-stone-900">{order.order_number}</span>
@@ -120,17 +141,24 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
             <p className="text-[11px] text-stone-500 mt-0.5">{order.date_created}</p>
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => onPrint(order)}
-              className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 text-stone-600 hover:text-stone-900 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
               title="Print Packing Slip"
             >
               <Printer className="w-4 h-4" />
             </button>
             <button
-              onClick={onClose}
-              className="p-2 text-stone-400 hover:text-stone-900 hover:bg-stone-200 rounded-xl transition-colors cursor-pointer"
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
+              className="w-10 h-10 rounded-full flex items-center justify-center text-stone-500 hover:text-stone-900 bg-stone-200/80 hover:bg-stone-300 active:scale-95 transition-all cursor-pointer shadow-xs"
+              aria-label="Close details"
+              title="Close window"
             >
               <X className="w-5 h-5" />
             </button>
@@ -355,6 +383,17 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
               <span className="text-xl font-black text-[#18833B]">₹{order.total}</span>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Sticky Bottom Close Bar */}
+        <div className="p-3 border-t border-stone-200 bg-stone-50 flex items-center justify-end md:hidden">
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full py-2.5 bg-stone-200 hover:bg-stone-300 text-stone-800 rounded-xl font-bold text-xs cursor-pointer active:scale-98 transition-all text-center"
+          >
+            Done / Close Window
+          </button>
         </div>
       </div>
     </div>

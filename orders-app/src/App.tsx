@@ -54,16 +54,14 @@ export const App: React.FC = () => {
       setOrders(data.orders);
       setStats(data.stats);
 
-      if (selectedOrder) {
-        const updated = data.orders.find((o) => o.id === selectedOrder.id);
-        if (updated) setSelectedOrder(updated);
-      }
+      // Keep selected order in sync if currently open without retriggering callback
+      setSelectedOrder((prev) => (prev ? data.orders.find((o) => o.id === prev.id) || prev : null));
     } catch (err: any) {
       setError(err?.message || 'Could not load orders from WooCommerce.');
     } finally {
       setLoading(false);
     }
-  }, [auth, statusFilter, searchQuery, selectedOrder]);
+  }, [auth, statusFilter, searchQuery]);
 
   useEffect(() => {
     if (auth) {
