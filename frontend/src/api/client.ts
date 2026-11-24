@@ -588,18 +588,14 @@ export const api = {
         if (data.success && data.order_number) {
           return data;
         }
+        throw new Error(data.message || 'WooCommerce was unable to process this order.');
       }
-    } catch (err) {
-      console.warn('[Mediherbz API] Live order create failed, generating confirmed order', err);
+      const errData = await res.json().catch(() => null);
+      throw new Error(errData?.message || `Backend server returned status ${res.status}. Could not place order.`);
+    } catch (err: any) {
+      console.error('[Mediherbz API] Live order create failed:', err);
+      throw err;
     }
-
-    // Fallback reliable order creation
-    const generatedOrderNum = `MED-${Math.floor(100000 + Math.random() * 900000)}`;
-    return {
-      success: true,
-      order_number: generatedOrderNum,
-      order_id: Math.floor(10000 + Math.random() * 90000),
-    };
   },
 
   // Customer Orders (My Account history)

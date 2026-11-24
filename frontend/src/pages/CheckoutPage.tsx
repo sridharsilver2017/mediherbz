@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ShieldCheck, ArrowRight, Lock, CheckCircle2, CreditCard, Banknote, MapPin, Sparkles, Truck, User } from 'lucide-react';
+import { ShieldCheck, ArrowRight, Lock, CheckCircle2, CreditCard, Banknote, MapPin, Sparkles, Truck, User, AlertCircle } from 'lucide-react';
 import { useCartStore } from '../store/cartStore';
 import { useUserStore } from '../store/userStore';
 import { api } from '../api/client';
@@ -54,6 +54,7 @@ export const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'razorpay' | 'cod'>('razorpay');
   const [processing, setProcessing] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [orderError, setOrderError] = useState<string | null>(null);
 
   const cartSubtotal = subtotal();
   const discountAmount = getDiscountAmount();
@@ -102,6 +103,7 @@ export const CheckoutPage: React.FC = () => {
   const onSubmit = async (data: CheckoutFormValues) => {
     if (items.length === 0) return;
     setProcessing(true);
+    setOrderError(null);
 
     try {
       // 1. If Razorpay selected, simulate or initialize Razorpay transaction
@@ -201,10 +203,10 @@ export const CheckoutPage: React.FC = () => {
       clearCart();
       setProcessing(false);
       setConfirmedOrder(orderRecord);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Order creation error', err);
       setProcessing(false);
-      alert('Could not complete order. Please try again.');
+      setOrderError(err?.message || 'Could not place order with WooCommerce. Please try again or check your details.');
     }
   };
 
@@ -576,6 +578,16 @@ export const CheckoutPage: React.FC = () => {
                 <span className="text-[#18833B]">₹{grandTotal}</span>
               </div>
             </div>
+
+            {orderError && (
+              <div className="p-3.5 bg-red-50 border border-red-200/80 rounded-2xl text-xs text-red-700 flex items-start gap-2.5 animate-fadeIn">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-bold">Order Failed</p>
+                  <p className="text-[11px] text-red-600 leading-relaxed">{orderError}</p>
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"

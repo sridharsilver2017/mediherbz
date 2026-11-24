@@ -373,35 +373,44 @@ class Mediherbz_REST_API {
             return new WP_Error('missing_param', 'Order number is required', array('status' => 400));
         }
 
-        // Search WooCommerce order
-        $orders = wc_get_orders(array(
-            'limit' => 1,
-            'meta_key' => '_order_number_formatted',
-            'meta_value' => $order_number,
-        ));
+        $order = null;
 
-        if (empty($orders)) {
-            // Try by ID
-            $id = intval(str_replace('MED-', '', $order_number));
-            $order = wc_get_order($id);
-        } else {
-            $order = $orders[0];
+        // 1. Try by numeric ID extracted from string (e.g. MED-56 or 56 or #56)
+        $clean_id = intval(preg_replace('/[^0-9]/', '', $order_number));
+        if ($clean_id > 0) {
+            $order = function_exists('wc_get_order') ? wc_get_order($clean_id) : null;
+        }
+
+        // 2. Try by custom formatted order number
+        if (!$order && function_exists('wc_get_orders')) {
+            $orders = wc_get_orders(array(
+                'limit' => 1,
+                'meta_key' => '_order_number_formatted',
+                'meta_value' => $order_number,
+            ));
+            if (!empty($orders)) {
+                $order = $orders[0];
+            }
         }
 
         if (!$order) {
             return new WP_Error('not_found', 'Order not found', array('status' => 404));
         }
 
+        $carrier = ($order->get_meta('_shipping_carrier') ?: get_post_meta($order->get_id(), '_shipping_carrier', true)) ?: 'Express Air';
+        $tracking_id = $order->get_meta('_tracking_number') ?: get_post_meta($order->get_id(), '_tracking_number', true) ?: '';
+        $tracking_url = $order->get_meta('_tracking_url') ?: get_post_meta($order->get_id(), '_tracking_url', true) ?: '';
+
         return rest_ensure_response(array(
-            'id'             => $order->get_id(),
-            'order_number'   => $order_number,
-            'status'         => $order->get_status(),
-            'total'          => (float) $order->get_total(),
-            'currency'       => $order->get_currency(),
-            'date_created'   => $order->get_date_created()->date('M d, Y'),
-            'shipping_carrier' => get_post_meta($order->get_id(), '_shipping_carrier', true) ?: 'Express Air',
-            'tracking_id'    => get_post_meta($order->get_id(), '_tracking_number', true),
-            'tracking_url'   => get_post_meta($order->get_id(), '_tracking_url', true),
+            'id'               => $order->get_id(),
+            'order_number'     => 'MED-' . $order->get_id(),
+            'status'           => $order->get_status(),
+            'total'            => (float) $order->get_total(),
+            'currency'         => $order->get_currency(),
+            'date_created'     => $order->get_date_created() ? $order->get_date_created()->date('M d, Y') : current_time('M d, Y'),
+            'shipping_carrier' => $carrier,
+            'tracking_id'      => $tracking_id,
+            'tracking_url'     => $tracking_url,
         ));
     }
 
@@ -420,72 +429,88 @@ class Mediherbz_REST_API {
             return new WP_Error('empty_cart', 'Cart items are required to create an order.', array('status' => 400));
         }
 
-        $order_number = 'MED-' . rand(100000, 999999);
-        $order_id = 0;
+        if (!function_exists('wc_create_order')) {
+            return new WP_Error('wc_missing', 'WooCommerce is not available.', array('status' => 500));
+        }
 
-        if (function_exists('wc_create_order')) {
-            $order = wc_create_order();
+        $order = wc_create_order();
 
-            foreach ($items as $item) {
-                $pid = intval($item['product']['id'] ?? 0);
-                $qty = intval($item['quantity'] ?? 1);
-                $price = floatval($item['variation']['price'] ?? $item['product']['price'] ?? 0);
+        foreach ($items as $item) {
+            $pid = intval($item['product']['id'] ?? 0);
+            $qty = intval($item['quantity'] ?? 1);
+            $price = floatval($item['variation']['price'] ?? $item['product']['price'] ?? 0);
 
-                $wc_prod = wc_get_product($pid);
-                if ($wc_prod) {
-                    $order->add_product($wc_prod, $qty, array(
-                        'subtotal' => $price * $qty,
-                        'total'    => $price * $qty,
-                    ));
+            $wc_prod = wc_get_product($pid);
+            if ($wc_prod) {
+                $order->add_product($wc_prod, $qty, array(
+                    'subtotal' => $price * $qty,
+                    'total'    => $price * $qty,
+                ));
+            }
+        }
+
+        $address = array(
+            'first_name' => sanitize_text_field($customer['firstName'] ?? ''),
+            'last_name'  => sanitize_text_field($customer['lastName'] ?? ''),
+            'email'      => sanitize_email($customer['email'] ?? ''),
+            'phone'      => sanitize_text_field($customer['phone'] ?? ''),
+            'address_1'  => sanitize_text_field($customer['address'] ?? ''),
+            'city'       => sanitize_text_field($customer['city'] ?? ''),
+            'state'      => sanitize_text_field($customer['state'] ?? ''),
+            'postcode'   => sanitize_text_field($customer['postcode'] ?? ''),
+            'country'    => 'IN',
+        );
+        $order->set_address($address, 'billing');
+        $order->set_address($address, 'shipping');
+
+        if ($shipping_total > 0 && class_exists('WC_Order_Item_Shipping')) {
+            $item_shipping = new WC_Order_Item_Shipping();
+            $item_shipping->set_method_title('Express Air Delivery');
+            $item_shipping->set_total($shipping_total);
+            $order->add_item($item_shipping);
+        }
+
+        if ($discount_total > 0) {
+            $order->set_discount_total($discount_total);
+        }
+
+        if ($payment_method === 'razorpay') {
+            $order->set_payment_method('razorpay');
+            $order->set_payment_method_title('Razorpay (Online Payment)');
+            $order->payment_complete($payment_id);
+            $order->update_status('processing', 'Paid via Razorpay: ' . $payment_id);
+        } else {
+            $order->set_payment_method('cod');
+            $order->set_payment_method_title('Cash on Delivery (COD)');
+            $order->update_status('processing', 'Cash on Delivery order placed via Mediherbz Storefront');
+        }
+
+        if (!empty($customer['notes'])) {
+            $order->set_customer_note(sanitize_textarea_field($customer['notes']));
+        }
+
+        $order->calculate_totals();
+
+        $order_id = $order->get_id();
+        $order_number = 'MED-' . $order_id;
+
+        $order->update_meta_data('_order_number_formatted', $order_number);
+        if ($payment_id) {
+            $order->update_meta_data('_razorpay_payment_id', $payment_id);
+        }
+        $order->save();
+
+        // Trigger WooCommerce core customer and admin email notifications
+        if (function_exists('WC') && WC()->mailer()) {
+            $emails = WC()->mailer()->get_emails();
+            if (!empty($emails)) {
+                if (isset($emails['WC_Email_New_Order'])) {
+                    $emails['WC_Email_New_Order']->trigger($order_id, $order);
+                }
+                if (isset($emails['WC_Email_Customer_Processing_Order'])) {
+                    $emails['WC_Email_Customer_Processing_Order']->trigger($order_id, $order);
                 }
             }
-
-            $address = array(
-                'first_name' => sanitize_text_field($customer['firstName'] ?? ''),
-                'last_name'  => sanitize_text_field($customer['lastName'] ?? ''),
-                'email'      => sanitize_email($customer['email'] ?? ''),
-                'phone'      => sanitize_text_field($customer['phone'] ?? ''),
-                'address_1'  => sanitize_text_field($customer['address'] ?? ''),
-                'city'       => sanitize_text_field($customer['city'] ?? ''),
-                'state'      => sanitize_text_field($customer['state'] ?? ''),
-                'postcode'   => sanitize_text_field($customer['postcode'] ?? ''),
-                'country'    => 'IN',
-            );
-            $order->set_address($address, 'billing');
-            $order->set_address($address, 'shipping');
-
-            if ($shipping_total > 0 && class_exists('WC_Order_Item_Shipping')) {
-                $item_shipping = new WC_Order_Item_Shipping();
-                $item_shipping->set_method_title('Express Air Delivery');
-                $item_shipping->set_total($shipping_total);
-                $order->add_item($item_shipping);
-            }
-
-            if ($discount_total > 0) {
-                $order->set_discount_total($discount_total);
-            }
-
-            if ($payment_method === 'razorpay') {
-                $order->set_payment_method('razorpay');
-                $order->set_payment_method_title('Razorpay (Online Payment)');
-                $order->payment_complete($payment_id);
-                $order->update_status('processing', 'Paid via Razorpay: ' . $payment_id);
-            } else {
-                $order->set_payment_method('cod');
-                $order->set_payment_method_title('Cash on Delivery (COD)');
-                $order->update_status('processing', 'Cash on Delivery order placed via Headless React app');
-            }
-
-            if (!empty($customer['notes'])) {
-                $order->set_customer_note(sanitize_textarea_field($customer['notes']));
-            }
-
-            $order->calculate_totals();
-            update_post_meta($order->get_id(), '_order_number_formatted', $order_number);
-            if ($payment_id) {
-                update_post_meta($order->get_id(), '_razorpay_payment_id', $payment_id);
-            }
-            $order_id = $order->get_id();
         }
 
         return rest_ensure_response(array(
@@ -493,7 +518,7 @@ class Mediherbz_REST_API {
             'order_id'         => $order_id,
             'order_number'     => $order_number,
             'payment_method'   => $payment_method,
-            'total'            => $total,
+            'total'            => (float) $order->get_total(),
             'date_created'     => current_time('mysql'),
             'message'          => 'Order created successfully in WooCommerce.',
         ));
