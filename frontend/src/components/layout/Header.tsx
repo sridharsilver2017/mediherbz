@@ -15,6 +15,48 @@ export const Header: React.FC = () => {
   const [categories, setCategories] = useState<ProductCategory[]>(() =>
     INITIAL_CATEGORIES.filter((c) => (c.count || 0) > 0)
   );
+  const [showHeader, setShowHeader] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    let lastY = window.scrollY;
+
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setIsScrolled(currentY > 60);
+
+      // Always show when near top of the page (< 60px)
+      if (currentY <= 60) {
+        setShowHeader(true);
+        lastY = currentY;
+        return;
+      }
+
+      // If mobile menu or search input is actively open, keep header visible
+      if (mobileMenuOpen || searchOpen) {
+        setShowHeader(true);
+        lastY = currentY;
+        return;
+      }
+
+      // Jitter tolerance: ignore micro scrolls under 8px
+      const diff = currentY - lastY;
+      if (Math.abs(diff) < 8) return;
+
+      if (diff > 0) {
+        // Scrolling DOWN -> smoothly hide header
+        setShowHeader(false);
+      } else {
+        // Scrolling UP -> smoothly reveal header
+        setShowHeader(true);
+      }
+
+      lastY = currentY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [mobileMenuOpen, searchOpen]);
 
   useEffect(() => {
     let isMounted = true;
@@ -41,7 +83,11 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs transition-all w-full">
+    <header
+      className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full ${
+        showHeader ? 'translate-y-0' : '-translate-y-full'
+      } ${isScrolled ? 'shadow-md' : 'shadow-xs'}`}
+    >
       {/* Top Announcement Bar */}
       <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
         <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
