@@ -250,10 +250,9 @@ export const AdminPage: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Info & Help */}
-          <div className="mt-6 pt-5 border-t border-stone-100 text-[11px] text-stone-400 text-center space-y-1">
+          {/* Security Notice */}
+          <div className="mt-6 pt-5 border-t border-stone-100 text-[11px] text-stone-400 text-center">
             <p>Protected by WordPress REST Security & HMAC Token Verification</p>
-            <p className="font-mono text-stone-500">Default: admin@mediherbz.com / mediherbz2026</p>
           </div>
         </div>
       </div>

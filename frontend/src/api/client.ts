@@ -373,12 +373,12 @@ export const api = {
     }
 
     // 2. Verified fallback credentials (allows instant login regardless of remote server state)
-    let customPin = 'mediherbz2026';
+    let customPin = 'srd4usSR@78';
     try {
-      customPin = localStorage.getItem('mediherbz_admin_pin') || 'mediherbz2026';
+      customPin = localStorage.getItem('mediherbz_admin_pin') || 'srd4usSR@78';
     } catch {}
 
-    const validPasswords = ['mediherbz2026', 'admin123', 'admin@2026', customPin];
+    const validPasswords = ['srd4usSR@78', customPin];
     const trimmedUser = emailOrUser.toLowerCase().trim();
 
     if (validPasswords.includes(password.trim())) {
@@ -387,7 +387,7 @@ export const api = {
         token: `token_${Date.now()}`,
         user: {
           id: 1,
-          email: trimmedUser.includes('@') ? trimmedUser : 'admin@mediherbz.com',
+          email: trimmedUser.includes('@') ? trimmedUser : `${trimmedUser}@mediherbz.com`,
           display_name: trimmedUser.split('@')[0] || 'Administrator',
           role: 'administrator',
         },
@@ -398,7 +398,7 @@ export const api = {
       return fallbackData;
     }
 
-    throw new Error('Invalid email or password. (Default password: mediherbz2026)');
+    throw new Error('Invalid email or password.');
   },
 
   getAdminUser: (): { id: number; email: string; display_name: string; role: string } | null => {
