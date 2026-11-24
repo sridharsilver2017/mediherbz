@@ -30,17 +30,17 @@ export const INITIAL_BRAND_SETTINGS: BrandSettings = {
 };
 
 export const INITIAL_CATEGORIES: ProductCategory[] = [
-  { id: 16, name: 'Herbal Supplements', slug: 'herbal-supplements', count: 1, description: 'Daily organic supplements for stamina, immunity, and vitality.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-supplements.jpg' },
-  { id: 17, name: 'Ayurvedic Products', slug: 'ayurvedic-products', count: 2, description: 'Classical Ayurvedic Rasayanas crafted with sacred Himalayan herbs.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-ayurvedic-products.jpg' },
-  { id: 18, name: 'Herbal Skin Care', slug: 'herbal-skin-care', count: 2, description: 'Natural radiance creams, serums, and scrubs for youthful, glowing skin.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-skin-care.jpg' },
-  { id: 19, name: 'Herbal Hair Care', slug: 'herbal-hair-care', count: 1, description: 'Root-nourishing herbal cleansers, masks, and follicle stimulants.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-hair-care.jpg' },
-  { id: 20, name: 'Herbal Oils', slug: 'herbal-oils', count: 1, description: 'Cold-pressed botanical oils infused with Ayurvedic herbal extracts.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-oils.jpg' },
-  { id: 21, name: 'Herbal Powders', slug: 'herbal-powders', count: 1, description: 'Single herb micronized pure powders for holistic daily wellness.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-powders.jpg' },
-  { id: 22, name: 'Herbal Teas', slug: 'herbal-teas', count: 1, description: 'Aromatic therapeutic infusions designed for relaxation, detox & digestion.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-teas.jpg' },
-  { id: 23, name: 'Natural Beauty', slug: 'natural-beauty', count: 2, description: 'Non-toxic, chemical-free botanical cosmetic treatments.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-natural-beauty.jpg' },
-  { id: 24, name: 'Organic Products', slug: 'organic-products', count: 0, description: 'Eco-harvested, pesticide-free pure organic wellness goods.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-organic-products.jpg' },
-  { id: 25, name: 'Wellness Essentials', slug: 'wellness-essentials', count: 2, description: 'Daily natural necessities for a balanced mind and body.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-wellness-essentials.jpg' },
-  { id: 26, name: 'Herbal Kits & Combos', slug: 'herbal-kits-combos', count: 1, description: 'Curated herbal bundles offering comprehensive care at great value.', image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-kits-combos.jpg' },
+  { id: 16, name: 'Herbal Supplements', slug: 'herbal-supplements', count: 1, description: 'Daily organic supplements for stamina, immunity, and vitality.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-supplements.jpg' },
+  { id: 17, name: 'Ayurvedic Products', slug: 'ayurvedic-products', count: 2, description: 'Classical Ayurvedic Rasayanas crafted with sacred Himalayan herbs.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-ayurvedic-products.jpg' },
+  { id: 18, name: 'Herbal Skin Care', slug: 'herbal-skin-care', count: 2, description: 'Natural radiance creams, serums, and scrubs for youthful, glowing skin.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-skin-care.jpg' },
+  { id: 19, name: 'Herbal Hair Care', slug: 'herbal-hair-care', count: 1, description: 'Root-nourishing herbal cleansers, masks, and follicle stimulants.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-hair-care.jpg' },
+  { id: 20, name: 'Herbal Oils', slug: 'herbal-oils', count: 1, description: 'Cold-pressed botanical oils infused with Ayurvedic herbal extracts.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-oils.jpg' },
+  { id: 21, name: 'Herbal Powders', slug: 'herbal-powders', count: 1, description: 'Single herb micronized pure powders for holistic daily wellness.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-powders.jpg' },
+  { id: 22, name: 'Herbal Teas', slug: 'herbal-teas', count: 1, description: 'Aromatic therapeutic infusions designed for relaxation, detox & digestion.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-teas.jpg' },
+  { id: 23, name: 'Natural Beauty', slug: 'natural-beauty', count: 2, description: 'Non-toxic, chemical-free botanical cosmetic treatments.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-natural-beauty.jpg' },
+  { id: 24, name: 'Organic Products', slug: 'organic-products', count: 0, description: 'Eco-harvested, pesticide-free pure organic wellness goods.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-organic-products.jpg' },
+  { id: 25, name: 'Wellness Essentials', slug: 'wellness-essentials', count: 2, description: 'Daily natural necessities for a balanced mind and body.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-wellness-essentials.jpg' },
+  { id: 26, name: 'Herbal Kits & Combos', slug: 'herbal-kits-combos', count: 1, description: 'Curated herbal bundles offering comprehensive care at great value.', image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/category-herbal-kits-combos.jpg' },
 ];
 
 export const INITIAL_PRODUCTS: Product[] = [
@@ -60,8 +60,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 5, name: 'Herbal Oils', slug: 'herbal-oils' }
     ],
     images: [
-      { id: 1, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kesh-ratna-hair-oil.jpg', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
-      { id: 2, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg', alt: 'Botanical ingredients herbs' }
+      { id: 1, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kesh-ratna-hair-oil.jpg', alt: 'Kesh Ratna Herbal Hair Oil bottle' },
+      { id: 2, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg', alt: 'Botanical ingredients herbs' }
     ],
     rating: 4.9,
     rating_count: 142,
@@ -114,8 +114,8 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 3, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg', alt: 'Kumkumadi Oil Bottle with dropper' },
-      { id: 4, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-kashmiri-saffron.jpg', alt: 'Kashmiri Saffron threads' }
+      { id: 3, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg', alt: 'Kumkumadi Oil Bottle with dropper' },
+      { id: 4, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-kashmiri-saffron.jpg', alt: 'Kashmiri Saffron threads' }
     ],
     rating: 5.0,
     rating_count: 98,
@@ -164,7 +164,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
     ],
     images: [
-      { id: 5, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg', alt: 'Ashwagandha supplement bottle' }
+      { id: 5, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg', alt: 'Ashwagandha supplement bottle' }
     ],
     rating: 4.8,
     rating_count: 215,
@@ -213,7 +213,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 2, name: 'Ayurvedic Products', slug: 'ayurvedic-products' }
     ],
     images: [
-      { id: 6, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-triphala-churna.jpg', alt: 'Triphala powder jar' }
+      { id: 6, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-triphala-churna.jpg', alt: 'Triphala powder jar' }
     ],
     rating: 4.7,
     rating_count: 83,
@@ -262,7 +262,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 10, name: 'Wellness Essentials', slug: 'wellness-essentials' }
     ],
     images: [
-      { id: 7, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-tulsi-ginger-tea.jpg', alt: 'Herbal tea in glass cup with dried herbs' }
+      { id: 7, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-tulsi-ginger-tea.jpg', alt: 'Herbal tea in glass cup with dried herbs' }
     ],
     rating: 4.9,
     rating_count: 114,
@@ -311,7 +311,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 8, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-sandalwood-turmeric-ubtan.jpg', alt: 'Herbal skincare scrub paste' }
+      { id: 8, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-sandalwood-turmeric-ubtan.jpg', alt: 'Herbal skincare scrub paste' }
     ],
     rating: 4.8,
     rating_count: 67,
@@ -360,7 +360,7 @@ export const INITIAL_PRODUCTS: Product[] = [
       { id: 8, name: 'Natural Beauty', slug: 'natural-beauty' }
     ],
     images: [
-      { id: 9, src: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-total-youth-combo-kit.jpg', alt: 'Luxury spa herbal kit combo' }
+      { id: 9, src: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-total-youth-combo-kit.jpg', alt: 'Luxury spa herbal kit combo' }
     ],
     rating: 5.0,
     rating_count: 52,
@@ -408,7 +408,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>How to Incorporate Kumkumadi Into Your Night Ritual</h3>
       <p>A few warm drops massaged into damp skin before sleep works synergistically with the skin's circadian repair cycle, allowing you to wake up to a supple, luminous, and youthful radiance without relying on synthetic chemicals.</p>
     `,
-    featured_image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg',
     date: 'October 15, 2026',
     author: 'Dr. Ananya Sharma (B.A.M.S.)',
     category: 'Natural Beauty',
@@ -425,7 +425,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>The Art of Kshir Pak Vidhi</h3>
       <p>Unlike industrial oils made by simply adding artificial fragrance to mineral oil, authentic Mediherbz hair vitalizers are crafted through Kshir Pak Vidhi. Fresh botanical herbs are simmered gently with milk and pure sesame oil for over 72 hours until all water evaporates and only the herb-infused lipid core remains.</p>
     `,
-    featured_image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/ingredient-herbal-leaves-ayurveda.jpg',
     date: 'October 22, 2026',
     author: 'Vaidya R. K. Namboodiri',
     category: 'Hair Care',
@@ -442,7 +442,7 @@ export const INITIAL_BLOGS: BlogPost[] = [
       <h3>How Adaptogens Function</h3>
       <p>Ashwagandha (Withania somnifera) is classified as a Rasayana, an herb that fosters longevity and systemic revitalization. Modern clinical studies confirm its efficacy in regulating serum cortisol levels and supporting deep restorative REM sleep.</p>
     `,
-    featured_image: 'https://i0.wp.com/dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg',
+    featured_image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-ashwagandha-capsules.jpg',
     date: 'October 28, 2026',
     author: 'Dr. Ananya Sharma (B.A.M.S.)',
     category: 'Herbal Living',

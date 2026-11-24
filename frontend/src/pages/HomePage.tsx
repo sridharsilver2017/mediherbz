@@ -77,6 +77,12 @@ export const HomePage: React.FC = () => {
                     alt={cat.name}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (target.src.includes('wp.com/')) {
+                        target.src = target.src.replace(/https?:\/\/i\d\.wp\.com\//, 'https://');
+                      }
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full bg-[#FAF9F2] flex items-center justify-center text-[#18833B]">

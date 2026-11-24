@@ -12,21 +12,11 @@ interface CacheEntry<T> {
 }
 
 /**
- * Global Edge CDN Image Optimizer
- * Routes WordPress media uploads through WordPress Photon CDN (i0.wp.com / i1.wp.com / i2.wp.com).
- * Automatically negotiates modern WebP/AVIF format, strips bulky EXIF metadata, and caches images
- * across 200+ global edge nodes, reducing response times from ~1,000ms to ~70ms and file size by 50-70%.
+ * Image URL Formatter
+ * Returns reliable WordPress media upload URL with cross-browser compatibility
  */
-export function optimizeImageUrl(url: string, width?: number): string {
+export function optimizeImageUrl(url: string, _width?: number): string {
   if (!url || typeof url !== 'string') return '';
-  if (url.startsWith('data:') || url.endsWith('.svg') || url.includes('.wp.com/')) return url;
-
-  if (url.includes('pantheonsite.io/wp-content/uploads/') || url.includes('/wp-content/uploads/')) {
-    const cleanUrl = url.replace(/^https?:\/\//, '');
-    const shard = Math.abs(cleanUrl.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 3;
-    const cdnUrl = `https://i${shard}.wp.com/${cleanUrl}`;
-    return width ? `${cdnUrl}?w=${width}&quality=85&strip=all` : `${cdnUrl}?quality=85&strip=all`;
-  }
   return url;
 }
 

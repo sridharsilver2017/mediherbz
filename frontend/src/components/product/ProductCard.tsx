@@ -69,6 +69,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           alt={product.images[0]?.alt || product.name}
           className="w-full h-full object-cover group-hover:scale-106 transition-transform duration-500 ease-out"
           loading="lazy"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (target.src.includes('wp.com/')) {
+              target.src = target.src.replace(/https?:\/\/i\d\.wp\.com\//, 'https://');
+            }
+          }}
         />
         {/* Category Pill Over Image */}
         <div className="absolute bottom-3 left-3">

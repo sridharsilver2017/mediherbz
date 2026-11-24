@@ -97,6 +97,12 @@ export const ProductDetailPage: React.FC = () => {
               src={product.images[selectedImage]?.src || product.images[0]?.src}
               alt={product.images[selectedImage]?.alt || product.name}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src.includes('wp.com/')) {
+                  target.src = target.src.replace(/https?:\/\/i\d\.wp\.com\//, 'https://');
+                }
+              }}
             />
           </div>
 
