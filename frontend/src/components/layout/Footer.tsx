@@ -4,7 +4,7 @@ import { ShieldCheck, Leaf, Award, Truck, Mail, Phone, MapPin, Share2 } from 'lu
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#12632F] text-white pt-16 pb-8 border-t border-[#18833B]/40">
+    <footer className="bg-[#12632F] text-white pt-12 sm:pt-16 pb-28 lg:pb-10 border-t border-[#18833B]/40">
       {/* Trust Badges Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-white/10">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
@@ -108,10 +108,12 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Legal bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-white/60 gap-4">
-        <p>© {new Date().getFullYear()} Mediherbz. All rights reserved. For Young &amp; Vibrant Look.</p>
-        <p className="text-center md:text-right">
-          Disclaimer: Ayurvedic descriptions are based on traditional knowledge systems and do not claim to treat, cure, or diagnose chronic diseases without medical consultation.
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between text-xs text-white/60 gap-3 text-center md:text-left">
+        <p className="font-medium text-white/80">
+          © {new Date().getFullYear()} Mediherbz. All rights reserved. <span className="text-[#A6C928]">For Young &amp; Vibrant Look.</span>
+        </p>
+        <p className="max-w-2xl text-[11px] sm:text-xs text-white/60 leading-relaxed md:text-right">
+          <span className="font-semibold text-white/80">Disclaimer:</span> Ayurvedic descriptions are based on traditional knowledge systems and do not claim to treat, cure, or diagnose chronic diseases without medical consultation.
         </p>
       </div>
     </footer>
