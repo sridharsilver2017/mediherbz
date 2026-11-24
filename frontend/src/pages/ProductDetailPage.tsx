@@ -74,7 +74,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-12 pb-28 lg:pb-12 overflow-x-hidden w-full max-w-full">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-10 sm:space-y-14 pb-28 lg:pb-12">
       {/* Breadcrumbs - horizontally scrollable on mobile */}
       <div className="flex items-center gap-1.5 text-xs text-stone-500 overflow-x-auto whitespace-nowrap scrollbar-none py-1 w-full max-w-full">
         <Link to="/" className="hover:text-[#18833B] shrink-0">Home</Link>

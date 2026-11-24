@@ -41,9 +41,9 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs transition-all overflow-x-hidden w-full max-w-full">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs transition-all w-full">
       {/* Top Announcement Bar */}
-      <div className="bg-[#12632F] text-white text-[11px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between overflow-hidden">
+      <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
         <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
           <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#A6C928]" /> +91 98765 43210</span>
           <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#A6C928]" /> care@mediherbz.com</span>
@@ -61,27 +61,27 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Mobile Menu Button */}
           <div className="flex items-center lg:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-md text-stone-700 hover:text-[#18833B] focus:outline-hidden"
+              className="p-1.5 sm:p-2 rounded-md text-stone-700 hover:text-[#18833B] focus:outline-hidden"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
           </div>
 
           {/* Mediherbz Official Brand Logo */}
-          <div className="flex-shrink-0 flex items-center">
-            <Link to="/" className="flex items-center gap-3 group">
+          <div className="shrink-0 flex items-center">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
               <img
                 src="/brand/mediherbz-logo.png"
                 alt="Mediherbz - For Young & Vibrant Look"
-                className="h-12 md:h-14 w-auto object-contain transition-transform group-hover:scale-102"
+                className="h-9 sm:h-12 md:h-14 w-auto object-contain transition-transform group-hover:scale-102"
               />
             </Link>
           </div>
@@ -138,11 +138,11 @@ export const Header: React.FC = () => {
           </nav>
 
           {/* Action Icons */}
-          <div className="flex items-center gap-4 sm:gap-5">
+          <div className="flex items-center gap-1.5 sm:gap-4">
             {/* Search Trigger */}
             <button
               onClick={() => setSearchOpen(!searchOpen)}
-              className="p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+              className="p-1.5 sm:p-2 text-stone-700 hover:text-[#18833B] transition-colors"
               aria-label="Search herbal products"
             >
               <Search className="w-5 h-5" />
@@ -151,7 +151,7 @@ export const Header: React.FC = () => {
             {/* Wishlist Link */}
             <Link
               to="/wishlist"
-              className="relative p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+              className="relative p-1.5 sm:p-2 text-stone-700 hover:text-[#18833B] transition-colors"
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
@@ -165,7 +165,7 @@ export const Header: React.FC = () => {
             {/* My Account Link */}
             <Link
               to="/account"
-              className="p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+              className="p-1.5 sm:p-2 text-stone-700 hover:text-[#18833B] transition-colors"
               aria-label="My Account"
               title="My Account"
             >
@@ -176,12 +176,12 @@ export const Header: React.FC = () => {
             <button
               type="button"
               onClick={openCart}
-              className="relative flex items-center gap-2 bg-[#18833B] hover:bg-[#12632F] text-white px-3.5 py-2 rounded-full font-medium text-sm transition-all shadow-sm hover:shadow-md cursor-pointer"
+              className="relative flex items-center justify-center gap-1.5 bg-[#18833B] hover:bg-[#12632F] text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full font-medium text-xs sm:text-sm transition-all shadow-sm hover:shadow-md cursor-pointer shrink-0"
               aria-label="Shopping Cart"
             >
               <ShoppingBag className="w-4 h-4" />
               <span className="hidden sm:inline">Cart</span>
-              <span className="bg-[#A6C928] text-[#12632F] font-bold text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-[#A6C928] text-[#12632F] font-bold text-[11px] sm:text-xs px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full">
                 {totalCartItems}
               </span>
             </button>
