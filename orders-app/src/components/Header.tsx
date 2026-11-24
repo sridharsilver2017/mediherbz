@@ -8,6 +8,7 @@ import {
   Bell,
   BellRing,
   Volume2,
+  Download,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -96,6 +97,17 @@ export const Header: React.FC<HeaderProps> = ({
               <Volume2 className="w-3.5 h-3.5 text-[#18833B]" />
             </button>
           )}
+
+          {/* Download Native Android APK */}
+          <a
+            href="/mediherbz-orders.apk"
+            download="mediherbz-orders.apk"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold transition-all shadow-2xs"
+            title="Download Standalone Android APK to install on phone"
+          >
+            <Download className="w-3.5 h-3.5 text-[#18833B]" />
+            <span>Android APK</span>
+          </a>
 
           {/* External Storefront link */}
           <a
