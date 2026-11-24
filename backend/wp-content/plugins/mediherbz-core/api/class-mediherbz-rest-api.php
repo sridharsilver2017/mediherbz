@@ -8,6 +8,21 @@ class Mediherbz_REST_API {
 
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
+        add_filter('rest_pre_serve_request', array($this, 'prevent_dynamic_caching'), 10, 4);
+    }
+
+    public function prevent_dynamic_caching($served, $result, $request, $server) {
+        $route = $request ? $request->get_route() : '';
+        if (
+            strpos($route, '/mediherbz/v1/admin/orders') !== false ||
+            strpos($route, '/mediherbz/v1/orders/track') !== false ||
+            strpos($route, '/mediherbz/v1/customer/orders') !== false
+        ) {
+            header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+            header('Pragma: no-cache');
+            header('Expires: 0');
+        }
+        return $served;
     }
 
     public function register_routes() {

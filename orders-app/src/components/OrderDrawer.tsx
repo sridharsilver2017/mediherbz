@@ -41,10 +41,18 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
   const [carrier, setCarrier] = useState(order.shipping_carrier || 'Express BlueDart Air');
   const [trackingId, setTrackingId] = useState(order.tracking_id || '');
   const [trackingUrl, setTrackingUrl] = useState(order.tracking_url || '');
+  const [currentStatus, setCurrentStatus] = useState(order.status);
   const [markShipped, setMarkShipped] = useState(false);
   const [savingTracking, setSavingTracking] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    setCurrentStatus(order.status);
+    setCarrier(order.shipping_carrier || 'Express BlueDart Air');
+    setTrackingId(order.tracking_id || '');
+    setTrackingUrl(order.tracking_url || '');
+  }, [order.id, order.status, order.shipping_carrier, order.tracking_id, order.tracking_url]);
 
   // Close on Escape key press
   useEffect(() => {
@@ -68,6 +76,9 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
         tracking_url: trackingUrl.trim(),
         mark_shipped: markShipped,
       });
+      if (markShipped) {
+        setCurrentStatus('completed');
+      }
       setMessage({ text: 'Tracking details saved to WooCommerce!', type: 'success' });
       onUpdated();
     } catch (err: any) {
@@ -80,12 +91,14 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
   const handleStatusChange = async (newStatus: string) => {
     setUpdatingStatus(true);
     setMessage(null);
+    setCurrentStatus(newStatus);
 
     try {
       await api.updateOrderStatus(order.id, newStatus, `Status changed to ${newStatus} via Mediherbz Orders App`);
       setMessage({ text: `Order marked as ${newStatus}!`, type: 'success' });
       onUpdated();
     } catch (err: any) {
+      setCurrentStatus(order.status);
       setMessage({ text: err?.message || 'Failed to update order status', type: 'error' });
     } finally {
       setUpdatingStatus(false);
@@ -129,13 +142,13 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
             <div className="flex items-center gap-2">
               <span className="font-mono text-base font-black text-stone-900">{order.order_number}</span>
               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                order.status === 'processing'
+                currentStatus === 'processing'
                   ? 'bg-amber-100 text-amber-800'
-                  : order.status === 'completed'
+                  : currentStatus === 'completed'
                   ? 'bg-emerald-100 text-emerald-800'
                   : 'bg-stone-100 text-stone-700'
               }`}>
-                {order.status}
+                {currentStatus}
               </span>
             </div>
             <p className="text-[11px] text-stone-500 mt-0.5">{order.date_created}</p>
@@ -284,44 +297,44 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">Status Workflow:</span>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
-                disabled={updatingStatus || order.status === 'processing'}
+                disabled={updatingStatus || currentStatus === 'processing'}
                 onClick={() => handleStatusChange('processing')}
                 className={`py-2 px-2 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
-                  order.status === 'processing'
-                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  currentStatus === 'processing'
+                    ? 'bg-amber-100 text-amber-900 border border-amber-300 font-extrabold shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                 }`}
               >
                 Processing
               </button>
               <button
-                disabled={updatingStatus || order.status === 'completed'}
+                disabled={updatingStatus || currentStatus === 'completed'}
                 onClick={() => handleStatusChange('completed')}
                 className={`py-2 px-2 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
-                  order.status === 'completed'
-                    ? 'bg-emerald-100 text-[#18833B] border border-emerald-300'
+                  currentStatus === 'completed'
+                    ? 'bg-emerald-100 text-[#18833B] border border-emerald-300 font-extrabold shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                 }`}
               >
                 Completed
               </button>
               <button
-                disabled={updatingStatus || order.status === 'on-hold'}
+                disabled={updatingStatus || currentStatus === 'on-hold'}
                 onClick={() => handleStatusChange('on-hold')}
                 className={`py-2 px-2 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
-                  order.status === 'on-hold'
-                    ? 'bg-purple-100 text-purple-900 border border-purple-300'
+                  currentStatus === 'on-hold'
+                    ? 'bg-purple-100 text-purple-900 border border-purple-300 font-extrabold shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                 }`}
               >
                 On Hold
               </button>
               <button
-                disabled={updatingStatus || order.status === 'cancelled'}
+                disabled={updatingStatus || currentStatus === 'cancelled'}
                 onClick={() => handleStatusChange('cancelled')}
                 className={`py-2 px-2 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
-                  order.status === 'cancelled'
-                    ? 'bg-red-100 text-red-900 border border-red-300'
+                  currentStatus === 'cancelled'
+                    ? 'bg-red-100 text-red-900 border border-red-300 font-extrabold shadow-xs'
                     : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                 }`}
               >

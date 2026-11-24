@@ -59,9 +59,12 @@ export const api = {
     if (options?.status && options.status !== 'all') params.append('status', options.status);
     if (options?.search) params.append('search', options.search);
     if (options?.limit) params.append('limit', String(options.limit));
+    params.append('_t', String(Date.now())); // Cache buster to bypass Cloudflare edge cache
 
     const url = `${WP_API_URL}/admin/orders?${params.toString()}`;
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+    });
     if (!res.ok) {
       throw new Error(`Failed to fetch orders from WooCommerce (${res.status})`);
     }
@@ -84,9 +87,9 @@ export const api = {
 
   // Update order status (e.g. Processing -> Completed or Shipped)
   updateOrderStatus: async (orderId: number, status: string, note?: string): Promise<boolean> => {
-    const res = await fetch(`${WP_API_URL}/admin/orders/update-status`, {
+    const res = await fetch(`${WP_API_URL}/admin/orders/update-status?_t=${Date.now()}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
       body: JSON.stringify({ order_id: orderId, status, note }),
     });
     if (!res.ok) throw new Error('Failed to update status');
@@ -102,9 +105,9 @@ export const api = {
     tracking_url?: string;
     mark_shipped?: boolean;
   }): Promise<boolean> => {
-    const res = await fetch(`${WP_API_URL}/admin/orders/update-tracking`, {
+    const res = await fetch(`${WP_API_URL}/admin/orders/update-tracking?_t=${Date.now()}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to save tracking details');

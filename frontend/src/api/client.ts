@@ -689,7 +689,7 @@ export const api = {
 
   trackOrder: async (orderNumber: string, emailOrPhone: string): Promise<Order | null> => {
     try {
-      const res = await fetch(`${WP_API_URL}/orders/track?number=${encodeURIComponent(orderNumber)}&contact=${encodeURIComponent(emailOrPhone)}`);
+      const res = await fetch(`${WP_API_URL}/orders/track?number=${encodeURIComponent(orderNumber)}&contact=${encodeURIComponent(emailOrPhone)}&_t=${Date.now()}`);
       if (res.ok) {
         const data = await res.json();
         if (data && data.id) {
