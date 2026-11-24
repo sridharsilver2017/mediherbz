@@ -34,8 +34,12 @@ import {
 
 export const App: React.FC = () => {
   const [auth, setAuth] = useState(() => api.getAdminAuth());
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<OrdersStats>({
+
+  // Instant Cache: Load cached orders immediately so UI renders in 0 milliseconds
+  const cachedData = useRef(api.getCachedOrders()).current;
+
+  const [orders, setOrders] = useState<Order[]>(() => cachedData?.orders || []);
+  const [stats, setStats] = useState<OrdersStats>(() => cachedData?.stats || {
     total_count: 0,
     processing: 0,
     completed: 0,
@@ -45,7 +49,7 @@ export const App: React.FC = () => {
     cod_count: 0,
     online_count: 0,
   });
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => !cachedData || cachedData.orders.length === 0);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'cod' | 'prepaid'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,8 +65,10 @@ export const App: React.FC = () => {
   const [newOrderToast, setNewOrderToast] = useState<Order | null>(null);
 
   // References to track known orders to prevent false alarms on initial page load
-  const knownOrderIds = useRef<Set<number>>(new Set());
-  const isInitialLoaded = useRef(false);
+  const knownOrderIds = useRef<Set<number>>(
+    new Set(cachedData?.orders ? cachedData.orders.map((o) => o.id) : [])
+  );
+  const isInitialLoaded = useRef(Boolean(cachedData && cachedData.orders.length > 0));
 
   const fetchOrders = useCallback(
     async (silent = false) => {
@@ -74,7 +80,7 @@ export const App: React.FC = () => {
         const data = await api.getOrders({
           status: statusFilter !== 'all' ? statusFilter : undefined,
           search: searchQuery.trim() || undefined,
-          limit: 100,
+          limit: 40,
         });
 
         // Detect new orders arriving after initial load
@@ -108,10 +114,11 @@ export const App: React.FC = () => {
     [auth, statusFilter, searchQuery]
   );
 
-  // Initial load
+  // Initial load: silent background fetch if cached, otherwise show loading state
   useEffect(() => {
     if (auth) {
-      fetchOrders();
+      const hasCached = Boolean(cachedData && cachedData.orders.length > 0);
+      fetchOrders(hasCached);
     }
   }, [auth, statusFilter, fetchOrders]);
 

@@ -1,6 +1,7 @@
 import { Order, OrdersStats } from './types';
 
 const WP_API_URL = 'https://dev-medinerbz.pantheonsite.io/wp-json/mediherbz/v1';
+const ORDERS_CACHE_KEY = 'mediherbz_orders_cache_v2';
 
 export const api = {
   // Authentication
@@ -19,6 +20,30 @@ export const api = {
 
   logout: () => {
     localStorage.removeItem('mediherbz_orders_auth');
+    localStorage.removeItem(ORDERS_CACHE_KEY);
+  },
+
+  // Instant Local Cache (0ms perceptual loading)
+  getCachedOrders: (): { orders: Order[]; stats: OrdersStats } | null => {
+    try {
+      const stored = localStorage.getItem(ORDERS_CACHE_KEY);
+      if (!stored) return null;
+      const parsed = JSON.parse(stored);
+      if (parsed && Array.isArray(parsed.orders) && parsed.stats) {
+        return parsed;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
+
+  setCachedOrders: (data: { orders: Order[]; stats: OrdersStats }) => {
+    try {
+      localStorage.setItem(ORDERS_CACHE_KEY, JSON.stringify(data));
+    } catch (e) {
+      console.warn('Could not persist orders to local cache:', e);
+    }
   },
 
   login: async (username: string, password: string): Promise<boolean> => {
@@ -68,7 +93,7 @@ export const api = {
     }
 
     const data = await res.json();
-    return {
+    const result = {
       orders: data.orders || [],
       stats: data.stats || {
         total_count: 0,
@@ -81,6 +106,13 @@ export const api = {
         online_count: 0,
       },
     };
+
+    // Cache the fresh dataset so the next time the app opens, it displays in 0ms!
+    if (!options?.search && (!options?.status || options.status === 'all')) {
+      api.setCachedOrders(result);
+    }
+
+    return result;
   },
 
   // Update order status (e.g. Processing -> Completed or Shipped)

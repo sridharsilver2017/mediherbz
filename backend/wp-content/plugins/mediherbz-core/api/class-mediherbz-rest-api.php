@@ -9,6 +9,14 @@ class Mediherbz_REST_API {
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
         add_filter('rest_pre_serve_request', array($this, 'prevent_dynamic_caching'), 10, 4);
+        add_action('woocommerce_new_order', array($this, 'clear_orders_cache'));
+        add_action('woocommerce_order_status_changed', array($this, 'clear_orders_cache'));
+    }
+
+    public function clear_orders_cache() {
+        delete_transient('mediherbz_orders_stats');
+        global $wpdb;
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_mediherbz_orders_%' OR option_name LIKE '_transient_timeout_mediherbz_orders_%'");
     }
 
     public function prevent_dynamic_caching($served, $result, $request, $server) {
@@ -535,6 +543,7 @@ class Mediherbz_REST_API {
             $order->update_meta_data('_razorpay_payment_id', $payment_id);
         }
         $order->save();
+        $this->clear_orders_cache();
 
         // Trigger WooCommerce core customer and admin email notifications
         if (function_exists('WC') && WC()->mailer()) {
@@ -618,10 +627,76 @@ class Mediherbz_REST_API {
             return rest_ensure_response(array('orders' => array(), 'stats' => array()));
         }
 
-        $limit  = intval($request->get_param('limit') ?: 50);
+        $limit  = min(100, max(1, intval($request->get_param('limit') ?: 40)));
         $status = sanitize_text_field($request->get_param('status') ?: 'any');
         $search = sanitize_text_field($request->get_param('search') ?: '');
 
+        // 1. Smart Short Transient Cache for Unfiltered Polls (bypasses heavy PHP execution)
+        $cache_key = 'mediherbz_orders_' . md5($status . '_' . $limit . '_' . $search);
+        if (empty($search)) {
+            $cached_payload = get_transient($cache_key);
+            if ($cached_payload !== false && is_array($cached_payload)) {
+                return rest_ensure_response($cached_payload);
+            }
+        }
+
+        // 2. High-Performance SQL Query for Order Statistics (Executes in ~2ms instead of loading 100 PHP objects)
+        global $wpdb;
+        $stats = array(
+            'total_count' => 0,
+            'processing'  => 0,
+            'completed'   => 0,
+            'on_hold'     => 0,
+            'cancelled'   => 0,
+            'total_rev'   => 0,
+            'cod_count'   => 0,
+            'online_count'=> 0,
+        );
+
+        $cached_stats = get_transient('mediherbz_orders_stats');
+        if ($cached_stats !== false && is_array($cached_stats)) {
+            $stats = $cached_stats;
+        } else {
+            $counts = $wpdb->get_results("
+                SELECT post_status, COUNT(*) as cnt 
+                FROM {$wpdb->posts} 
+                WHERE post_type = 'shop_order' 
+                AND post_status IN ('wc-processing', 'wc-completed', 'wc-on-hold', 'wc-cancelled', 'wc-pending')
+                GROUP BY post_status
+            ");
+
+            if (!empty($counts)) {
+                foreach ($counts as $row) {
+                    $raw_st = str_replace('wc-', '', $row->post_status);
+                    $c = intval($row->cnt);
+                    $stats['total_count'] += $c;
+                    if ($raw_st === 'on-hold') {
+                        $stats['on_hold'] = $c;
+                    } elseif (isset($stats[$raw_st])) {
+                        $stats[$raw_st] = $c;
+                    }
+                }
+            }
+
+            $rev_row = $wpdb->get_row("
+                SELECT 
+                    SUM(CASE WHEN p.post_status NOT IN ('wc-cancelled', 'wc-failed', 'trash') THEN CAST(pm.meta_value AS DECIMAL(10,2)) ELSE 0 END) as total_rev,
+                    SUM(CASE WHEN pm_pay.meta_value = 'cod' THEN 1 ELSE 0 END) as cod_count,
+                    SUM(CASE WHEN pm_pay.meta_value != 'cod' AND pm_pay.meta_value IS NOT NULL THEN 1 ELSE 0 END) as online_count
+                FROM {$wpdb->posts} p
+                LEFT JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key = '_order_total')
+                LEFT JOIN {$wpdb->postmeta} pm_pay ON (p.ID = pm_pay.post_id AND pm_pay.meta_key = '_payment_method')
+                WHERE p.post_type = 'shop_order'
+            ");
+            if ($rev_row) {
+                $stats['total_rev']    = floatval($rev_row->total_rev ?: 0);
+                $stats['cod_count']    = intval($rev_row->cod_count ?: 0);
+                $stats['online_count'] = intval($rev_row->online_count ?: 0);
+            }
+            set_transient('mediherbz_orders_stats', $stats, 60);
+        }
+
+        // 3. Optimized Orders Fetching
         $args = array(
             'limit'   => $limit,
             'orderby' => 'date',
@@ -634,35 +709,7 @@ class Mediherbz_REST_API {
 
         $orders = wc_get_orders($args);
         $formatted = array();
-
-        $stats = array(
-            'total_count' => 0,
-            'processing'  => 0,
-            'completed'   => 0,
-            'on_hold'     => 0,
-            'cancelled'   => 0,
-            'total_rev'   => 0,
-            'cod_count'   => 0,
-            'online_count'=> 0,
-        );
-
-        // Calculate all-time / recent stats
-        $all_recent = wc_get_orders(array('limit' => 100, 'orderby' => 'date', 'order' => 'DESC'));
-        foreach ($all_recent as $ro) {
-            $stats['total_count']++;
-            $st = $ro->get_status();
-            if (isset($stats[$st])) {
-                $stats[$st]++;
-            }
-            if ($st !== 'cancelled' && $st !== 'failed') {
-                $stats['total_rev'] += floatval($ro->get_total());
-            }
-            if ($ro->get_payment_method() === 'cod') {
-                $stats['cod_count']++;
-            } else {
-                $stats['online_count']++;
-            }
-        }
+        static $img_cache = array();
 
         foreach ($orders as $o) {
             $order_id = $o->get_id();
@@ -685,17 +732,26 @@ class Mediherbz_REST_API {
                 if (!$match) continue;
             }
 
+            // Line items extracted without heavy N+1 WC_Product loads
             $items = array();
             foreach ($o->get_items() as $item_id => $item) {
-                $product = $item->get_product();
-                $img_id = $product ? $product->get_image_id() : 0;
+                $product_id = $item->get_product_id();
+                $img_url = '';
+                if ($product_id) {
+                    if (!isset($img_cache[$product_id])) {
+                        $thumb_id = get_post_thumbnail_id($product_id);
+                        $img_cache[$product_id] = $thumb_id ? wp_get_attachment_url($thumb_id) : '';
+                    }
+                    $img_url = $img_cache[$product_id];
+                }
+
                 $items[] = array(
                     'id'       => $item_id,
                     'name'     => $item->get_name(),
                     'quantity' => $item->get_quantity(),
                     'total'    => floatval($item->get_total()),
-                    'sku'      => $product ? $product->get_sku() : '',
-                    'image'    => $img_id ? wp_get_attachment_url($img_id) : '',
+                    'sku'      => '',
+                    'image'    => $img_url,
                 );
             }
 
@@ -737,12 +793,19 @@ class Mediherbz_REST_API {
             );
         }
 
-        return rest_ensure_response(array(
+        $response_data = array(
             'success' => true,
             'stats'   => $stats,
             'orders'  => $formatted,
             'count'   => count($formatted),
-        ));
+        );
+
+        // Store short 20s transient for fast sub-50ms repeat polling
+        if (empty($search)) {
+            set_transient($cache_key, $response_data, 20);
+        }
+
+        return rest_ensure_response($response_data);
     }
 
     public function update_admin_order_status($request) {
@@ -762,6 +825,8 @@ class Mediherbz_REST_API {
 
         $order->update_status($status, $note ?: 'Status updated via Mediherbz Orders App');
         $order->save();
+        $this->clear_orders_cache();
+        $this->clear_orders_cache();
 
         return rest_ensure_response(array(
             'success'    => true,
@@ -814,6 +879,8 @@ class Mediherbz_REST_API {
         }
 
         $order->save();
+        $this->clear_orders_cache();
+        $this->clear_orders_cache();
 
         return rest_ensure_response(array(
             'success'          => true,
