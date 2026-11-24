@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Heart, Search, Menu, X, Phone, Mail, ChevronDown, User } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
@@ -17,15 +17,39 @@ export const Header: React.FC = () => {
   );
   const [showHeader, setShowHeader] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+
+  const headerRef = useRef<HTMLElement>(null);
+  const location = useLocation();
+
+  // Measure base header height so spacer perfectly preserves layout without jumps
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeight = () => {
+      if (headerRef.current && !mobileMenuOpen) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [mobileMenuOpen]);
+
+  // Reset header visibility and close menus on route changes
+  useEffect(() => {
+    setShowHeader(true);
+    setMobileMenuOpen(false);
+    setSearchOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
-    let lastY = window.scrollY;
+    let lastY = window.scrollY || document.documentElement.scrollTop || 0;
 
     const handleScroll = () => {
-      const currentY = window.scrollY;
-      setIsScrolled(currentY > 60);
+      const currentY = window.scrollY || document.documentElement.scrollTop || 0;
+      setIsScrolled(currentY > 40);
 
-      // Always show when near top of the page (< 60px)
+      // Always show when near top of the page (< 60px) or iOS overscroll
       if (currentY <= 60) {
         setShowHeader(true);
         lastY = currentY;
@@ -39,9 +63,15 @@ export const Header: React.FC = () => {
         return;
       }
 
-      // Jitter tolerance: ignore micro scrolls under 8px
+      // Prevent erratic behavior at the very bottom of the page
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      if (currentY > maxScroll - 20) {
+        return;
+      }
+
+      // Jitter tolerance: ignore micro scrolls under 5px
       const diff = currentY - lastY;
-      if (Math.abs(diff) < 8) return;
+      if (Math.abs(diff) < 5) return;
 
       if (diff > 0) {
         // Scrolling DOWN -> smoothly hide header
@@ -83,11 +113,19 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header
-      className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full ${
-        showHeader ? 'translate-y-0' : '-translate-y-full'
-      } ${isScrolled ? 'shadow-md' : 'shadow-xs'}`}
-    >
+    <>
+      {/* Spacer to hold page flow so fixed header never causes layout jump or content clipping */}
+      <div
+        style={{ height: headerHeight ? `${headerHeight}px` : undefined }}
+        className={headerHeight ? '' : 'h-[96px] sm:h-[112px] shrink-0'}
+        aria-hidden="true"
+      />
+      <header
+        ref={headerRef}
+        className={`fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full ${
+          showHeader ? 'translate-y-0' : '-translate-y-full'
+        } ${isScrolled ? 'shadow-md' : 'shadow-xs'} ${mobileMenuOpen ? 'max-h-screen overflow-y-auto' : ''}`}
+      >
       {/* Top Announcement Bar */}
       <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
         <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
@@ -327,5 +365,6 @@ export const Header: React.FC = () => {
         </div>
       )}
     </header>
+    </>
   );
 };
