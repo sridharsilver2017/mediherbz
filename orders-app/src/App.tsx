@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Search,
   RefreshCw,
-  SlidersHorizontal,
   Package,
   TrendingUp,
   AlertCircle,
@@ -14,7 +13,8 @@ import {
   MessageCircle,
   Truck,
   Sparkles,
-  Filter,
+  BellRing,
+  ShoppingBag,
 } from 'lucide-react';
 import { Order, OrdersStats } from './types';
 import { api } from './api';
@@ -25,6 +25,12 @@ import { OrderDrawer } from './components/OrderDrawer';
 import { PrintSlipModal } from './components/PrintSlipModal';
 import { BottomNav } from './components/BottomNav';
 import { LoginScreen } from './components/LoginScreen';
+import {
+  getNotificationPermission,
+  requestNotificationPermission,
+  showOrderPushNotification,
+  playOrderChime,
+} from './utils/notifications';
 
 export const App: React.FC = () => {
   const [auth, setAuth] = useState(() => api.getAdminAuth());
@@ -48,34 +54,94 @@ export const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showStatsModal, setShowStatsModal] = useState(false);
 
-  const fetchOrders = useCallback(async () => {
-    if (!auth) return;
-    setLoading(true);
-    setError(null);
+  // Push notifications & chime states
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    () => getNotificationPermission() === 'granted'
+  );
+  const [newOrderToast, setNewOrderToast] = useState<Order | null>(null);
 
-    try {
-      const data = await api.getOrders({
-        status: statusFilter !== 'all' ? statusFilter : undefined,
-        search: searchQuery.trim() || undefined,
-        limit: 100,
-      });
-      setOrders(data.orders);
-      setStats(data.stats);
+  // References to track known orders to prevent false alarms on initial page load
+  const knownOrderIds = useRef<Set<number>>(new Set());
+  const isInitialLoaded = useRef(false);
 
-      // Keep selected order in sync if currently open
-      setSelectedOrder((prev) => (prev ? data.orders.find((o) => o.id === prev.id) || prev : null));
-    } catch (err: any) {
-      setError(err?.message || 'Could not load orders from WooCommerce.');
-    } finally {
-      setLoading(false);
-    }
-  }, [auth, statusFilter, searchQuery]);
+  const fetchOrders = useCallback(
+    async (silent = false) => {
+      if (!auth) return;
+      if (!silent) setLoading(true);
+      setError(null);
 
+      try {
+        const data = await api.getOrders({
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          search: searchQuery.trim() || undefined,
+          limit: 100,
+        });
+
+        // Detect new orders arriving after initial load
+        if (isInitialLoaded.current && data.orders.length > 0) {
+          const freshOrders = data.orders.filter((o) => !knownOrderIds.current.has(o.id));
+          if (freshOrders.length > 0) {
+            const newest = freshOrders[0];
+            // Play sound chime & fire browser push alert
+            showOrderPushNotification(newest, (ord) => setSelectedOrder(ord));
+            setNewOrderToast(newest);
+          }
+        }
+
+        // Register all received IDs
+        data.orders.forEach((o) => knownOrderIds.current.add(o.id));
+        isInitialLoaded.current = true;
+
+        setOrders(data.orders);
+        setStats(data.stats);
+
+        // Keep selected order in sync if currently open
+        setSelectedOrder((prev) => (prev ? data.orders.find((o) => o.id === prev.id) || prev : null));
+      } catch (err: any) {
+        if (!silent) {
+          setError(err?.message || 'Could not load orders from WooCommerce.');
+        }
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [auth, statusFilter, searchQuery]
+  );
+
+  // Initial load
   useEffect(() => {
     if (auth) {
       fetchOrders();
     }
   }, [auth, statusFilter, fetchOrders]);
+
+  // Background Auto-polling for new bookings (runs every 15 seconds)
+  useEffect(() => {
+    if (!auth) return;
+    const interval = setInterval(() => {
+      fetchOrders(true);
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [auth, fetchOrders]);
+
+  const handleToggleNotifications = async () => {
+    if (notificationsEnabled) {
+      // If already enabled, offer test chime
+      playOrderChime();
+      alert('🔔 Order notifications and audio chimes are active!');
+      return;
+    }
+    const granted = await requestNotificationPermission();
+    setNotificationsEnabled(granted);
+  };
+
+  const handleTestChime = () => {
+    playOrderChime();
+    if (orders.length > 0) {
+      showOrderPushNotification(orders[0], (ord) => setSelectedOrder(ord));
+    }
+  };
 
   const handleLogout = () => {
     api.logout();
@@ -108,12 +174,55 @@ export const App: React.FC = () => {
       <Header
         adminUsername={auth.username}
         loading={loading}
-        onRefresh={fetchOrders}
+        onRefresh={() => fetchOrders(false)}
         onLogout={handleLogout}
+        notificationsEnabled={notificationsEnabled}
+        onToggleNotifications={handleToggleNotifications}
+        onTestChime={handleTestChime}
       />
 
+      {/* Floating Incoming Order Notification Toast */}
+      {newOrderToast && (
+        <div className="fixed top-20 right-4 sm:right-8 z-50 max-w-sm w-full bg-[#12632F] text-white p-4 rounded-xl shadow-2xl border border-[#A6C928]/40 animate-slideDown flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#18833B] text-white flex items-center justify-center shrink-0">
+              <BellRing className="w-5 h-5 animate-bounce" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-black text-sm">{newOrderToast.order_number}</span>
+                <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-[#A6C928] text-emerald-950">
+                  New Order
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100 mt-0.5">
+                {newOrderToast.customer.name} &bull; ₹{newOrderToast.total.toLocaleString('en-IN')}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedOrder(newOrderToast);
+                  setNewOrderToast(null);
+                }}
+                className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-white underline hover:text-[#A6C928] cursor-pointer"
+              >
+                <span>View &amp; Dispatch Order</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setNewOrderToast(null)}
+            className="text-white/60 hover:text-white p-1 rounded-md cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       <main className="max-w-7xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6 flex-1">
-        
         {/* KPI Metrics on Desktop & Tablet */}
         <div className="hidden sm:block">
           <StatsCards stats={stats} />
@@ -129,7 +238,11 @@ export const App: React.FC = () => {
                 : 'bg-white text-stone-900 border-stone-200/90 shadow-2xs'
             }`}
           >
-            <span className={`text-[10px] block font-black uppercase tracking-wider ${statusFilter === 'all' ? 'text-emerald-100' : 'text-stone-400'}`}>
+            <span
+              className={`text-[10px] block font-black uppercase tracking-wider ${
+                statusFilter === 'all' ? 'text-emerald-100' : 'text-stone-400'
+              }`}
+            >
               All Orders
             </span>
             <span className="text-lg font-black tracking-tight">{stats.total_count}</span>
@@ -143,7 +256,11 @@ export const App: React.FC = () => {
                 : 'bg-white text-amber-700 border-stone-200/90 shadow-2xs'
             }`}
           >
-            <span className={`text-[10px] block font-black uppercase tracking-wider ${statusFilter === 'processing' ? 'text-amber-100' : 'text-amber-600'}`}>
+            <span
+              className={`text-[10px] block font-black uppercase tracking-wider ${
+                statusFilter === 'processing' ? 'text-amber-100' : 'text-amber-600'
+              }`}
+            >
               To Fulfill
             </span>
             <span className="text-lg font-black tracking-tight">{stats.processing}</span>
@@ -157,7 +274,11 @@ export const App: React.FC = () => {
                 : 'bg-white text-[#18833B] border-stone-200/90 shadow-2xs'
             }`}
           >
-            <span className={`text-[10px] block font-black uppercase tracking-wider ${statusFilter === 'completed' ? 'text-emerald-100' : 'text-emerald-600'}`}>
+            <span
+              className={`text-[10px] block font-black uppercase tracking-wider ${
+                statusFilter === 'completed' ? 'text-emerald-100' : 'text-emerald-600'
+              }`}
+            >
               Delivered
             </span>
             <span className="text-lg font-black tracking-tight">{stats.completed}</span>
@@ -173,7 +294,7 @@ export const App: React.FC = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && fetchOrders()}
+              onKeyDown={(e) => e.key === 'Enter' && fetchOrders(false)}
               placeholder="Search by Order #, Customer, Phone, or City..."
               className="w-full pl-11 pr-10 py-2.5 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-lg text-xs sm:text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-2 focus:ring-[#18833B]/10 transition-all"
             />
@@ -181,7 +302,7 @@ export const App: React.FC = () => {
               <button
                 onClick={() => {
                   setSearchQuery('');
-                  fetchOrders();
+                  fetchOrders(false);
                 }}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 rounded-md cursor-pointer"
                 title="Clear search"
@@ -274,7 +395,7 @@ export const App: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={fetchOrders}
+              onClick={() => fetchOrders(false)}
               className="px-3.5 py-1.5 bg-red-100 hover:bg-red-200 text-red-900 rounded-lg font-bold text-xs cursor-pointer transition-all active:scale-95"
             >
               Retry Sync
@@ -310,7 +431,7 @@ export const App: React.FC = () => {
                   setSearchQuery('');
                   setStatusFilter('all');
                   setPaymentFilter('all');
-                  fetchOrders();
+                  fetchOrders(false);
                 }}
                 className="mt-2 px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-bold cursor-pointer active:scale-95"
               >
@@ -336,16 +457,15 @@ export const App: React.FC = () => {
             <div className="hidden md:block bg-white rounded-lg border border-stone-200/90 shadow-xs overflow-hidden">
               <div className="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <h2 className="font-serif font-black text-base text-stone-900">
-                    Live Bookings
-                  </h2>
+                  <h2 className="font-serif font-black text-base text-stone-900">Live Bookings</h2>
                   <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-stone-100 text-stone-600">
                     {filteredOrders.length} {filteredOrders.length === 1 ? 'order' : 'orders'}
                   </span>
                 </div>
-                <span className="text-[11px] text-stone-400 font-medium">
-                  Click any order to dispatch, assign courier tracking &amp; print slip
-                </span>
+                <div className="flex items-center gap-2 text-[11px] text-stone-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#18833B] animate-pulse" />
+                  <span>Auto-syncs every 15 seconds</span>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -443,7 +563,7 @@ export const App: React.FC = () => {
                               o.status === 'processing'
                                 ? 'bg-amber-100 text-amber-900 border-amber-300'
                                 : o.status === 'completed'
-                                ? 'bg-emerald-100 text-[#18833B] border-emerald-300 font-extrabold'
+                                ? 'bg-emerald-100 text-[#18833B] border border-emerald-300 font-extrabold'
                                 : 'bg-stone-100 text-stone-700 border-stone-200'
                             }`}
                           >
@@ -467,7 +587,7 @@ export const App: React.FC = () => {
                               e.stopPropagation();
                               setSelectedOrder(o);
                             }}
-                            className="px-3.5 py-1.5 text-xs font-bold text-[#18833B] bg-emerald-50 hover:bg-emerald-100 rounded-xl inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                            className="px-3.5 py-1.5 text-xs font-bold text-[#18833B] bg-emerald-50 hover:bg-emerald-100 rounded-lg inline-flex items-center gap-1.5 transition-colors cursor-pointer"
                           >
                             <span>Dispatch</span>
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -484,17 +604,13 @@ export const App: React.FC = () => {
       </main>
 
       {/* Mobile Sticky Bottom Navigation (< md) */}
-      <BottomNav
-        currentTab={statusFilter}
-        onTabChange={handleBottomTabChange}
-        stats={stats}
-      />
+      <BottomNav currentTab={statusFilter} onTabChange={handleBottomTabChange} stats={stats} />
 
       {/* Slide-over / Bottom Sheet Order Detail Drawer */}
       <OrderDrawer
         order={selectedOrder}
         onClose={() => setSelectedOrder(null)}
-        onUpdated={fetchOrders}
+        onUpdated={() => fetchOrders(false)}
         onPrint={(ord) => setPrintingOrder(ord)}
       />
 
