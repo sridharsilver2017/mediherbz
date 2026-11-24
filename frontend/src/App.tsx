@@ -111,7 +111,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF9F2] text-[#26352A] overflow-x-clip w-full max-w-full">
-      <Header />
+      {!isAdminRoute && <Header />}
       <main className="flex-1 overflow-x-clip w-full max-w-full">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -140,9 +140,13 @@ const AppContent: React.FC = () => {
           />
         </Routes>
       </main>
-      <Footer />
-      <CartDrawer />
-      <BackToTopButton />
+      {!isAdminRoute && (
+        <>
+          <Footer />
+          <CartDrawer />
+          <BackToTopButton />
+        </>
+      )}
     </div>
   );
 };

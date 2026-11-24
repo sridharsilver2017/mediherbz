@@ -369,6 +369,16 @@ export const AdminPage: React.FC = () => {
               <span>WooCommerce REST &amp; HMAC Signature Encrypted</span>
             </div>
           </div>
+
+          {/* Back to store navigation */}
+          <div className="text-center mt-6">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 hover:text-[#18833B] transition-colors"
+            >
+              <span>← Return to Mediherbz Storefront</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
