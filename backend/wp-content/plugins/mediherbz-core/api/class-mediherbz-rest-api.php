@@ -53,6 +53,27 @@ class Mediherbz_REST_API {
             'permission_callback' => '__return_true',
         ));
 
+        // Create order (Razorpay or COD)
+        register_rest_route($this->namespace, '/orders/create', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'create_order'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Customer order history
+        register_rest_route($this->namespace, '/customer/orders', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'get_customer_orders'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Coupons validation
+        register_rest_route($this->namespace, '/coupons/validate', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'validate_coupon'),
+            'permission_callback' => '__return_true',
+        ));
+
         // 1-Click Demo Data Importer (can be triggered with secret key or admin)
         register_rest_route($this->namespace, '/seed-demo-data', array(
             'methods'             => array('GET', 'POST'),
@@ -278,6 +299,190 @@ class Mediherbz_REST_API {
             'shipping_carrier' => get_post_meta($order->get_id(), '_shipping_carrier', true) ?: 'Express Air',
             'tracking_id'    => get_post_meta($order->get_id(), '_tracking_number', true),
             'tracking_url'   => get_post_meta($order->get_id(), '_tracking_url', true),
+        ));
+    }
+
+    public function create_order($request) {
+        $params         = $request->get_json_params();
+        $customer       = $params['customer'] ?? array();
+        $items          = $params['items'] ?? array();
+        $payment_method = sanitize_text_field($params['payment_method'] ?? 'cod');
+        $payment_id     = sanitize_text_field($params['payment_id'] ?? '');
+        $coupon         = sanitize_text_field($params['coupon'] ?? '');
+        $discount_total = floatval($params['discount_total'] ?? 0);
+        $shipping_total = floatval($params['shipping_total'] ?? 0);
+        $total          = floatval($params['total'] ?? 0);
+
+        if (empty($items)) {
+            return new WP_Error('empty_cart', 'Cart items are required to create an order.', array('status' => 400));
+        }
+
+        $order_number = 'MED-' . rand(100000, 999999);
+        $order_id = 0;
+
+        if (function_exists('wc_create_order')) {
+            $order = wc_create_order();
+
+            foreach ($items as $item) {
+                $pid = intval($item['product']['id'] ?? 0);
+                $qty = intval($item['quantity'] ?? 1);
+                $price = floatval($item['variation']['price'] ?? $item['product']['price'] ?? 0);
+
+                $wc_prod = wc_get_product($pid);
+                if ($wc_prod) {
+                    $order->add_product($wc_prod, $qty, array(
+                        'subtotal' => $price * $qty,
+                        'total'    => $price * $qty,
+                    ));
+                }
+            }
+
+            $address = array(
+                'first_name' => sanitize_text_field($customer['firstName'] ?? ''),
+                'last_name'  => sanitize_text_field($customer['lastName'] ?? ''),
+                'email'      => sanitize_email($customer['email'] ?? ''),
+                'phone'      => sanitize_text_field($customer['phone'] ?? ''),
+                'address_1'  => sanitize_text_field($customer['address'] ?? ''),
+                'city'       => sanitize_text_field($customer['city'] ?? ''),
+                'state'      => sanitize_text_field($customer['state'] ?? ''),
+                'postcode'   => sanitize_text_field($customer['postcode'] ?? ''),
+                'country'    => 'IN',
+            );
+            $order->set_address($address, 'billing');
+            $order->set_address($address, 'shipping');
+
+            if ($shipping_total > 0 && class_exists('WC_Order_Item_Shipping')) {
+                $item_shipping = new WC_Order_Item_Shipping();
+                $item_shipping->set_method_title('Express Air Delivery');
+                $item_shipping->set_total($shipping_total);
+                $order->add_item($item_shipping);
+            }
+
+            if ($discount_total > 0) {
+                $order->set_discount_total($discount_total);
+            }
+
+            if ($payment_method === 'razorpay') {
+                $order->set_payment_method('razorpay');
+                $order->set_payment_method_title('Razorpay (Online Payment)');
+                $order->payment_complete($payment_id);
+                $order->update_status('processing', 'Paid via Razorpay: ' . $payment_id);
+            } else {
+                $order->set_payment_method('cod');
+                $order->set_payment_method_title('Cash on Delivery (COD)');
+                $order->update_status('processing', 'Cash on Delivery order placed via Headless React app');
+            }
+
+            if (!empty($customer['notes'])) {
+                $order->set_customer_note(sanitize_textarea_field($customer['notes']));
+            }
+
+            $order->calculate_totals();
+            update_post_meta($order->get_id(), '_order_number_formatted', $order_number);
+            if ($payment_id) {
+                update_post_meta($order->get_id(), '_razorpay_payment_id', $payment_id);
+            }
+            $order_id = $order->get_id();
+        }
+
+        return rest_ensure_response(array(
+            'success'          => true,
+            'order_id'         => $order_id,
+            'order_number'     => $order_number,
+            'payment_method'   => $payment_method,
+            'total'            => $total,
+            'date_created'     => current_time('mysql'),
+            'message'          => 'Order created successfully in WooCommerce.',
+        ));
+    }
+
+    public function get_customer_orders($request) {
+        $email = sanitize_email($request->get_param('email'));
+        $phone = sanitize_text_field($request->get_param('phone'));
+
+        if (!$email && !$phone) {
+            return rest_ensure_response(array());
+        }
+
+        $args = array(
+            'limit'   => 20,
+            'orderby' => 'date',
+            'order'   => 'DESC',
+        );
+
+        if ($email) {
+            $args['billing_email'] = $email;
+        }
+
+        $orders = function_exists('wc_get_orders') ? wc_get_orders($args) : array();
+        $formatted = array();
+
+        foreach ($orders as $o) {
+            $order_num = get_post_meta($o->get_id(), '_order_number_formatted', true) ?: ('MED-' . $o->get_id());
+            $items = array();
+            foreach ($o->get_items() as $item_id => $item) {
+                $product = $item->get_product();
+                $img_id = $product ? $product->get_image_id() : 0;
+                $items[] = array(
+                    'id'       => $item_id,
+                    'name'     => $item->get_name(),
+                    'quantity' => $item->get_quantity(),
+                    'total'    => floatval($item->get_total()),
+                    'image'    => $img_id ? wp_get_attachment_url($img_id) : '',
+                );
+            }
+
+            $formatted[] = array(
+                'id'                   => $o->get_id(),
+                'order_number'         => $order_num,
+                'status'               => $o->get_status(),
+                'total'                => floatval($o->get_total()),
+                'currency'             => $o->get_currency(),
+                'date_created'         => $o->get_date_created() ? $o->get_date_created()->date('M d, Y') : '',
+                'items'                => $items,
+                'shipping_carrier'     => get_post_meta($o->get_id(), '_shipping_carrier', true) ?: 'Express Air',
+                'tracking_id'          => get_post_meta($o->get_id(), '_tracking_number', true) ?: '',
+                'payment_method_title' => $o->get_payment_method_title(),
+            );
+        }
+
+        return rest_ensure_response($formatted);
+    }
+
+    public function validate_coupon($request) {
+        $params   = $request->get_json_params();
+        $code     = strtoupper(trim($params['code'] ?? ''));
+        $subtotal = floatval($params['subtotal'] ?? 0);
+
+        $coupons = array(
+            'MED10'     => array('discount_pct' => 10, 'min_spend' => 0, 'description' => '10% OFF on all botanical wellness orders'),
+            'AYURVEDA'  => array('discount_pct' => 15, 'min_spend' => 499, 'description' => '15% OFF Ayurvedic special discount on orders over ₹499'),
+            'FIRST50'   => array('discount_amt' => 50, 'min_spend' => 299, 'description' => 'Flat ₹50 OFF for new herbal wellness customers'),
+            'FREESHIP'  => array('free_shipping' => true, 'min_spend' => 0, 'description' => 'Complimentary Free Express Shipping'),
+        );
+
+        if (!isset($coupons[$code])) {
+            return new WP_Error('invalid_coupon', 'Coupon code is invalid or has expired.', array('status' => 400));
+        }
+
+        $c = $coupons[$code];
+        if ($subtotal < $c['min_spend']) {
+            return new WP_Error('min_spend_required', 'Minimum order of ₹' . $c['min_spend'] . ' required for this coupon.', array('status' => 400));
+        }
+
+        $discount_amt = 0;
+        if (!empty($c['discount_pct'])) {
+            $discount_amt = round(($subtotal * $c['discount_pct']) / 100);
+        } elseif (!empty($c['discount_amt'])) {
+            $discount_amt = min($c['discount_amt'], $subtotal);
+        }
+
+        return rest_ensure_response(array(
+            'valid'         => true,
+            'code'          => $code,
+            'discount_amt'  => $discount_amt,
+            'free_shipping' => !empty($c['free_shipping']),
+            'description'   => $c['description'],
         ));
     }
 

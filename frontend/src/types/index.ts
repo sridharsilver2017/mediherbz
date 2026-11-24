@@ -165,3 +165,36 @@ export interface BlogPost {
   read_time: string;
 }
 
+export interface SavedAddress {
+  id: string;
+  title?: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  address_1: string;
+  address_2?: string;
+  city: string;
+  state: string;
+  postcode: string;
+  country: string;
+  is_default?: boolean;
+}
+
+export interface UserProfile {
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  avatar?: string;
+  dosha?: 'Vata' | 'Pitta' | 'Kapha' | 'Tridoshic' | 'Unknown';
+  wellness_goal?: string;
+}
+
+export interface CouponDiscount {
+  code: string;
+  discount_amt: number;
+  free_shipping?: boolean;
+  description: string;
+}
+

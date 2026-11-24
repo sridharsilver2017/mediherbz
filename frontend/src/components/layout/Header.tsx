@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag, Heart, Search, Menu, X, Phone, Mail, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Menu, X, Phone, Mail, ChevronDown, User } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
 import { INITIAL_CATEGORIES } from '../../data/mockData';
@@ -53,6 +53,8 @@ export const Header: React.FC = () => {
         </div>
         <div className="hidden md:flex items-center gap-3 text-xs">
           <Link to="/track-order" className="hover:text-[#A6C928] transition-colors">Track Order</Link>
+          <span>|</span>
+          <Link to="/account" className="hover:text-[#A6C928] transition-colors">My Account</Link>
           <span>|</span>
           <Link to="/about" className="hover:text-[#A6C928] transition-colors">Why Mediherbz</Link>
         </div>
@@ -160,6 +162,16 @@ export const Header: React.FC = () => {
               )}
             </Link>
 
+            {/* My Account Link */}
+            <Link
+              to="/account"
+              className="p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+              aria-label="My Account"
+              title="My Account"
+            >
+              <User className="w-5 h-5" />
+            </Link>
+
             {/* Cart Trigger */}
             <button
               type="button"
@@ -237,6 +249,13 @@ export const Header: React.FC = () => {
             className="block py-2 text-stone-800 font-semibold hover:text-[#18833B]"
           >
             Our Story & Ingredients
+          </Link>
+          <Link
+            to="/account"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block py-2 text-stone-800 font-semibold hover:text-[#18833B] flex items-center gap-2"
+          >
+            <User className="w-4 h-4 text-[#18833B]" /> My Account & Orders
           </Link>
           <Link
             to="/quality"

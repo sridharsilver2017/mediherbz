@@ -16,6 +16,7 @@ import { AboutPage } from './pages/AboutPage';
 import { BlogPage } from './pages/BlogPage';
 import { BlogDetailPage } from './pages/BlogDetailPage';
 import { ContactPage } from './pages/ContactPage';
+import { AccountPage } from './pages/AccountPage';
 
 export function App() {
   return (
@@ -31,6 +32,8 @@ export function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/track-order" element={<TrackOrderPage />} />
+            <Route path="/account" element={<AccountPage />} />
+            <Route path="/my-account" element={<AccountPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/quality" element={<AboutPage />} />
