@@ -209,7 +209,7 @@ export const AccountPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-10 space-y-6 sm:space-y-8 w-full max-w-full overflow-x-hidden">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
       {/* Top Profile Banner */}
       <div className="bg-gradient-to-r from-[#18833B] to-[#12632F] text-white p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
@@ -245,7 +245,7 @@ export const AccountPage: React.FC = () => {
       </div>
 
       {/* Account Navigation Tabs */}
-      <div className="flex border-b border-stone-200 gap-1.5 sm:gap-6 overflow-x-auto scrollbar-none pb-1 text-xs sm:text-sm -mx-3.5 px-3.5 sm:mx-0 sm:px-0">
+      <div className="flex border-b border-stone-200 gap-1.5 sm:gap-6 overflow-x-auto scrollbar-none pb-1 text-xs sm:text-sm w-full">
         <button
           onClick={() => setActiveTab('orders')}
           className={`flex items-center gap-1.5 pb-2.5 sm:pb-3 font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 px-1 sm:px-0 ${
