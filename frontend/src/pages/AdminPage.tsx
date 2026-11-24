@@ -48,30 +48,44 @@ const ANNOUNCEMENT_PRESETS = [
 
 export const AdminPage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem('mediherbz_admin_auth') === 'true';
+    try {
+      return sessionStorage.getItem('mediherbz_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
   });
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
   const [showPin, setShowPin] = useState(false);
 
   const [settings, setSettings] = useState<BrandSettings>(INITIAL_BRAND_SETTINGS);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'announcement' | 'contact' | 'security'>('announcement');
 
-  const [customPin, setCustomPin] = useState(() => {
-    return localStorage.getItem('mediherbz_admin_pin') || DEFAULT_PIN;
-  });
   const [newPinInput, setNewPinInput] = useState('');
   const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
+
+  // Safe fallback getters
+  const announcement = settings?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar;
+  const socialLinks = settings?.social_links || INITIAL_BRAND_SETTINGS.social_links;
 
   useEffect(() => {
     let isMounted = true;
     api.getBrandSettings().then((data) => {
-      if (isMounted) {
-        setSettings(data);
-        setLoading(false);
+      if (isMounted && data) {
+        setSettings({
+          ...INITIAL_BRAND_SETTINGS,
+          ...data,
+          announcement_bar: {
+            ...INITIAL_BRAND_SETTINGS.announcement_bar,
+            ...(data.announcement_bar || {}),
+          },
+          social_links: {
+            ...INITIAL_BRAND_SETTINGS.social_links,
+            ...(data.social_links || {}),
+          },
+        });
       }
     });
     return () => {
@@ -81,10 +95,16 @@ export const AdminPage: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const storedPin = localStorage.getItem('mediherbz_admin_pin') || DEFAULT_PIN;
+    let storedPin = DEFAULT_PIN;
+    try {
+      storedPin = localStorage.getItem('mediherbz_admin_pin') || DEFAULT_PIN;
+    } catch {}
+
     if (pinInput.trim() === storedPin.trim()) {
       setIsAuthenticated(true);
-      sessionStorage.setItem('mediherbz_admin_auth', 'true');
+      try {
+        sessionStorage.setItem('mediherbz_admin_auth', 'true');
+      } catch {}
       setPinError('');
     } else {
       setPinError('Invalid admin passcode. Please try again.');
@@ -93,7 +113,9 @@ export const AdminPage: React.FC = () => {
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    sessionStorage.removeItem('mediherbz_admin_auth');
+    try {
+      sessionStorage.removeItem('mediherbz_admin_auth');
+    } catch {}
     setPinInput('');
   };
 
@@ -125,8 +147,9 @@ export const AdminPage: React.FC = () => {
       alert('Passcode must be at least 4 characters long.');
       return;
     }
-    localStorage.setItem('mediherbz_admin_pin', newPinInput.trim());
-    setCustomPin(newPinInput.trim());
+    try {
+      localStorage.setItem('mediherbz_admin_pin', newPinInput.trim());
+    } catch {}
     setNewPinInput('');
     setPinChangeSuccess(true);
     setTimeout(() => setPinChangeSuccess(false), 3000);
@@ -164,7 +187,7 @@ export const AdminPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
                 aria-label="Toggle password visibility"
               >
                 {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -253,21 +276,21 @@ export const AdminPage: React.FC = () => {
           </div>
           <span
             className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-              settings.announcement_bar.enabled
+              announcement.enabled
                 ? 'bg-emerald-100 text-emerald-800'
                 : 'bg-stone-100 text-stone-500'
             }`}
           >
-            Status: {settings.announcement_bar.enabled ? 'ACTIVE & VISIBLE' : 'HIDDEN'}
+            Status: {announcement.enabled ? 'ACTIVE & VISIBLE' : 'HIDDEN'}
           </span>
         </div>
 
-        {settings.announcement_bar.enabled ? (
+        {announcement.enabled ? (
           <div className="bg-[#12632F] text-white text-xs sm:text-sm py-2.5 px-4 rounded-xl text-center font-medium shadow-inner flex items-center justify-center gap-2">
-            <span>{settings.announcement_bar.text || 'Empty announcement text'}</span>
-            {settings.announcement_bar.link && (
+            <span>{announcement.text || 'Empty announcement text'}</span>
+            {announcement.link && (
               <span className="underline opacity-80 text-xs hover:opacity-100">
-                (Link: {settings.announcement_bar.link})
+                (Link: {announcement.link})
               </span>
             )}
           </div>
@@ -332,15 +355,15 @@ export const AdminPage: React.FC = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={settings.announcement_bar.enabled}
+                checked={announcement.enabled}
                 onChange={(e) =>
-                  setSettings({
-                    ...settings,
+                  setSettings((prev) => ({
+                    ...prev,
                     announcement_bar: {
-                      ...settings.announcement_bar,
+                      ...(prev?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar),
                       enabled: e.target.checked,
                     },
-                  })
+                  }))
                 }
                 className="sr-only peer"
               />
@@ -355,15 +378,15 @@ export const AdminPage: React.FC = () => {
             </label>
             <input
               type="text"
-              value={settings.announcement_bar.text}
+              value={announcement.text || ''}
               onChange={(e) =>
-                setSettings({
-                  ...settings,
+                setSettings((prev) => ({
+                  ...prev,
                   announcement_bar: {
-                    ...settings.announcement_bar,
+                    ...(prev?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar),
                     text: e.target.value,
                   },
-                })
+                }))
               }
               placeholder="e.g. 🌿 Free Shipping in India on Orders Over ₹999 • 100% Ayurvedic & Organic"
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
@@ -380,15 +403,15 @@ export const AdminPage: React.FC = () => {
             </label>
             <input
               type="text"
-              value={settings.announcement_bar.link || ''}
+              value={announcement.link || ''}
               onChange={(e) =>
-                setSettings({
-                  ...settings,
+                setSettings((prev) => ({
+                  ...prev,
                   announcement_bar: {
-                    ...settings.announcement_bar,
+                    ...(prev?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar),
                     link: e.target.value,
                   },
-                })
+                }))
               }
               placeholder="e.g. /shop, /track-order, or https://example.com"
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
@@ -407,14 +430,14 @@ export const AdminPage: React.FC = () => {
                   key={idx}
                   type="button"
                   onClick={() =>
-                    setSettings({
-                      ...settings,
+                    setSettings((prev) => ({
+                      ...prev,
                       announcement_bar: {
                         enabled: true,
                         text: preset.text,
                         link: preset.link,
                       },
-                    })
+                    }))
                   }
                   className="p-3 bg-stone-50 hover:bg-[#FAF9F2] hover:border-[#18833B]/40 border border-stone-200 rounded-2xl text-left transition-all group cursor-pointer"
                 >
@@ -437,8 +460,8 @@ export const AdminPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={settings.support_phone}
-                onChange={(e) => setSettings({ ...settings, support_phone: e.target.value })}
+                value={settings?.support_phone || ''}
+                onChange={(e) => setSettings((prev) => ({ ...prev, support_phone: e.target.value }))}
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
               />
             </div>
@@ -449,8 +472,8 @@ export const AdminPage: React.FC = () => {
               </label>
               <input
                 type="email"
-                value={settings.contact_email}
-                onChange={(e) => setSettings({ ...settings, contact_email: e.target.value })}
+                value={settings?.contact_email || ''}
+                onChange={(e) => setSettings((prev) => ({ ...prev, contact_email: e.target.value }))}
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
               />
             </div>
@@ -461,12 +484,15 @@ export const AdminPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={settings.social_links.whatsapp || ''}
+                value={socialLinks.whatsapp || ''}
                 onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    social_links: { ...settings.social_links, whatsapp: e.target.value },
-                  })
+                  setSettings((prev) => ({
+                    ...prev,
+                    social_links: {
+                      ...(prev?.social_links || INITIAL_BRAND_SETTINGS.social_links),
+                      whatsapp: e.target.value,
+                    },
+                  }))
                 }
                 placeholder="https://wa.me/919876543210"
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
@@ -479,12 +505,15 @@ export const AdminPage: React.FC = () => {
               </label>
               <input
                 type="text"
-                value={settings.social_links.instagram || ''}
+                value={socialLinks.instagram || ''}
                 onChange={(e) =>
-                  setSettings({
-                    ...settings,
-                    social_links: { ...settings.social_links, instagram: e.target.value },
-                  })
+                  setSettings((prev) => ({
+                    ...prev,
+                    social_links: {
+                      ...(prev?.social_links || INITIAL_BRAND_SETTINGS.social_links),
+                      instagram: e.target.value,
+                    },
+                  }))
                 }
                 placeholder="https://instagram.com/mediherbz"
                 className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
@@ -498,8 +527,8 @@ export const AdminPage: React.FC = () => {
             </label>
             <input
               type="text"
-              value={settings.address}
-              onChange={(e) => setSettings({ ...settings, address: e.target.value })}
+              value={settings?.address || ''}
+              onChange={(e) => setSettings((prev) => ({ ...prev, address: e.target.value }))}
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
             />
           </div>

@@ -295,11 +295,23 @@ export const api = {
       if (local) {
         const parsed = JSON.parse(local);
         if (parsed && typeof parsed === 'object') {
-          return { ...INITIAL_BRAND_SETTINGS, ...parsed };
+          return {
+            ...INITIAL_BRAND_SETTINGS,
+            ...parsed,
+            announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(parsed.announcement_bar || {}) },
+            social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(parsed.social_links || {}) },
+          };
         }
       }
     } catch {}
-    return fetchFromApi<BrandSettings>('/settings', INITIAL_BRAND_SETTINGS);
+
+    const remote = await fetchFromApi<BrandSettings>('/settings', INITIAL_BRAND_SETTINGS);
+    return {
+      ...INITIAL_BRAND_SETTINGS,
+      ...remote,
+      announcement_bar: { ...INITIAL_BRAND_SETTINGS.announcement_bar, ...(remote?.announcement_bar || {}) },
+      social_links: { ...INITIAL_BRAND_SETTINGS.social_links, ...(remote?.social_links || {}) },
+    };
   },
 
   updateBrandSettings: async (settings: Partial<BrandSettings>): Promise<BrandSettings> => {
