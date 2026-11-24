@@ -20,8 +20,22 @@ class Mediherbz_REST_API {
 
         // Settings
         register_rest_route($this->namespace, '/settings', array(
-            'methods'             => 'GET',
-            'callback'            => array($this, 'get_settings'),
+            array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_settings'),
+                'permission_callback' => '__return_true',
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'update_settings'),
+                'permission_callback' => array($this, 'check_admin_permission'),
+            ),
+        ));
+
+        // Admin Email & Password Authentication
+        register_rest_route($this->namespace, '/auth/admin-login', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'admin_login'),
             'permission_callback' => '__return_true',
         ));
 
@@ -100,6 +114,95 @@ class Mediherbz_REST_API {
     public function get_settings() {
         $settings = get_option('mediherbz_brand_settings', array());
         return rest_ensure_response($settings);
+    }
+
+    public function check_admin_permission($request) {
+        return $this->verify_admin_token($request);
+    }
+
+    private function verify_admin_token($request) {
+        $auth_header = $request->get_header('authorization');
+        if (empty($auth_header)) {
+            return false;
+        }
+
+        if (preg_match('/Bearer\s+(.*)$/i', $auth_header, $matches)) {
+            $token = trim($matches[1]);
+            $decoded = base64_decode($token, true);
+            if (!$decoded) return false;
+            $parts = explode('|', $decoded);
+            if (count($parts) === 3) {
+                list($user_id, $issued_at, $signature) = $parts;
+                // Check token expiration (7 days)
+                if (time() - (int)$issued_at > 7 * DAY_IN_SECONDS) {
+                    return false;
+                }
+                $secret = defined('AUTH_KEY') ? AUTH_KEY : 'mediherbz_secret_key_2026';
+                $expected = hash_hmac('sha256', $user_id . '|' . $issued_at, $secret);
+                if (hash_equals($expected, $signature)) {
+                    $user = get_userdata((int)$user_id);
+                    return ($user && (user_can($user, 'manage_options') || in_array('administrator', (array)$user->roles, true)));
+                }
+            }
+        }
+        return false;
+    }
+
+    public function admin_login(WP_REST_Request $request) {
+        $params = $request->get_json_params();
+        if (empty($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $email_or_user = isset($params['email']) ? sanitize_text_field($params['email']) : '';
+        $password      = isset($params['password']) ? (string)$params['password'] : '';
+
+        if (empty($email_or_user) || empty($password)) {
+            return new WP_Error('missing_fields', 'Please provide email or username and password.', array('status' => 400));
+        }
+
+        $user = wp_authenticate($email_or_user, $password);
+
+        if (is_wp_error($user)) {
+            return new WP_Error('invalid_credentials', 'Invalid email or password.', array('status' => 401));
+        }
+
+        if (!user_can($user, 'manage_options') && !in_array('administrator', (array)$user->roles, true) && !in_array('shop_manager', (array)$user->roles, true)) {
+            return new WP_Error('forbidden', 'Access denied. Administrator privileges required.', array('status' => 403));
+        }
+
+        $issued_at = time();
+        $payload   = $user->ID . '|' . $issued_at;
+        $secret    = defined('AUTH_KEY') ? AUTH_KEY : 'mediherbz_secret_key_2026';
+        $signature = hash_hmac('sha256', $payload, $secret);
+        $token     = base64_encode($payload . '|' . $signature);
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'token'   => $token,
+            'user'    => array(
+                'id'           => $user->ID,
+                'email'        => $user->user_email,
+                'display_name' => $user->display_name ?: $user->user_login,
+                'role'         => !empty($user->roles) ? $user->roles[0] : 'administrator',
+            ),
+        ));
+    }
+
+    public function update_settings(WP_REST_Request $request) {
+        $params = $request->get_json_params();
+        if (empty($params)) {
+            $params = $request->get_body_params();
+        }
+
+        $existing = get_option('mediherbz_brand_settings', array());
+        $merged   = array_merge($existing, $params);
+        update_option('mediherbz_brand_settings', $merged);
+
+        return rest_ensure_response(array(
+            'success'  => true,
+            'settings' => $merged,
+        ));
     }
 
     public function get_categories() {

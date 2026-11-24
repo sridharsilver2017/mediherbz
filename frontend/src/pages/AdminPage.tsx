@@ -10,18 +10,18 @@ import {
   Megaphone,
   Phone,
   Mail,
-  Globe,
-  Sparkles,
+  User,
   ExternalLink,
   ShieldCheck,
   Eye,
   EyeOff,
+  Sparkles,
+  LogOut,
+  Sliders,
 } from 'lucide-react';
 import { BrandSettings } from '../types';
 import { INITIAL_BRAND_SETTINGS } from '../data/mockData';
 import { api } from '../api/client';
-
-const DEFAULT_PIN = 'mediherbz2026';
 
 const ANNOUNCEMENT_PRESETS = [
   {
@@ -47,24 +47,20 @@ const ANNOUNCEMENT_PRESETS = [
 ];
 
 export const AdminPage: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    try {
-      return sessionStorage.getItem('mediherbz_admin_auth') === 'true';
-    } catch {
-      return false;
-    }
-  });
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [showPin, setShowPin] = useState(false);
+  // Authentication states
+  const [adminUser, setAdminUser] = useState(() => api.getAdminUser());
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
+  // Dashboard states
   const [settings, setSettings] = useState<BrandSettings>(INITIAL_BRAND_SETTINGS);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'announcement' | 'contact' | 'security'>('announcement');
-
-  const [newPinInput, setNewPinInput] = useState('');
-  const [pinChangeSuccess, setPinChangeSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<'announcement' | 'contact' | 'store'>('announcement');
 
   // Safe fallback getters
   const announcement = settings?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar;
@@ -93,30 +89,31 @@ export const AdminPage: React.FC = () => {
     };
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    let storedPin = DEFAULT_PIN;
-    try {
-      storedPin = localStorage.getItem('mediherbz_admin_pin') || DEFAULT_PIN;
-    } catch {}
+    if (!emailInput.trim() || !passwordInput) {
+      setLoginError('Please enter both email and password.');
+      return;
+    }
 
-    if (pinInput.trim() === storedPin.trim()) {
-      setIsAuthenticated(true);
-      try {
-        sessionStorage.setItem('mediherbz_admin_auth', 'true');
-      } catch {}
-      setPinError('');
-    } else {
-      setPinError('Invalid admin passcode. Please try again.');
+    setLoginLoading(true);
+    setLoginError('');
+
+    try {
+      const res = await api.adminLogin(emailInput.trim(), passwordInput, rememberMe);
+      setAdminUser(res.user);
+      setEmailInput('');
+      setPasswordInput('');
+    } catch (err: any) {
+      setLoginError(err.message || 'Authentication failed. Please verify credentials.');
+    } finally {
+      setLoginLoading(false);
     }
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    try {
-      sessionStorage.removeItem('mediherbz_admin_auth');
-    } catch {}
-    setPinInput('');
+    api.adminLogout();
+    setAdminUser(null);
   };
 
   const handleSave = async () => {
@@ -133,86 +130,128 @@ export const AdminPage: React.FC = () => {
   };
 
   const handleReset = async () => {
-    if (window.confirm('Reset all brand and announcement settings back to system defaults?')) {
+    if (window.confirm('Reset all banner and brand settings back to initial factory defaults?')) {
       const def = await api.resetBrandSettings();
       setSettings(def);
-      setToastMessage('Settings restored to initial factory defaults.');
+      setToastMessage('Settings restored to factory defaults.');
       setTimeout(() => setToastMessage(null), 3500);
     }
   };
 
-  const handleUpdatePin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPinInput.trim().length < 4) {
-      alert('Passcode must be at least 4 characters long.');
-      return;
-    }
-    try {
-      localStorage.setItem('mediherbz_admin_pin', newPinInput.trim());
-    } catch {}
-    setNewPinInput('');
-    setPinChangeSuccess(true);
-    setTimeout(() => setPinChangeSuccess(false), 3000);
-  };
-
   // -------------------------------------------------------------
-  // Passcode Lock Screen
+  // Real Email & Password Login Screen
   // -------------------------------------------------------------
-  if (!isAuthenticated) {
+  if (!adminUser) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md bg-white border border-stone-200 rounded-3xl shadow-xl p-8 sm:p-10 text-center">
-          <div className="w-16 h-16 bg-[#18833B]/10 text-[#18833B] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner">
-            <ShieldCheck className="w-8 h-8" />
+      <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-white border border-stone-200 rounded-3xl shadow-xl p-8 sm:p-10">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-[#18833B]/10 text-[#18833B] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
+              <ShieldCheck className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-black text-stone-900 font-serif">Admin Sign In</h1>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+              Sign in with your administrator account to manage store announcements and brand settings.
+            </p>
           </div>
 
-          <h1 className="text-2xl font-black text-stone-900 font-serif mb-2">Mediherbz Admin</h1>
-          <p className="text-xs sm:text-sm text-stone-500 mb-6">
-            Enter your admin passcode to configure banner announcements and brand settings.
-          </p>
-
           <form onSubmit={handleLogin} className="space-y-4">
-            <div className="relative">
-              <input
-                type={showPin ? 'text' : 'password'}
-                value={pinInput}
-                onChange={(e) => {
-                  setPinInput(e.target.value);
-                  setPinError('');
-                }}
-                placeholder="Enter admin passcode"
-                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-center text-base tracking-widest font-mono focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setShowPin(!showPin)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
-                aria-label="Toggle password visibility"
-              >
-                {showPin ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+            {/* Email Address / Username */}
+            <div className="space-y-1.5 text-left">
+              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                Admin Email or Username
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <input
+                  type="text"
+                  value={emailInput}
+                  onChange={(e) => {
+                    setEmailInput(e.target.value);
+                    setLoginError('');
+                  }}
+                  placeholder="admin@mediherbz.com"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
+                  autoFocus
+                  required
+                />
+              </div>
             </div>
 
-            {pinError && (
-              <div className="flex items-center justify-center gap-1.5 text-xs text-red-600 font-medium">
-                <AlertCircle className="w-3.5 h-3.5" />
-                <span>{pinError}</span>
+            {/* Password */}
+            <div className="space-y-1.5 text-left">
+              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordInput}
+                  onChange={(e) => {
+                    setPasswordInput(e.target.value);
+                    setLoginError('');
+                  }}
+                  placeholder="••••••••••••"
+                  className="w-full pl-10 pr-10 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 p-1 cursor-pointer"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between text-xs text-stone-500 pt-1">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#18833B] focus:ring-[#18833B] border-stone-300"
+                />
+                <span>Remember me for 7 days</span>
+              </label>
+            </div>
+
+            {/* Error Notification */}
+            {loginError && (
+              <div className="flex items-center gap-2 text-xs text-red-600 font-medium bg-red-50 p-3 rounded-xl border border-red-200 text-left">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{loginError}</span>
               </div>
             )}
 
+            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              disabled={loginLoading}
+              className="w-full py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-semibold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
             >
-              <Unlock className="w-4 h-4" />
-              Unlock Admin Dashboard
+              {loginLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Authenticating...</span>
+                </>
+              ) : (
+                <>
+                  <Unlock className="w-4 h-4" />
+                  <span>Sign In as Administrator</span>
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 pt-5 border-t border-stone-100 text-[11px] text-stone-400">
-            <span>Default passcode: </span>
-            <code className="bg-stone-100 px-1.5 py-0.5 rounded text-stone-600 font-mono">mediherbz2026</code>
+          {/* Quick Info & Help */}
+          <div className="mt-6 pt-5 border-t border-stone-100 text-[11px] text-stone-400 text-center space-y-1">
+            <p>Protected by WordPress REST Security & HMAC Token Verification</p>
+            <p className="font-mono text-stone-500">Default: admin@mediherbz.com / mediherbz2026</p>
           </div>
         </div>
       </div>
@@ -220,7 +259,7 @@ export const AdminPage: React.FC = () => {
   }
 
   // -------------------------------------------------------------
-  // Authenticated Admin Dashboard
+  // Authenticated Dashboard
   // -------------------------------------------------------------
   return (
     <div className="min-h-screen py-8 sm:py-12 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
@@ -232,7 +271,7 @@ export const AdminPage: React.FC = () => {
         </div>
       )}
 
-      {/* Top Header Bar */}
+      {/* Top Header Card */}
       <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 mb-1">
@@ -240,11 +279,13 @@ export const AdminPage: React.FC = () => {
               <span className="w-2 h-2 rounded-full bg-[#18833B] animate-pulse"></span>
               Live Control Panel
             </span>
-            <span className="text-xs text-stone-400">• Mediherbz v1.2</span>
+            <span className="text-xs text-stone-500 font-medium">
+              Signed in as: <strong className="text-stone-800">{adminUser.display_name || adminUser.email}</strong>
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-stone-900 font-serif">Store & Banner Settings</h1>
           <p className="text-xs sm:text-sm text-stone-500 mt-1">
-            Toggle and customize the top announcement bar, brand contact information, and store notices.
+            Configure the top announcement banner, brand customer care contacts, and social media channels.
           </p>
         </div>
 
@@ -261,13 +302,13 @@ export const AdminPage: React.FC = () => {
             onClick={handleLogout}
             className="flex items-center gap-1.5 px-4 py-2 border border-stone-300 hover:border-red-300 hover:text-red-600 text-stone-600 text-xs font-semibold rounded-xl transition-all cursor-pointer"
           >
-            <Lock className="w-3.5 h-3.5" />
-            Lock
+            <LogOut className="w-3.5 h-3.5" />
+            Sign Out
           </button>
         </div>
       </div>
 
-      {/* Live Announcement Bar Preview Banner */}
+      {/* Live Announcement Bar Preview */}
       <div className="bg-white border border-stone-200 rounded-3xl p-6 shadow-xs mb-8">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
@@ -296,7 +337,7 @@ export const AdminPage: React.FC = () => {
           </div>
         ) : (
           <div className="border border-dashed border-stone-300 bg-stone-50 text-stone-400 py-3 px-4 rounded-xl text-center text-xs">
-            The top announcement bar is currently disabled and not shown to website visitors.
+            The top announcement bar is currently hidden. Toggle the switch below to show it live.
           </div>
         )}
       </div>
@@ -328,15 +369,15 @@ export const AdminPage: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setActiveTab('security')}
+          onClick={() => setActiveTab('store')}
           className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
-            activeTab === 'security'
+            activeTab === 'store'
               ? 'border-[#18833B] text-[#18833B]'
               : 'border-transparent text-stone-500 hover:text-stone-800'
           }`}
         >
-          <ShieldCheck className="w-4 h-4" />
-          Admin Passcode
+          <Sliders className="w-4 h-4" />
+          Store Info
         </button>
       </div>
 
@@ -346,7 +387,7 @@ export const AdminPage: React.FC = () => {
           {/* Main Visibility Switch */}
           <div className="flex items-center justify-between pb-6 border-b border-stone-100">
             <div>
-              <h3 className="text-base font-bold text-stone-900">Show Announcement Bar</h3>
+              <h3 className="text-base font-bold text-stone-900">Show Top Announcement Bar</h3>
               <p className="text-xs text-stone-500 mt-0.5">
                 Turn on to display the green announcement header at the very top of the website.
               </p>
@@ -392,7 +433,7 @@ export const AdminPage: React.FC = () => {
               className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
             />
             <p className="text-[11px] text-stone-400">
-              Tip: You can use emojis (🌿, ✨, 📦, 🎉) to make announcements stand out.
+              Tip: Emojis (🌿, ✨, 📦, 🎉) display cleanly across all iOS and Android devices.
             </p>
           </div>
 
@@ -456,7 +497,7 @@ export const AdminPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
-                Support Phone Number
+                Customer Care Phone
               </label>
               <input
                 type="text"
@@ -468,7 +509,7 @@ export const AdminPage: React.FC = () => {
 
             <div className="space-y-2">
               <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
-                Support Email Address
+                Customer Care Email
               </label>
               <input
                 type="email"
@@ -535,44 +576,34 @@ export const AdminPage: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 3: Security & Passcode */}
-      {activeTab === 'security' && (
+      {/* Tab 3: Store Information */}
+      {activeTab === 'store' && (
         <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
-          <div>
-            <h3 className="text-base font-bold text-stone-900">Change Admin Passcode</h3>
-            <p className="text-xs text-stone-500 mt-0.5">
-              Update the passcode required to access this control panel.
-            </p>
-          </div>
-
-          <form onSubmit={handleUpdatePin} className="space-y-4 max-w-md">
-            <div>
-              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
-                New Passcode
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                Store Name
               </label>
               <input
                 type="text"
-                value={newPinInput}
-                onChange={(e) => setNewPinInput(e.target.value)}
-                placeholder="Enter new 4+ character passcode"
-                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm font-mono focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
+                value={settings?.brand_name || ''}
+                onChange={(e) => setSettings((prev) => ({ ...prev, brand_name: e.target.value }))}
+                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
               />
             </div>
 
-            {pinChangeSuccess && (
-              <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5" />
-                Admin passcode updated successfully!
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 text-white text-xs font-semibold rounded-xl transition-all shadow-sm cursor-pointer"
-            >
-              Update Passcode
-            </button>
-          </form>
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                Tagline
+              </label>
+              <input
+                type="text"
+                value={settings?.tagline || ''}
+                onChange={(e) => setSettings((prev) => ({ ...prev, tagline: e.target.value }))}
+                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
+              />
+            </div>
+          </div>
         </div>
       )}
 
