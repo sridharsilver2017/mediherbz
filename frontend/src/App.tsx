@@ -22,9 +22,9 @@ export function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen flex flex-col bg-[#FAF9F2] text-[#26352A]">
+      <div className="min-h-screen flex flex-col bg-[#FAF9F2] text-[#26352A] overflow-x-hidden w-full max-w-full">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 overflow-x-hidden w-full max-w-full">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />

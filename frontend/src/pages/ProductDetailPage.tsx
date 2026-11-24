@@ -74,9 +74,9 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-12 pb-28 lg:pb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-8 sm:space-y-12 pb-28 lg:pb-12 overflow-x-hidden w-full max-w-full">
       {/* Breadcrumbs - horizontally scrollable on mobile */}
-      <div className="flex items-center gap-1.5 text-xs text-stone-500 overflow-x-auto whitespace-nowrap scrollbar-none py-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex items-center gap-1.5 text-xs text-stone-500 overflow-x-auto whitespace-nowrap scrollbar-none py-1 w-full max-w-full">
         <Link to="/" className="hover:text-[#18833B] shrink-0">Home</Link>
         <span className="shrink-0 text-stone-300">/</span>
         <Link to="/shop" className="hover:text-[#18833B] shrink-0">Shop</Link>
@@ -305,8 +305,8 @@ export const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Structured Herbal Product Tabs */}
-      <div className="border-t border-stone-200 pt-8 sm:pt-10">
-        <div className="overflow-x-auto scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="border-t border-stone-200 pt-8 sm:pt-10 w-full max-w-full overflow-hidden">
+        <div className="overflow-x-auto scrollbar-none w-full max-w-full">
           <div className="flex border-b border-stone-200 min-w-max space-x-3 sm:space-x-8">
             <button
               onClick={() => setActiveTab('details')}

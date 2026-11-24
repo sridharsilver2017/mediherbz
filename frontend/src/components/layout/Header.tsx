@@ -41,9 +41,9 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs transition-all">
+    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-xs transition-all overflow-x-hidden w-full max-w-full">
       {/* Top Announcement Bar */}
-      <div className="bg-[#12632F] text-white text-xs sm:text-sm py-2 px-4 text-center font-medium tracking-wide flex items-center justify-between">
+      <div className="bg-[#12632F] text-white text-[11px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between overflow-hidden">
         <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
           <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#A6C928]" /> +91 98765 43210</span>
           <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#A6C928]" /> care@mediherbz.com</span>
