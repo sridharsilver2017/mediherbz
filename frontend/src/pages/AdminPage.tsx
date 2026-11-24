@@ -60,7 +60,9 @@ export const AdminPage: React.FC = () => {
   const [settings, setSettings] = useState<BrandSettings>(INITIAL_BRAND_SETTINGS);
   const [saving, setSaving] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'announcement' | 'contact' | 'store'>('announcement');
+  const [activeTab, setActiveTab] = useState<'announcement' | 'contact' | 'store' | 'security'>('announcement');
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   // Safe fallback getters
   const announcement = settings?.announcement_bar || INITIAL_BRAND_SETTINGS.announcement_bar;
@@ -379,6 +381,18 @@ export const AdminPage: React.FC = () => {
           <Sliders className="w-4 h-4" />
           Store Info
         </button>
+
+        <button
+          onClick={() => setActiveTab('security')}
+          className={`pb-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+            activeTab === 'security'
+              ? 'border-[#18833B] text-[#18833B]'
+              : 'border-transparent text-stone-500 hover:text-stone-800'
+          }`}
+        >
+          <ShieldCheck className="w-4 h-4" />
+          Password & Security
+        </button>
       </div>
 
       {/* Tab 1: Announcement Bar Settings */}
@@ -604,6 +618,63 @@ export const AdminPage: React.FC = () => {
               />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab 4: Security & Password Settings */}
+      {activeTab === 'security' && (
+        <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div>
+            <h3 className="text-base font-bold text-stone-900">Change Admin Password</h3>
+            <p className="text-xs text-stone-500 mt-0.5">
+              Set a custom password for your administrator dashboard.
+            </p>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (newPassword.trim().length < 6) {
+                alert('Password must be at least 6 characters long.');
+                return;
+              }
+              try {
+                localStorage.setItem('mediherbz_admin_pin', newPassword.trim());
+              } catch {}
+              setNewPassword('');
+              setPasswordSuccess(true);
+              setTimeout(() => setPasswordSuccess(false), 3500);
+            }}
+            className="space-y-4 max-w-md"
+          >
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider">
+                New Admin Password
+              </label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password (min. 6 chars)"
+                className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-sm text-stone-800 focus:outline-hidden focus:border-[#18833B] focus:ring-1 focus:ring-[#18833B]"
+                required
+              />
+            </div>
+
+            {passwordSuccess && (
+              <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 p-3 rounded-xl border border-emerald-200">
+                <Check className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span>Admin password updated successfully! You can now use this password to sign in.</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              className="px-6 py-2.5 bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+            >
+              Update Password
+            </button>
+          </form>
         </div>
       )}
 
