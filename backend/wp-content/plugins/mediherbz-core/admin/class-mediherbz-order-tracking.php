@@ -11,13 +11,14 @@ if (!defined('ABSPATH')) {
 class Mediherbz_Order_Tracking {
 
     public function __construct() {
-        add_action('add_meta_boxes', array($this, 'add_tracking_meta_box'));
+        add_action('add_meta_boxes', array($this, 'add_tracking_meta_box'), 10, 2);
+        add_action('add_meta_boxes_woocommerce_page_wc-orders', array($this, 'add_tracking_meta_box'), 10, 2);
         add_action('woocommerce_process_shop_order_meta', array($this, 'save_tracking_meta'));
         add_action('save_post_shop_order', array($this, 'save_tracking_meta'));
     }
 
     public function add_tracking_meta_box() {
-        $screens = array('shop_order');
+        $screens = array('shop_order', 'woocommerce_page_wc-orders');
         if (function_exists('wc_get_page_screen_id')) {
             $hpos_screen = wc_get_page_screen_id('shop_order');
             if ($hpos_screen && !in_array($hpos_screen, $screens, true)) {

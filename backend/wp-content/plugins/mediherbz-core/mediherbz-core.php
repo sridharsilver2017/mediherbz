@@ -30,6 +30,13 @@ require_once MEDIHERBZ_CORE_PATH . 'api/class-mediherbz-rest-api.php';
 require_once MEDIHERBZ_CORE_PATH . 'integrations/razorpay/class-mediherbz-razorpay.php';
 require_once MEDIHERBZ_CORE_PATH . 'security/class-mediherbz-security.php';
 
+// Declare High-Performance Order Storage (HPOS) Compatibility
+add_action('before_woocommerce_init', function() {
+    if (class_exists(\Automattic\WooCommerce\Utilities\FeaturesUtil::class)) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility('custom_order_tables', __FILE__, true);
+    }
+});
+
 register_activation_hook(__FILE__, array('Mediherbz_Activator', 'activate'));
 register_deactivation_hook(__FILE__, array('Mediherbz_Activator', 'deactivate'));
 

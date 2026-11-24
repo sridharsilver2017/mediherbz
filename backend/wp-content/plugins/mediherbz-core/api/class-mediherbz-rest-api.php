@@ -81,6 +81,27 @@ class Mediherbz_REST_API {
             'permission_callback' => '__return_true',
         ));
 
+        // Admin Orders list
+        register_rest_route($this->namespace, '/admin/orders', array(
+            'methods'             => 'GET',
+            'callback'            => array($this, 'get_admin_orders'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Admin update order status
+        register_rest_route($this->namespace, '/admin/orders/update-status', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'update_admin_order_status'),
+            'permission_callback' => '__return_true',
+        ));
+
+        // Admin update order tracking
+        register_rest_route($this->namespace, '/admin/orders/update-tracking', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'update_admin_order_tracking'),
+            'permission_callback' => '__return_true',
+        ));
+
         // Coupons validation
         register_rest_route($this->namespace, '/coupons/validate', array(
             'methods'             => 'POST',
@@ -575,6 +596,219 @@ class Mediherbz_REST_API {
         }
 
         return rest_ensure_response($formatted);
+    }
+
+    public function get_admin_orders($request) {
+        if (!function_exists('wc_get_orders')) {
+            return rest_ensure_response(array('orders' => array(), 'stats' => array()));
+        }
+
+        $limit  = intval($request->get_param('limit') ?: 50);
+        $status = sanitize_text_field($request->get_param('status') ?: 'any');
+        $search = sanitize_text_field($request->get_param('search') ?: '');
+
+        $args = array(
+            'limit'   => $limit,
+            'orderby' => 'date',
+            'order'   => 'DESC',
+        );
+
+        if ($status && $status !== 'any') {
+            $args['status'] = $status;
+        }
+
+        $orders = wc_get_orders($args);
+        $formatted = array();
+
+        $stats = array(
+            'total_count' => 0,
+            'processing'  => 0,
+            'completed'   => 0,
+            'on_hold'     => 0,
+            'cancelled'   => 0,
+            'total_rev'   => 0,
+            'cod_count'   => 0,
+            'online_count'=> 0,
+        );
+
+        // Calculate all-time / recent stats
+        $all_recent = wc_get_orders(array('limit' => 100, 'orderby' => 'date', 'order' => 'DESC'));
+        foreach ($all_recent as $ro) {
+            $stats['total_count']++;
+            $st = $ro->get_status();
+            if (isset($stats[$st])) {
+                $stats[$st]++;
+            }
+            if ($st !== 'cancelled' && $st !== 'failed') {
+                $stats['total_rev'] += floatval($ro->get_total());
+            }
+            if ($ro->get_payment_method() === 'cod') {
+                $stats['cod_count']++;
+            } else {
+                $stats['online_count']++;
+            }
+        }
+
+        foreach ($orders as $o) {
+            $order_id = $o->get_id();
+            $order_num = ($o->get_meta('_order_number_formatted') ?: get_post_meta($order_id, '_order_number_formatted', true)) ?: ('MED-' . $order_id);
+
+            // Filter by search term if provided
+            $cust_name = trim($o->get_billing_first_name() . ' ' . $o->get_billing_last_name());
+            $cust_phone = $o->get_billing_phone();
+            $cust_email = $o->get_billing_email();
+
+            if (!empty($search)) {
+                $s_lower = strtolower($search);
+                $match = (
+                    strpos(strtolower($order_num), $s_lower) !== false ||
+                    strpos(strval($order_id), $s_lower) !== false ||
+                    strpos(strtolower($cust_name), $s_lower) !== false ||
+                    strpos(strtolower($cust_phone), $s_lower) !== false ||
+                    strpos(strtolower($cust_email), $s_lower) !== false
+                );
+                if (!$match) continue;
+            }
+
+            $items = array();
+            foreach ($o->get_items() as $item_id => $item) {
+                $product = $item->get_product();
+                $img_id = $product ? $product->get_image_id() : 0;
+                $items[] = array(
+                    'id'       => $item_id,
+                    'name'     => $item->get_name(),
+                    'quantity' => $item->get_quantity(),
+                    'total'    => floatval($item->get_total()),
+                    'sku'      => $product ? $product->get_sku() : '',
+                    'image'    => $img_id ? wp_get_attachment_url($img_id) : '',
+                );
+            }
+
+            $carrier      = ($o->get_meta('_shipping_carrier') ?: get_post_meta($order_id, '_shipping_carrier', true)) ?: 'Express BlueDart Air';
+            $tracking_id  = ($o->get_meta('_tracking_number') ?: get_post_meta($order_id, '_tracking_number', true)) ?: '';
+            $tracking_url = ($o->get_meta('_tracking_url') ?: get_post_meta($order_id, '_tracking_url', true)) ?: '';
+
+            $formatted[] = array(
+                'id'                   => $order_id,
+                'order_number'         => $order_num,
+                'status'               => $o->get_status(),
+                'total'                => floatval($o->get_total()),
+                'subtotal'             => floatval($o->get_subtotal()),
+                'shipping_total'       => floatval($o->get_shipping_total()),
+                'discount_total'       => floatval($o->get_discount_total()),
+                'currency'             => $o->get_currency(),
+                'date_created'         => $o->get_date_created() ? $o->get_date_created()->date('M d, Y h:i A') : '',
+                'customer'             => array(
+                    'first_name' => $o->get_billing_first_name(),
+                    'last_name'  => $o->get_billing_last_name(),
+                    'name'       => $cust_name ?: 'Customer',
+                    'email'      => $cust_email,
+                    'phone'      => $cust_phone,
+                    'address'    => trim($o->get_billing_address_1() . ' ' . $o->get_billing_address_2()),
+                    'city'       => $o->get_billing_city(),
+                    'state'      => $o->get_billing_state(),
+                    'postcode'   => $o->get_billing_postcode(),
+                    'country'    => $o->get_billing_country(),
+                ),
+                'items'                => $items,
+                'item_count'           => $o->get_item_count(),
+                'shipping_carrier'     => $carrier,
+                'tracking_id'          => $tracking_id,
+                'tracking_url'         => $tracking_url,
+                'payment_method'       => $o->get_payment_method(),
+                'payment_method_title' => $o->get_payment_method_title(),
+                'is_paid'              => $o->is_paid(),
+                'customer_note'        => $o->get_customer_note(),
+            );
+        }
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'stats'   => $stats,
+            'orders'  => $formatted,
+            'count'   => count($formatted),
+        ));
+    }
+
+    public function update_admin_order_status($request) {
+        $params   = $request->get_json_params();
+        $order_id = intval($params['order_id'] ?? 0);
+        $status   = sanitize_text_field($params['status'] ?? '');
+        $note     = sanitize_text_field($params['note'] ?? '');
+
+        if (!$order_id || !$status) {
+            return new WP_Error('invalid_params', 'Order ID and Status required', array('status' => 400));
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new WP_Error('not_found', 'Order not found', array('status' => 404));
+        }
+
+        $order->update_status($status, $note ?: 'Status updated via Mediherbz Orders App');
+        $order->save();
+
+        return rest_ensure_response(array(
+            'success'    => true,
+            'order_id'   => $order_id,
+            'status'     => $order->get_status(),
+            'message'    => 'Order status updated successfully.',
+        ));
+    }
+
+    public function update_admin_order_tracking($request) {
+        $params       = $request->get_json_params();
+        $order_id     = intval($params['order_id'] ?? 0);
+        $carrier      = sanitize_text_field($params['shipping_carrier'] ?? '');
+        $tracking_id  = sanitize_text_field($params['tracking_id'] ?? '');
+        $tracking_url = esc_url_raw($params['tracking_url'] ?? '');
+        $mark_shipped = !empty($params['mark_shipped']);
+
+        if (!$order_id) {
+            return new WP_Error('invalid_params', 'Order ID is required', array('status' => 400));
+        }
+
+        $order = wc_get_order($order_id);
+        if (!$order) {
+            return new WP_Error('not_found', 'Order not found', array('status' => 404));
+        }
+
+        if ($carrier) {
+            $order->update_meta_data('_shipping_carrier', $carrier);
+            update_post_meta($order_id, '_shipping_carrier', $carrier);
+        }
+        if ($tracking_id) {
+            $order->update_meta_data('_tracking_number', $tracking_id);
+            update_post_meta($order_id, '_tracking_number', $tracking_id);
+        }
+        if ($tracking_url) {
+            $order->update_meta_data('_tracking_url', $tracking_url);
+            update_post_meta($order_id, '_tracking_url', $tracking_url);
+        }
+
+        if ($tracking_id) {
+            $order->add_order_note(
+                sprintf('Shipment dispatched via %s (Waybill #%s)', $carrier ?: 'Courier', $tracking_id),
+                false,
+                true
+            );
+        }
+
+        if ($mark_shipped && $order->get_status() === 'processing') {
+            $order->update_status('completed', sprintf('Dispatched via %s (AWB #%s)', $carrier, $tracking_id));
+        }
+
+        $order->save();
+
+        return rest_ensure_response(array(
+            'success'          => true,
+            'order_id'         => $order_id,
+            'shipping_carrier' => $carrier,
+            'tracking_id'      => $tracking_id,
+            'tracking_url'     => $tracking_url,
+            'status'           => $order->get_status(),
+            'message'          => 'Tracking information saved to WooCommerce.',
+        ));
     }
 
     public function validate_coupon($request) {

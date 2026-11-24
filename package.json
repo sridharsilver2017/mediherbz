@@ -6,7 +6,10 @@
   "scripts": {
     "build": "npm run build --prefix frontend",
     "dev": "npm run dev --prefix frontend",
-    "install:frontend": "npm install --prefix frontend"
+    "install:frontend": "npm install --prefix frontend",
+    "build:orders": "npm run build --prefix orders-app",
+    "dev:orders": "npm run dev --prefix orders-app",
+    "install:orders": "npm install --prefix orders-app"
   }
 }
 
