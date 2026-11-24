@@ -95,29 +95,50 @@ export const TrackOrderPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Progress Milestones */}
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1">
-                  <CheckCircle2 className="w-6 h-6 text-[#18833B] mx-auto" />
-                  <p className="font-bold text-xs text-stone-900">Order Confirmed</p>
-                  <p className="text-[10px] text-stone-500">Payment verified</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1">
-                  <Clock className="w-6 h-6 text-[#18833B] mx-auto" />
-                  <p className="font-bold text-xs text-stone-900">Batch Packaging</p>
-                  <p className="text-[10px] text-stone-500">Fresh herbal packing</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1 opacity-70">
-                  <Truck className="w-6 h-6 text-stone-400 mx-auto" />
-                  <p className="font-bold text-xs text-stone-700">In Transit</p>
-                  <p className="text-[10px] text-stone-400">Handed to carrier</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-white border border-stone-200 space-y-1 opacity-70">
-                  <Package className="w-6 h-6 text-stone-400 mx-auto" />
-                  <p className="font-bold text-xs text-stone-700">Delivered</p>
-                  <p className="text-[10px] text-stone-400">At your doorstep</p>
-                </div>
-              </div>
+              {/* Dynamic Progress Milestones */}
+              {(() => {
+                const s = (order.status || '').toLowerCase();
+                const hasTracking = Boolean(order.tracking_id);
+                const step = s === 'completed' ? 4 : (s === 'shipped' || hasTracking ? 3 : (s === 'processing' || s === 'on-hold' ? 2 : 1));
+
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-center">
+                    <div className={`p-4 rounded-2xl border space-y-1 transition-all ${
+                      step >= 1 ? 'bg-emerald-50 border-emerald-200' : 'bg-stone-50 border-stone-200 opacity-60'
+                    }`}>
+                      <CheckCircle2 className={`w-6 h-6 mx-auto ${step >= 1 ? 'text-[#18833B]' : 'text-stone-400'}`} />
+                      <p className="font-bold text-xs text-stone-900">Order Confirmed</p>
+                      <p className="text-[10px] text-stone-500">Verified in store</p>
+                    </div>
+
+                    <div className={`p-4 rounded-2xl border space-y-1 transition-all ${
+                      step >= 2 ? 'bg-emerald-50 border-emerald-200' : 'bg-stone-50 border-stone-200 opacity-60'
+                    }`}>
+                      <Clock className={`w-6 h-6 mx-auto ${step >= 2 ? 'text-[#18833B]' : 'text-stone-400'}`} />
+                      <p className="font-bold text-xs text-stone-900">Batch Packaging</p>
+                      <p className="text-[10px] text-stone-500">Fresh herbal packing</p>
+                    </div>
+
+                    <div className={`p-4 rounded-2xl border space-y-1 transition-all ${
+                      step >= 3 ? 'bg-emerald-50 border-emerald-200' : 'bg-stone-50 border-stone-200 opacity-60'
+                    }`}>
+                      <Truck className={`w-6 h-6 mx-auto ${step >= 3 ? 'text-[#18833B]' : 'text-stone-400'}`} />
+                      <p className="font-bold text-xs text-stone-900">In Transit</p>
+                      <p className="text-[10px] text-stone-500">
+                        {order.shipping_carrier || 'Handed to carrier'}
+                      </p>
+                    </div>
+
+                    <div className={`p-4 rounded-2xl border space-y-1 transition-all ${
+                      step >= 4 ? 'bg-emerald-50 border-emerald-200' : 'bg-stone-50 border-stone-200 opacity-60'
+                    }`}>
+                      <Package className={`w-6 h-6 mx-auto ${step >= 4 ? 'text-[#18833B]' : 'text-stone-400'}`} />
+                      <p className="font-bold text-xs text-stone-900">Delivered</p>
+                      <p className="text-[10px] text-stone-500">At your doorstep</p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Waybill / Tracking Link */}
               {order.tracking_id && (

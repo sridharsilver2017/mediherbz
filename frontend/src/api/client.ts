@@ -690,57 +690,34 @@ export const api = {
   trackOrder: async (orderNumber: string, emailOrPhone: string): Promise<Order | null> => {
     try {
       const res = await fetch(`${WP_API_URL}/orders/track?number=${encodeURIComponent(orderNumber)}&contact=${encodeURIComponent(emailOrPhone)}`);
-      if (!res.ok) throw new Error('Order not found');
-      return await res.json();
-    } catch {
-      // Return mock tracking data if order number matches simulated format
-      if (orderNumber.toUpperCase().startsWith('MED-') || orderNumber.length >= 6) {
-        return {
-          id: 9942,
-          order_number: orderNumber,
-          status: 'processing',
-          currency: 'INR',
-          total: 1250,
-          subtotal: 1250,
-          shipping_total: 0,
-          discount_total: 0,
-          tax_total: 0,
-          date_created: new Date().toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' }),
-          billing: {
-            first_name: 'Customer',
-            last_name: 'Care',
-            email: emailOrPhone.includes('@') ? emailOrPhone : 'customer@example.com',
-            phone: !emailOrPhone.includes('@') ? emailOrPhone : '+91 9876543210',
-            address_1: 'Green Gardens, MG Road',
-            city: 'Bengaluru',
-            state: 'Karnataka',
-            postcode: '560001',
-            country: 'IN'
-          },
-          shipping: {
-            first_name: 'Customer',
-            last_name: 'Care',
-            email: emailOrPhone.includes('@') ? emailOrPhone : 'customer@example.com',
-            phone: !emailOrPhone.includes('@') ? emailOrPhone : '+91 9876543210',
-            address_1: 'Green Gardens, MG Road',
-            city: 'Bengaluru',
-            state: 'Karnataka',
-            postcode: '560001',
-            country: 'IN'
-          },
-          items: [
-            { id: 1, product_id: 102, name: 'Kumkumadi Radiance Youth Elixir Serum', quantity: 1, subtotal: 1250, total: 1250 }
-          ],
-          tracking_id: 'SR88291044IN',
-          tracking_url: 'https://shiprocket.co/tracking/SR88291044IN',
-          shipping_carrier: 'Shiprocket Air Priority Express',
-          payment_method: 'razorpay',
-          payment_method_title: 'Razorpay UPI / Cards',
-          is_paid: true,
-        };
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.id) {
+          return data;
+        }
       }
-      return null;
+    } catch (err) {
+      console.warn('[Mediherbz API] Live order tracking error:', err);
     }
+
+    // Check locally saved orders in store as fallback for instant feedback
+    try {
+      const rawUserStorage = localStorage.getItem('mediherbz-user-store');
+      if (rawUserStorage) {
+        const parsed = JSON.parse(rawUserStorage);
+        const localOrders = parsed?.state?.orders || [];
+        const found = localOrders.find(
+          (o: Order) =>
+            o.order_number?.toLowerCase() === orderNumber.toLowerCase() ||
+            String(o.id) === orderNumber.replace(/\D/g, '')
+        );
+        if (found) return found;
+      }
+    } catch {
+      // ignore storage parse errors
+    }
+
+    return null;
   }
 };
 
