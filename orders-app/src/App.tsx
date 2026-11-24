@@ -123,7 +123,7 @@ export const App: React.FC = () => {
         <div className="sm:hidden grid grid-cols-3 gap-2">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
               statusFilter === 'all'
                 ? 'bg-[#18833B] text-white border-[#18833B] shadow-xs'
                 : 'bg-white text-stone-900 border-stone-200/90 shadow-2xs'
@@ -137,7 +137,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setStatusFilter('processing')}
-            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
               statusFilter === 'processing'
                 ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                 : 'bg-white text-amber-700 border-stone-200/90 shadow-2xs'
@@ -151,7 +151,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setStatusFilter('completed')}
-            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
               statusFilter === 'completed'
                 ? 'bg-[#18833B] text-white border-[#18833B] shadow-xs'
                 : 'bg-white text-[#18833B] border-stone-200/90 shadow-2xs'
@@ -165,7 +165,7 @@ export const App: React.FC = () => {
         </div>
 
         {/* Search, Status Tabs & Payment Filter Bar */}
-        <div className="bg-white p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-200/90 shadow-xs space-y-3">
+        <div className="bg-white p-3.5 sm:p-5 rounded-lg border border-stone-200/90 shadow-xs space-y-3">
           {/* Search Input with Instant Clear */}
           <div className="relative">
             <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
@@ -175,7 +175,7 @@ export const App: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchOrders()}
               placeholder="Search by Order #, Customer, Phone, or City..."
-              className="w-full pl-11 pr-10 py-2.5 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-xl text-xs sm:text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-3 focus:ring-[#18833B]/10 transition-all"
+              className="w-full pl-11 pr-10 py-2.5 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-lg text-xs sm:text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-2 focus:ring-[#18833B]/10 transition-all"
             />
             {searchQuery && (
               <button
@@ -183,7 +183,7 @@ export const App: React.FC = () => {
                   setSearchQuery('');
                   fetchOrders();
                 }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 rounded-lg cursor-pointer"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 rounded-md cursor-pointer"
                 title="Clear search"
               >
                 <X className="w-4 h-4" />
@@ -265,7 +265,7 @@ export const App: React.FC = () => {
 
         {/* Sync Error Banner */}
         {error && (
-          <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center justify-between gap-3 shadow-xs">
+          <div className="p-3.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700 flex items-center justify-between gap-3 shadow-xs">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
               <div>
@@ -284,8 +284,8 @@ export const App: React.FC = () => {
 
         {/* Orders Listing State */}
         {loading && orders.length === 0 ? (
-          <div className="py-24 text-center space-y-4 bg-white rounded-xl sm:rounded-2xl border border-stone-200/90 shadow-xs">
-            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-[#18833B] flex items-center justify-center mx-auto">
+          <div className="py-24 text-center space-y-4 bg-white rounded-lg border border-stone-200/90 shadow-xs">
+            <div className="w-12 h-12 rounded-lg bg-emerald-50 text-[#18833B] flex items-center justify-center mx-auto">
               <RefreshCw className="w-6 h-6 animate-spin" />
             </div>
             <div className="space-y-1">
@@ -294,8 +294,8 @@ export const App: React.FC = () => {
             </div>
           </div>
         ) : filteredOrders.length === 0 ? (
-          <div className="py-20 text-center space-y-3 bg-white rounded-xl sm:rounded-2xl border border-stone-200/90 px-4 shadow-xs">
-            <div className="w-12 h-12 rounded-xl bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
+          <div className="py-20 text-center space-y-3 bg-white rounded-lg border border-stone-200/90 px-4 shadow-xs">
+            <div className="w-12 h-12 rounded-lg bg-stone-100 text-stone-400 flex items-center justify-center mx-auto">
               <Package className="w-6 h-6" />
             </div>
             <h3 className="text-sm font-black text-stone-900">No orders found</h3>
@@ -312,7 +312,7 @@ export const App: React.FC = () => {
                   setPaymentFilter('all');
                   fetchOrders();
                 }}
-                className="mt-2 px-4 py-2 bg-stone-900 text-white rounded-xl text-xs font-bold cursor-pointer active:scale-95"
+                className="mt-2 px-4 py-2 bg-stone-900 text-white rounded-lg text-xs font-bold cursor-pointer active:scale-95"
               >
                 Reset All Filters
               </button>
@@ -333,7 +333,7 @@ export const App: React.FC = () => {
             </div>
 
             {/* DESKTOP/TABLET VIEW: Structured Luxury Table (md+) */}
-            <div className="hidden md:block bg-white rounded-xl sm:rounded-2xl border border-stone-200/90 shadow-xs overflow-hidden">
+            <div className="hidden md:block bg-white rounded-lg border border-stone-200/90 shadow-xs overflow-hidden">
               <div className="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <h2 className="font-serif font-black text-base text-stone-900">
@@ -506,7 +506,7 @@ export const App: React.FC = () => {
       {/* Mobile Stats Modal */}
       {showStatsModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
+          <div className="bg-white rounded-lg w-full max-w-sm p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-stone-100 pb-3">
               <h3 className="font-serif font-black text-stone-900 text-base">
                 Performance Overview

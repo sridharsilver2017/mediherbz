@@ -217,7 +217,7 @@ export const AdminPage: React.FC = () => {
         <div className="w-full max-w-md">
           {/* Brand Emblem */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-xl shadow-emerald-900/15 mb-4 relative ring-8 ring-[#18833B]/10">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-lg bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-xl shadow-emerald-900/15 mb-4 relative ring-8 ring-[#18833B]/10">
               <ShieldCheck className="w-10 h-10" />
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#A6C928] border-2 border-white flex items-center justify-center text-[10px] font-black text-emerald-950">
                 ✓
@@ -232,7 +232,7 @@ export const AdminPage: React.FC = () => {
           </div>
 
           {/* Form Card */}
-          <div className="bg-white border border-stone-200/90 rounded-2xl shadow-xl shadow-stone-200/50 p-7 sm:p-9 relative overflow-hidden">
+          <div className="bg-white border border-stone-200/90 rounded-lg shadow-xl shadow-stone-200/50 p-7 sm:p-9 relative overflow-hidden">
             {/* Top decorative accent bar */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#18833B] via-[#A6C928] to-[#12632F]" />
 
@@ -350,7 +350,7 @@ export const AdminPage: React.FC = () => {
     <div className="min-h-screen bg-[#FBFBF7] pb-24 sm:pb-32">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 sm:right-8 z-50 bg-[#12632F] text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 border border-[#A6C928]/40 animate-slideDown">
+        <div className="fixed top-20 right-4 sm:right-8 z-50 bg-[#12632F] text-white px-5 py-3.5 rounded-lg shadow-2xl flex items-center gap-3 border border-[#A6C928]/40 animate-slideDown">
           <CheckCircle2 className="w-5 h-5 text-[#A6C928]" />
           <span className="text-sm font-bold">{toastMessage}</span>
         </div>
@@ -361,7 +361,7 @@ export const AdminPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
           {/* Logo & Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center shadow-md shadow-emerald-900/10">
+            <div className="w-10 h-10 rounded-lg bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center shadow-md shadow-emerald-900/10">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
@@ -423,7 +423,7 @@ export const AdminPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
         
         {/* Hub Overview Card */}
-        <div className="bg-linear-to-r from-[#12632F] via-[#18833B] to-[#12632F] text-white rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-950/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="bg-linear-to-r from-[#12632F] via-[#18833B] to-[#12632F] text-white rounded-lg p-6 sm:p-8 shadow-xl shadow-emerald-950/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
           <div className="space-y-1.5 z-10">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#A6C928] animate-pulse" />
@@ -444,7 +444,7 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-3 bg-white hover:bg-emerald-50 text-[#12632F] rounded-2xl text-xs sm:text-sm font-black shadow-lg shadow-black/10 transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="px-6 py-3 bg-white hover:bg-emerald-50 text-[#12632F] rounded-lg text-xs sm:text-sm font-black shadow-lg shadow-black/10 transition-all active:scale-95 flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4 text-[#18833B]" />
               <span>{saving ? 'Publishing...' : 'Save & Publish Live'}</span>
@@ -458,7 +458,7 @@ export const AdminPage: React.FC = () => {
         </div>
 
         {/* Tab Navigation Segmented Bar */}
-        <div className="bg-white p-1.5 sm:p-2 rounded-2xl border border-stone-200/80 shadow-xs flex items-center gap-1 overflow-x-auto">
+        <div className="bg-white p-1.5 sm:p-2 rounded-lg border border-stone-200/80 shadow-xs flex items-center gap-1 overflow-x-auto">
           <button
             onClick={() => setActiveTab('announcement')}
             className={`flex-1 min-w-[130px] sm:min-w-0 py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -527,7 +527,7 @@ export const AdminPage: React.FC = () => {
           <div className="space-y-6">
             
             {/* Real-time Interactive Device Preview */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4">
+            <div className="bg-white border border-stone-200 rounded-lg p-5 sm:p-7 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -584,7 +584,7 @@ export const AdminPage: React.FC = () => {
               </div>
 
               {/* Viewport Sandbox */}
-              <div className="p-4 sm:p-6 bg-stone-100/70 rounded-2xl flex items-center justify-center">
+              <div className="p-4 sm:p-6 bg-stone-100/70 rounded-lg flex items-center justify-center">
                 {previewDevice === 'desktop' ? (
                   <div className="w-full bg-white rounded-xl shadow-xs overflow-hidden border border-stone-200">
                     {/* Simulated browser top bar */}
@@ -660,7 +660,7 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Form Controls Card */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-6">
               
               {/* Main Toggle Switch */}
               <div className="flex items-center justify-between pb-6 border-b border-stone-100">
@@ -809,7 +809,7 @@ export const AdminPage: React.FC = () => {
                           },
                         }))
                       }
-                      className="p-4 bg-stone-50 hover:bg-[#FAF9F2] hover:border-[#18833B]/50 border border-stone-200/90 rounded-2xl text-left transition-all group cursor-pointer shadow-2xs hover:shadow-xs"
+                      className="p-4 bg-stone-50 hover:bg-[#FAF9F2] hover:border-[#18833B]/50 border border-stone-200/90 rounded-lg text-left transition-all group cursor-pointer shadow-2xs hover:shadow-xs"
                     >
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-bold text-[#18833B] group-hover:underline">
@@ -838,7 +838,7 @@ export const AdminPage: React.FC = () => {
           <div className="space-y-6">
             
             {/* Standalone Orders App Card */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-[#18833B]">
@@ -857,7 +857,7 @@ export const AdminPage: React.FC = () => {
                     href="https://mediherbz-orders.pages.dev"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-6 py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-bold rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95"
+                    className="px-6 py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-bold rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95"
                   >
                     <Smartphone className="w-4 h-4" />
                     <span>Launch Orders App</span>
@@ -868,7 +868,7 @@ export const AdminPage: React.FC = () => {
                     href="https://dev-medinerbz.pantheonsite.io/wp-admin/admin.php?page=wc-orders"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-5 py-3 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
+                    className="px-5 py-3 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 transition-all"
                   >
                     <Layers className="w-4 h-4 text-stone-500" />
                     <span>WP-Admin Orders</span>
@@ -879,7 +879,7 @@ export const AdminPage: React.FC = () => {
 
               {/* Key Features Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-stone-100">
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+                <div className="p-4 rounded-lg bg-stone-50 border border-stone-200/80 space-y-1.5">
                   <div className="w-8 h-8 rounded-xl bg-emerald-100 text-[#18833B] flex items-center justify-center">
                     <Truck className="w-4 h-4" />
                   </div>
@@ -889,7 +889,7 @@ export const AdminPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+                <div className="p-4 rounded-lg bg-stone-50 border border-stone-200/80 space-y-1.5">
                   <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
                     <MessageCircle className="w-4 h-4" />
                   </div>
@@ -899,7 +899,7 @@ export const AdminPage: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+                <div className="p-4 rounded-lg bg-stone-50 border border-stone-200/80 space-y-1.5">
                   <div className="w-8 h-8 rounded-xl bg-purple-100 text-purple-800 flex items-center justify-center">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
@@ -912,7 +912,7 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Quick Live Order Inspection Tool */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-5">
+            <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-5">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#18833B]" />
                 <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wider">
@@ -958,7 +958,7 @@ export const AdminPage: React.FC = () => {
               )}
 
               {trackResult && (
-                <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-xs space-y-2 animate-fadeIn">
+                <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-lg text-xs space-y-2 animate-fadeIn">
                   <div className="flex items-center justify-between">
                     <span className="font-mono font-black text-stone-900 text-sm">
                       {trackResult.order_number || `Order #${trackResult.id}`}
@@ -996,7 +996,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 3: CONTACT & CUSTOMER CARE                            */}
         {/* ========================================================= */}
         {activeTab === 'contact' && (
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Customer Care &amp; Support Channels
@@ -1115,7 +1115,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 4: STORE IDENTITY & BRAND COLORS                      */}
         {/* ========================================================= */}
         {activeTab === 'store' && (
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Brand Name, Tagline &amp; Aesthetics
@@ -1157,7 +1157,7 @@ export const AdminPage: React.FC = () => {
                 Official Mediherbz Ayurvedic Color System
               </span>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-3">
+                <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#18833B] shadow-xs shrink-0" />
                   <div>
                     <span className="text-[11px] font-bold text-stone-800 block">Primary Leaf</span>
@@ -1165,7 +1165,7 @@ export const AdminPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-3">
+                <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#12632F] shadow-xs shrink-0" />
                   <div>
                     <span className="text-[11px] font-bold text-stone-800 block">Deep Forest</span>
@@ -1173,7 +1173,7 @@ export const AdminPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-3">
+                <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#A6C928] shadow-xs shrink-0" />
                   <div>
                     <span className="text-[11px] font-bold text-stone-800 block">Herbal Lime</span>
@@ -1181,7 +1181,7 @@ export const AdminPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="p-3 bg-stone-50 rounded-2xl border border-stone-200 flex items-center gap-3">
+                <div className="p-3 bg-stone-50 rounded-lg border border-stone-200 flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-[#FAF9F2] border border-stone-300 shadow-xs shrink-0" />
                   <div>
                     <span className="text-[11px] font-bold text-stone-800 block">Ayurvedic Cream</span>
@@ -1197,7 +1197,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 5: SECURITY & ADMIN PIN                               */}
         {/* ========================================================= */}
         {activeTab === 'security' && (
-          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-lg p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Administrator Password &amp; Access Controls
@@ -1291,7 +1291,7 @@ export const AdminPage: React.FC = () => {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-[#18833B] hover:bg-[#12632F] text-white text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl transition-all shadow-md hover:shadow-lg shadow-emerald-800/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-6 sm:px-8 py-2.5 sm:py-3 bg-[#18833B] hover:bg-[#12632F] text-white text-xs sm:text-sm font-black rounded-xl sm:rounded-lg transition-all shadow-md hover:shadow-lg shadow-emerald-800/20 flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               <span>{saving ? 'Publishing Changes...' : 'Save & Publish Live'}</span>

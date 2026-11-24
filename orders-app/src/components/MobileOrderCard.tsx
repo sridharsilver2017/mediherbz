@@ -72,7 +72,7 @@ export const MobileOrderCard: React.FC<MobileOrderCardProps> = ({ order, onSelec
   return (
     <div
       onClick={() => onSelect(order)}
-      className="bg-white rounded-xl border border-stone-200/90 shadow-xs hover:shadow-md active:scale-[0.99] transition-all cursor-pointer p-4 space-y-3.5 relative overflow-hidden"
+      className="bg-white rounded-lg border border-stone-200/90 shadow-xs hover:shadow-md active:scale-[0.99] transition-all cursor-pointer p-4 space-y-3.5 relative overflow-hidden"
     >
       {/* Top Header: Order Number, Date, Payment pill, Status pill */}
       <div className="flex items-start justify-between gap-2 border-b border-stone-100 pb-3">

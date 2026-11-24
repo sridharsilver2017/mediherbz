@@ -63,7 +63,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
         </div>
 
         {/* Login Box */}
-        <div className="bg-white rounded-2xl p-7 sm:p-8 shadow-2xl shadow-black/40 border border-stone-200/90 relative overflow-hidden">
+        <div className="bg-white rounded-lg p-7 sm:p-8 shadow-2xl shadow-black/40 border border-stone-200/90 relative overflow-hidden">
           {/* Top accent line */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#18833B] via-[#A6C928] to-[#12632F]" />
 
