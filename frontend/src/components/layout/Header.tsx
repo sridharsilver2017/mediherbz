@@ -170,21 +170,21 @@ export const Header: React.FC = () => {
       {/* Header Container - Always stays pinned at top */}
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full ${
+        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full max-w-full overflow-x-hidden ${
           showHeader || mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
         } ${isScrolled || mobileMenuOpen ? 'shadow-md' : 'shadow-xs'}`}
       >
         {/* Top Announcement Bar (Toggled via announcement.enabled) */}
         {announcement.enabled && (
-          <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
-            <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
+          <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-1.5 sm:py-2 px-2.5 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between w-full max-w-full overflow-hidden">
+            <div className="hidden md:flex items-center gap-4 text-xs opacity-90 shrink-0">
               <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#A6C928]" /> +91 98765 43210</span>
               <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#A6C928]" /> care@mediherbz.com</span>
             </div>
-            <div className="mx-auto flex items-center gap-2">
-              <span>{announcement.text}</span>
+            <div className="mx-auto flex items-center justify-center gap-2 min-w-0 px-1">
+              <span className="truncate sm:whitespace-normal">{announcement.text}</span>
             </div>
-            <div className="hidden md:flex items-center gap-3 text-xs">
+            <div className="hidden md:flex items-center gap-3 text-xs shrink-0">
               <Link to="/track-order" className="hover:text-[#A6C928] transition-colors">Track Order</Link>
               <span>|</span>
               <Link to="/account" className="hover:text-[#A6C928] transition-colors">My Account</Link>
@@ -195,21 +195,21 @@ export const Header: React.FC = () => {
         )}
 
         {/* Main Navigation Bar */}
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 w-full max-w-full">
+          <div className="flex items-center justify-between h-14 sm:h-20 gap-1.5 sm:gap-4 w-full">
             
             {/* Mobile Menu Button - Prominent touch target with state indication */}
-            <div className="flex items-center lg:hidden">
+            <div className="flex items-center lg:hidden shrink-0">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 rounded-lg transition-colors focus:outline-hidden ${
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors focus:outline-hidden ${
                   mobileMenuOpen
                     ? 'bg-emerald-50 text-[#18833B] ring-1 ring-emerald-200'
                     : 'text-stone-700 hover:text-[#18833B] hover:bg-stone-50'
                 }`}
                 aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
               >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
               </button>
             </div>
 
@@ -223,7 +223,7 @@ export const Header: React.FC = () => {
                 <img
                   src="/brand/mediherbz-logo.png"
                   alt="Mediherbz - For Young & Vibrant Look"
-                  className="h-9 sm:h-12 md:h-14 w-auto object-contain transition-transform group-hover:scale-102"
+                  className="h-8 sm:h-12 md:h-14 w-auto max-w-[120px] sm:max-w-none object-contain transition-transform group-hover:scale-102"
                 />
               </Link>
             </div>

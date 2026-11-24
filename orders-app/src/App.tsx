@@ -200,7 +200,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F7F6EE] flex flex-col pb-24 md:pb-12 font-sans selection:bg-[#18833B] selection:text-white">
+    <div className="min-h-screen bg-[#F7F6EE] flex flex-col pb-24 md:pb-12 font-sans selection:bg-[#18833B] selection:text-white w-full max-w-full overflow-x-hidden">
       {/* App Header */}
       <Header
         adminUsername={auth.username}
