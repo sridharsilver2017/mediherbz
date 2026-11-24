@@ -217,7 +217,7 @@ export const AdminPage: React.FC = () => {
         <div className="w-full max-w-md">
           {/* Brand Emblem */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-xl shadow-emerald-900/15 mb-4 relative ring-8 ring-[#18833B]/10">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-xl shadow-emerald-900/15 mb-4 relative ring-8 ring-[#18833B]/10">
               <ShieldCheck className="w-10 h-10" />
               <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#A6C928] border-2 border-white flex items-center justify-center text-[10px] font-black text-emerald-950">
                 ✓
@@ -232,7 +232,7 @@ export const AdminPage: React.FC = () => {
           </div>
 
           {/* Form Card */}
-          <div className="bg-white border border-stone-200/90 rounded-3xl shadow-xl shadow-stone-200/50 p-7 sm:p-9 relative overflow-hidden">
+          <div className="bg-white border border-stone-200/90 rounded-2xl shadow-xl shadow-stone-200/50 p-7 sm:p-9 relative overflow-hidden">
             {/* Top decorative accent bar */}
             <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#18833B] via-[#A6C928] to-[#12632F]" />
 
@@ -423,7 +423,7 @@ export const AdminPage: React.FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6">
         
         {/* Hub Overview Card */}
-        <div className="bg-linear-to-r from-[#12632F] via-[#18833B] to-[#12632F] text-white rounded-3xl p-6 sm:p-8 shadow-xl shadow-emerald-950/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="bg-linear-to-r from-[#12632F] via-[#18833B] to-[#12632F] text-white rounded-2xl p-6 sm:p-8 shadow-xl shadow-emerald-950/10 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
           <div className="space-y-1.5 z-10">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#A6C928] animate-pulse" />
@@ -527,7 +527,7 @@ export const AdminPage: React.FC = () => {
           <div className="space-y-6">
             
             {/* Real-time Interactive Device Preview */}
-            <div className="bg-white border border-stone-200 rounded-3xl p-5 sm:p-7 shadow-xs space-y-4">
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 shadow-xs space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-stone-100 pb-4">
                 <div>
                   <div className="flex items-center gap-2">
@@ -660,7 +660,7 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Form Controls Card */}
-            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
               
               {/* Main Toggle Switch */}
               <div className="flex items-center justify-between pb-6 border-b border-stone-100">
@@ -838,7 +838,7 @@ export const AdminPage: React.FC = () => {
           <div className="space-y-6">
             
             {/* Standalone Orders App Card */}
-            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-[#18833B]">
@@ -912,7 +912,7 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Quick Live Order Inspection Tool */}
-            <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-5">
+            <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-5">
               <div className="flex items-center gap-2">
                 <Truck className="w-4 h-4 text-[#18833B]" />
                 <h3 className="text-sm font-bold text-stone-900 uppercase tracking-wider">
@@ -996,7 +996,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 3: CONTACT & CUSTOMER CARE                            */}
         {/* ========================================================= */}
         {activeTab === 'contact' && (
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Customer Care &amp; Support Channels
@@ -1115,7 +1115,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 4: STORE IDENTITY & BRAND COLORS                      */}
         {/* ========================================================= */}
         {activeTab === 'store' && (
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Brand Name, Tagline &amp; Aesthetics
@@ -1197,7 +1197,7 @@ export const AdminPage: React.FC = () => {
         {/* TAB 5: SECURITY & ADMIN PIN                               */}
         {/* ========================================================= */}
         {activeTab === 'security' && (
-          <div className="bg-white border border-stone-200 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+          <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
             <div>
               <h2 className="text-base font-bold text-stone-900">
                 Administrator Password &amp; Access Controls

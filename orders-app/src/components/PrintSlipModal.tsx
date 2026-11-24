@@ -27,7 +27,7 @@ export const PrintSlipModal: React.FC<PrintSlipModalProps> = ({ order, onClose }
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
+        className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
       >
         {/* Modal Header */}
         <div className="p-4 border-b border-stone-200 flex items-center justify-between bg-stone-50">

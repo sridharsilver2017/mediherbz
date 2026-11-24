@@ -42,9 +42,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
       <div className="w-full max-w-md relative z-10 space-y-6">
         {/* Brand Emblem */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-2xl shadow-emerald-950/60 ring-8 ring-white/10 relative">
-            <Package className="w-10 h-10 text-white" />
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#A6C928] border-2 border-[#0E2818] flex items-center justify-center text-[10px] font-black text-emerald-950">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-xl shadow-emerald-950/60 ring-6 ring-white/10 relative">
+            <Package className="w-8 h-8 text-white" />
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#A6C928] border-2 border-[#0E2818] flex items-center justify-center text-[9px] font-black text-emerald-950">
               ⚡
             </div>
           </div>
@@ -63,7 +63,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
         </div>
 
         {/* Login Box */}
-        <div className="bg-white rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/40 border border-stone-200/90 relative overflow-hidden">
+        <div className="bg-white rounded-2xl p-7 sm:p-8 shadow-2xl shadow-black/40 border border-stone-200/90 relative overflow-hidden">
           {/* Top accent line */}
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#18833B] via-[#A6C928] to-[#12632F]" />
 
