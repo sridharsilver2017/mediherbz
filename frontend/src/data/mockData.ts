@@ -23,8 +23,9 @@ export const INITIAL_BRAND_SETTINGS: BrandSettings = {
     whatsapp: 'https://wa.me/919876543210',
   },
   announcement_bar: {
-    enabled: true,
-    text: '🌿 100% Certified Organic & Ayurvedic Formulations • Free Shipping in India on orders above ₹999!',
+    // Set enabled to true to show, or false to hide the top announcement header
+    enabled: false,
+    text: '🌿 Free Shipping in India on Orders Over ₹999 • 100% Ayurvedic & Organic',
     link: '/shop',
   },
 };

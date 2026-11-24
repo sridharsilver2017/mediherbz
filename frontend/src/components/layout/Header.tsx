@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Heart, Search, Menu, X, Phone, Mail, ChevronDown, User } from 'lucide-react';
 import { useCartStore } from '../../store/cartStore';
 import { useWishlistStore } from '../../store/wishlistStore';
-import { INITIAL_CATEGORIES } from '../../data/mockData';
+import { INITIAL_CATEGORIES, INITIAL_BRAND_SETTINGS } from '../../data/mockData';
 import { ProductCategory } from '../../types';
 import { api } from '../../api/client';
 
@@ -15,6 +15,7 @@ export const Header: React.FC = () => {
   const [categories, setCategories] = useState<ProductCategory[]>(() =>
     INITIAL_CATEGORIES.filter((c) => (c.count || 0) > 0)
   );
+  const [announcement, setAnnouncement] = useState(() => INITIAL_BRAND_SETTINGS.announcement_bar);
   const [showHeader, setShowHeader] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [headerHeight, setHeaderHeight] = useState<number>(0);
@@ -33,7 +34,7 @@ export const Header: React.FC = () => {
     updateHeight();
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, announcement.enabled]);
 
   // Reset header visibility and close menus on route changes
   useEffect(() => {
@@ -95,6 +96,11 @@ export const Header: React.FC = () => {
         setCategories(cats.filter((c) => (c.count || 0) > 0));
       }
     });
+    api.getBrandSettings().then((settings) => {
+      if (isMounted && settings?.announcement_bar) {
+        setAnnouncement(settings.announcement_bar);
+      }
+    });
     return () => { isMounted = false; };
   }, []);
 
@@ -117,7 +123,7 @@ export const Header: React.FC = () => {
       {/* Spacer to hold page flow so fixed header never causes layout jump or content clipping */}
       <div
         style={{ height: headerHeight ? `${headerHeight}px` : undefined }}
-        className={headerHeight ? '' : 'h-[96px] sm:h-[112px] shrink-0'}
+        className={headerHeight ? '' : (announcement.enabled ? 'h-[96px] sm:h-[112px] shrink-0' : 'h-16 sm:h-20 shrink-0')}
         aria-hidden="true"
       />
       <header
@@ -126,23 +132,25 @@ export const Header: React.FC = () => {
           showHeader ? 'translate-y-0' : '-translate-y-full'
         } ${isScrolled ? 'shadow-md' : 'shadow-xs'} ${mobileMenuOpen ? 'max-h-screen overflow-y-auto' : ''}`}
       >
-      {/* Top Announcement Bar */}
-      <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
-        <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
-          <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#A6C928]" /> +91 98765 43210</span>
-          <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#A6C928]" /> care@mediherbz.com</span>
+      {/* Top Announcement Bar (Toggled via announcement.enabled) */}
+      {announcement.enabled && (
+        <div className="bg-[#12632F] text-white text-[10px] sm:text-xs py-2 px-3 sm:px-4 text-center font-medium tracking-wide flex items-center justify-between">
+          <div className="hidden md:flex items-center gap-4 text-xs opacity-90">
+            <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 text-[#A6C928]" /> +91 98765 43210</span>
+            <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#A6C928]" /> care@mediherbz.com</span>
+          </div>
+          <div className="mx-auto flex items-center gap-2">
+            <span>{announcement.text}</span>
+          </div>
+          <div className="hidden md:flex items-center gap-3 text-xs">
+            <Link to="/track-order" className="hover:text-[#A6C928] transition-colors">Track Order</Link>
+            <span>|</span>
+            <Link to="/account" className="hover:text-[#A6C928] transition-colors">My Account</Link>
+            <span>|</span>
+            <Link to="/about" className="hover:text-[#A6C928] transition-colors">Why Mediherbz</Link>
+          </div>
         </div>
-        <div className="mx-auto flex items-center gap-2">
-          <span>🌿 Free Shipping in India on Orders Over ₹999 • 100% Ayurvedic & Organic</span>
-        </div>
-        <div className="hidden md:flex items-center gap-3 text-xs">
-          <Link to="/track-order" className="hover:text-[#A6C928] transition-colors">Track Order</Link>
-          <span>|</span>
-          <Link to="/account" className="hover:text-[#A6C928] transition-colors">My Account</Link>
-          <span>|</span>
-          <Link to="/about" className="hover:text-[#A6C928] transition-colors">Why Mediherbz</Link>
-        </div>
-      </div>
+      )}
 
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
