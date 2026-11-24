@@ -112,7 +112,9 @@ async function fetchLiveProductsNetwork(): Promise<Product[]> {
         const wcProducts = await wcRes.json();
         if (Array.isArray(wcProducts) && wcProducts.length > 0) {
           list = wcProducts.map((wp: any) => {
-            const seed = INITIAL_PRODUCTS.find((p) => p.slug === wp.slug);
+            const seed = INITIAL_PRODUCTS.find(
+              (p) => p.slug === wp.slug || p.slug.includes(wp.slug) || wp.slug.includes(p.slug) || p.name.toLowerCase().includes(wp.slug.split('-')[0])
+            );
             const minorUnit = wp.prices?.currency_minor_unit ?? 2;
             const divisor = Math.pow(10, minorUnit);
             const livePrice = wp.prices?.price ? Number(wp.prices.price) / divisor : (seed?.price || 649);
@@ -349,11 +351,11 @@ export const api = {
     } else {
       fetchLiveProductsNetwork().catch(() => {});
     }
-    const found = list.find(p => p.slug === slug);
+    const found = list.find(p => p.slug === slug || p.slug.includes(slug) || slug.includes(p.slug));
     if (found) return found;
 
     // Fallback search in initial products
-    return INITIAL_PRODUCTS.find(p => p.slug === slug);
+    return INITIAL_PRODUCTS.find(p => p.slug === slug || p.slug.includes(slug) || slug.includes(p.slug));
   },
 
   getFeaturedProducts: async (): Promise<Product[]> => {

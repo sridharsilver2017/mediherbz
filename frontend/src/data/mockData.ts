@@ -151,7 +151,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 103,
     name: 'Pure Ashwagandha KSM-66 Vitality Capsules',
-    slug: 'pure-ashwagandha-ksm-66-vitality-capsules',
+    slug: 'ashwagandha-ksm66-organic-vitality-capsules',
     price: 899,
     regular_price: 999,
     sale_price: 899,
@@ -200,7 +200,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 104,
     name: 'Triphala Bio-Cleanse Digestive Infusion Powder',
-    slug: 'triphala-bio-cleanse-digestive-infusion-powder',
+    slug: 'triphala-bio-active-micronized-churna',
     price: 399,
     regular_price: 499,
     sale_price: 399,
@@ -249,7 +249,7 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 105,
     name: 'Tulsi Holy Basil Immuno-Teas (25 Herbal Pyramids)',
-    slug: 'tulsi-holy-basil-immuno-teas',
+    slug: 'himalayan-tulsi-ginger-herbal-infusion-tea',
     price: 449,
     regular_price: 549,
     sale_price: 449,
@@ -297,8 +297,8 @@ export const INITIAL_PRODUCTS: Product[] = [
   },
   {
     id: 106,
-    name: 'Sandalwood & Haldi Glow Polishing Ubtan Scrub',
-    slug: 'sandalwood-haldi-glow-polishing-ubtan-scrub',
+    name: 'Sandalwood & Turmeric Radiance Ubtan Paste',
+    slug: 'sandalwood-turmeric-radiance-ubtan-paste',
     price: 599,
     regular_price: 699,
     sale_price: 599,
