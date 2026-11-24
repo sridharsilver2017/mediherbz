@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, Lock, User, ArrowRight, AlertCircle } from 'lucide-react';
+import { Package, Lock, User, ArrowRight, AlertCircle, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 import { api } from '../api';
 
 interface LoginScreenProps {
@@ -33,75 +33,116 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#122A1E] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      {/* Decorative gradient glow */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#18833B]/20 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#A6C928]/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#0E2818] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden font-sans">
+      {/* Ambient background glows */}
+      <div className="absolute top-1/4 -left-20 w-[420px] h-[420px] bg-[#18833B]/25 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-20 w-[420px] h-[420px] bg-[#A6C928]/15 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(#18833B_1px,transparent_1px)] [background-size:24px_24px] opacity-15 pointer-events-none" />
 
-      <div className="w-full max-w-md bg-white rounded-3xl p-8 shadow-2xl relative z-10 space-y-6">
-        <div className="text-center space-y-2">
-          <div className="w-14 h-14 bg-[#18833B]/10 rounded-2xl flex items-center justify-center mx-auto text-[#18833B] shadow-xs">
-            <Package className="w-7 h-7" />
+      <div className="w-full max-w-md relative z-10 space-y-6">
+        {/* Brand Emblem */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white shadow-2xl shadow-emerald-950/60 ring-8 ring-white/10 relative">
+            <Package className="w-10 h-10 text-white" />
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#A6C928] border-2 border-[#0E2818] flex items-center justify-center text-[10px] font-black text-emerald-950">
+              ⚡
+            </div>
           </div>
-          <h1 className="text-2xl font-black text-stone-900 tracking-tight font-serif">Mediherbz Orders</h1>
-          <p className="text-xs text-stone-500">
-            Sign in with store administrator credentials to manage live WooCommerce orders and shipments.
-          </p>
+          <div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-500/20 text-[#A6C928] border border-emerald-500/30 mb-2">
+              <Sparkles className="w-3 h-3" />
+              <span>Merchant Dispatch Terminal</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-serif">
+              Mediherbz Orders
+            </h1>
+            <p className="text-xs text-emerald-100/70 mt-1 max-w-xs mx-auto">
+              Real-time WooCommerce order fulfillment, thermal packing slips &amp; live courier tracking.
+            </p>
+          </div>
         </div>
 
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
-            <span>{error}</span>
-          </div>
-        )}
+        {/* Login Box */}
+        <div className="bg-white rounded-3xl p-7 sm:p-9 shadow-2xl shadow-black/40 border border-stone-200/90 relative overflow-hidden">
+          {/* Top accent line */}
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r from-[#18833B] via-[#A6C928] to-[#12632F]" />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-xs font-bold text-stone-700 block mb-1">Username or Email</label>
-            <div className="relative">
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
-                className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-[#18833B] focus:bg-white"
-              />
-              <User className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+          {error && (
+            <div className="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-700 flex items-center gap-2.5 animate-shake">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+              <span className="font-medium">{error}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                Admin Username or Email
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="admin"
+                  className="w-full pl-11 pr-4 py-3 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-xl text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-3 focus:ring-[#18833B]/10 transition-all"
+                  autoFocus
+                />
+                <User className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-stone-700 uppercase tracking-wider block">
+                  Password
+                </label>
+                <span className="text-[10px] text-stone-400 font-medium">WooCommerce Store Admin</span>
+              </div>
+              <div className="relative">
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  className="w-full pl-11 pr-4 py-3 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-xl text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-3 focus:ring-[#18833B]/10 transition-all font-mono"
+                />
+                <Lock className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 bg-[#18833B] hover:bg-[#12632F] text-white font-black rounded-xl text-xs sm:text-sm transition-all shadow-md hover:shadow-lg shadow-emerald-800/25 flex items-center justify-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50 mt-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Connecting to WooCommerce...</span>
+                </>
+              ) : (
+                <>
+                  <span>Open Orders Terminal</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Connection Status Footnote */}
+          <div className="mt-6 pt-5 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+            <div className="flex items-center gap-1.5 text-stone-500">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#18833B]" />
+              <span>Pantheon Dev API Synced</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-stone-400" />
+              <span>TLS Encrypted</span>
             </div>
           </div>
-
-          <div>
-            <label className="text-xs font-bold text-stone-700 block mb-1">Admin Password</label>
-            <div className="relative">
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
-                className="w-full pl-10 pr-4 py-3 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:outline-hidden focus:border-[#18833B] focus:bg-white"
-              />
-              <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 bg-[#18833B] hover:bg-[#12632F] text-white font-bold rounded-xl text-xs transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            {loading ? 'Authenticating...' : (
-              <>
-                Sign In to Orders App <ArrowRight className="w-4 h-4" />
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="pt-2 border-t border-stone-100 text-center text-[11px] text-stone-400">
-          <span>Connected to Pantheon WordPress backend</span>
         </div>
       </div>
     </div>
