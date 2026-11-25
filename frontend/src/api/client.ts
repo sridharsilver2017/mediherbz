@@ -639,34 +639,35 @@ export const api = {
       const res = await fetch(`${WP_API_URL}/customer/orders?${param}`);
       if (res.ok) {
         const orders = await res.json();
-        if (Array.isArray(orders) && orders.length > 0) {
+        if (Array.isArray(orders)) {
           return orders.map((o: any) => ({
             id: o.id,
             order_number: o.order_number,
             status: o.status || 'processing',
             currency: o.currency || 'INR',
-            total: o.total,
-            subtotal: o.total,
-            shipping_total: 0,
-            discount_total: 0,
-            tax_total: 0,
-            date_created: o.date_created,
-            billing: {} as any,
-            shipping: {} as any,
+            total: Number(o.total || 0),
+            subtotal: Number(o.subtotal || o.total || 0),
+            shipping_total: Number(o.shipping_total || 0),
+            discount_total: Number(o.discount_total || 0),
+            tax_total: Number(o.tax_total || 0),
+            date_created: o.date_created || '',
+            billing: o.billing || ({} as any),
+            shipping: o.shipping || ({} as any),
             items: (o.items || []).map((it: any) => ({
               id: it.id,
-              product_id: it.id,
+              product_id: it.product_id || it.id,
               name: it.name,
               quantity: it.quantity,
-              subtotal: it.total,
-              total: it.total,
-              image: it.image,
+              subtotal: Number(it.subtotal || it.total || 0),
+              total: Number(it.total || 0),
+              image: it.image || '',
             })),
             shipping_carrier: o.shipping_carrier || 'Express Air',
-            tracking_id: o.tracking_id,
-            payment_method: 'online',
-            payment_method_title: o.payment_method_title || 'Prepaid',
-            is_paid: true,
+            tracking_id: o.tracking_id || '',
+            tracking_url: o.tracking_url || `https://mediherbz.pages.dev/track-order?order=${encodeURIComponent(o.order_number)}`,
+            payment_method: o.payment_method || 'cod',
+            payment_method_title: o.payment_method_title || (o.payment_method === 'cod' ? 'Cash on Delivery' : 'Prepaid (Razorpay)'),
+            is_paid: Boolean(o.is_paid),
           }));
         }
       }
@@ -674,6 +675,74 @@ export const api = {
       console.warn('[Mediherbz API] Customer orders fetch fallback', err);
     }
     return [];
+  },
+
+  // Customer Authentication & Account Management
+  customerLogin: async (emailOrUser: string, password?: string): Promise<{ success: boolean; token?: string; profile: any; billing?: any }> => {
+    const res = await fetch(`${WP_API_URL}/customer/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email: emailOrUser.trim(), password }),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Login failed. Please check your credentials.');
+    }
+    return data;
+  },
+
+  customerRegister: async (payload: {
+    email: string;
+    password?: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+    dosha?: string;
+  }): Promise<{ success: boolean; token?: string; profile: any }> => {
+    const res = await fetch(`${WP_API_URL}/customer/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      throw new Error(data.message || 'Registration failed. Please try again.');
+    }
+    return data;
+  },
+
+  updateCustomerProfile: async (payload: {
+    email: string;
+    first_name?: string;
+    last_name?: string;
+    phone?: string;
+    dosha?: string;
+  }): Promise<boolean> => {
+    try {
+      const res = await fetch(`${WP_API_URL}/customer/profile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  saveCustomerAddress: async (payload: any): Promise<boolean> => {
+    try {
+      const res = await fetch(`${WP_API_URL}/customer/address`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
   },
 
   // Orders & Payment

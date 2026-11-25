@@ -113,8 +113,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Download Native Android APK */}
           <a
-            href="/mediherbz-orders.apk"
+            href="https://dev-medinerbz.pantheonsite.io/wp-content/uploads/mediherbz-orders.apk"
             download="mediherbz-orders.apk"
+            target="_blank"
+            rel="noopener noreferrer"
             style={{ minHeight: '44px', height: '44px' }}
             className="hidden md:inline-flex items-center min-h-[44px] h-11 gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all shadow-2xs shrink-0"
             title="Download Standalone Android APK to install on phone"

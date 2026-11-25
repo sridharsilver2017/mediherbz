@@ -196,6 +196,7 @@ export interface UserProfile {
   avatar?: string;
   dosha?: 'Vata' | 'Pitta' | 'Kapha' | 'Tridoshic' | 'Unknown';
   wellness_goal?: string;
+  member_since?: string;
 }
 
 export interface CouponDiscount {

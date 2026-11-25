@@ -104,6 +104,31 @@ class Mediherbz_REST_API {
             'permission_callback' => '__return_true',
         ));
 
+        // Customer Authentication & Management
+        register_rest_route($this->namespace, '/customer/login', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'customer_login'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route($this->namespace, '/customer/register', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'customer_register'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route($this->namespace, '/customer/profile', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'update_customer_profile'),
+            'permission_callback' => '__return_true',
+        ));
+
+        register_rest_route($this->namespace, '/customer/address', array(
+            'methods'             => 'POST',
+            'callback'            => array($this, 'save_customer_address'),
+            'permission_callback' => '__return_true',
+        ));
+
         // Admin Orders list
         register_rest_route($this->namespace, '/admin/orders', array(
             'methods'             => 'GET',
@@ -580,6 +605,244 @@ class Mediherbz_REST_API {
         ));
     }
 
+    public function customer_login(WP_REST_Request $request) {
+        $params        = $request->get_json_params() ?: $request->get_body_params();
+        $email_or_user = !empty($params['email']) ? sanitize_text_field($params['email']) : (!empty($params['username']) ? sanitize_text_field($params['username']) : '');
+        $password      = isset($params['password']) ? (string)$params['password'] : '';
+
+        if (empty($email_or_user)) {
+            return new WP_Error('missing_fields', 'Please enter your email address.', array('status' => 400));
+        }
+
+        // 1. Password-based authentication
+        if (!empty($password)) {
+            $user = wp_authenticate($email_or_user, $password);
+            if (!is_wp_error($user)) {
+                $issued_at = time();
+                $payload   = $user->ID . '|' . $issued_at;
+                $secret    = defined('AUTH_KEY') ? AUTH_KEY : 'mediherbz_secret_key_2026';
+                $signature = hash_hmac('sha256', $payload, $secret);
+                $token     = base64_encode($payload . '|' . $signature);
+
+                $billing_address = array(
+                    'first_name' => get_user_meta($user->ID, 'billing_first_name', true) ?: $user->first_name,
+                    'last_name'  => get_user_meta($user->ID, 'billing_last_name', true) ?: $user->last_name,
+                    'email'      => $user->user_email,
+                    'phone'      => get_user_meta($user->ID, 'billing_phone', true) ?: '',
+                    'address_1'  => get_user_meta($user->ID, 'billing_address_1', true) ?: '',
+                    'city'       => get_user_meta($user->ID, 'billing_city', true) ?: '',
+                    'state'      => get_user_meta($user->ID, 'billing_state', true) ?: '',
+                    'postcode'   => get_user_meta($user->ID, 'billing_postcode', true) ?: '',
+                    'country'    => 'India',
+                );
+
+                return rest_ensure_response(array(
+                    'success'  => true,
+                    'token'    => $token,
+                    'profile'  => array(
+                        'id'            => $user->ID,
+                        'first_name'    => $user->first_name ?: $user->display_name,
+                        'last_name'     => $user->last_name ?: '',
+                        'email'         => $user->user_email,
+                        'phone'         => get_user_meta($user->ID, 'billing_phone', true) ?: '',
+                        'dosha'         => get_user_meta($user->ID, 'mediherbz_dosha', true) ?: 'Tridoshic',
+                        'member_since'  => date('F Y', strtotime($user->user_registered)),
+                        'wellness_goal' => get_user_meta($user->ID, 'mediherbz_goal', true) ?: 'Holistic Herbal Wellness',
+                    ),
+                    'billing'  => $billing_address,
+                ));
+            } else {
+                return new WP_Error('invalid_credentials', 'Invalid email or password. Please try again.', array('status' => 401));
+            }
+        }
+
+        // 2. Seamless customer lookup by email
+        $existing_user = get_user_by('email', $email_or_user) ?: get_user_by('login', $email_or_user);
+        $orders        = function_exists('wc_get_orders') ? wc_get_orders(array('billing_email' => $email_or_user, 'limit' => 1)) : array();
+
+        $first_name = '';
+        $last_name  = '';
+        $phone      = '';
+        $billing    = null;
+
+        if ($existing_user) {
+            $first_name = $existing_user->first_name ?: $existing_user->display_name;
+            $last_name  = $existing_user->last_name ?: '';
+            $phone      = get_user_meta($existing_user->ID, 'billing_phone', true) ?: '';
+            $billing    = array(
+                'first_name' => $first_name,
+                'last_name'  => $last_name,
+                'email'      => $existing_user->user_email,
+                'phone'      => $phone,
+                'address_1'  => get_user_meta($existing_user->ID, 'billing_address_1', true) ?: '',
+                'city'       => get_user_meta($existing_user->ID, 'billing_city', true) ?: '',
+                'state'      => get_user_meta($existing_user->ID, 'billing_state', true) ?: '',
+                'postcode'   => get_user_meta($existing_user->ID, 'billing_postcode', true) ?: '',
+                'country'    => 'India',
+            );
+        } elseif (!empty($orders)) {
+            $o          = $orders[0];
+            $first_name = $o->get_billing_first_name() ?: 'Ayurvedic';
+            $last_name  = $o->get_billing_last_name() ?: 'Customer';
+            $phone      = $o->get_billing_phone() ?: '';
+            $billing    = array(
+                'first_name' => $first_name,
+                'last_name'  => $last_name,
+                'email'      => $email_or_user,
+                'phone'      => $phone,
+                'address_1'  => $o->get_billing_address_1() ?: '',
+                'city'       => $o->get_billing_city() ?: '',
+                'state'      => $o->get_billing_state() ?: '',
+                'postcode'   => $o->get_billing_postcode() ?: '',
+                'country'    => 'India',
+            );
+        } else {
+            $first_name = ucfirst(explode('@', $email_or_user)[0]);
+            $last_name  = '';
+        }
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'token'   => base64_encode($email_or_user . '|' . time()),
+            'profile' => array(
+                'id'            => $existing_user ? $existing_user->ID : 0,
+                'first_name'    => $first_name ?: 'Ayurvedic',
+                'last_name'     => $last_name ?: '',
+                'email'         => $email_or_user,
+                'phone'         => $phone,
+                'dosha'         => $existing_user ? (get_user_meta($existing_user->ID, 'mediherbz_dosha', true) ?: 'Tridoshic') : 'Tridoshic',
+                'member_since'  => $existing_user ? date('F Y', strtotime($existing_user->user_registered)) : date('F Y'),
+                'wellness_goal' => 'Holistic Herbal Wellness',
+            ),
+            'billing' => $billing,
+        ));
+    }
+
+    public function customer_register(WP_REST_Request $request) {
+        $params     = $request->get_json_params() ?: $request->get_body_params();
+        $email      = sanitize_email($params['email'] ?? '');
+        $password   = isset($params['password']) ? (string)$params['password'] : '';
+        $first_name = sanitize_text_field($params['first_name'] ?? '');
+        $last_name  = sanitize_text_field($params['last_name'] ?? '');
+        $phone      = sanitize_text_field($params['phone'] ?? '');
+
+        if (empty($email) || !is_email($email)) {
+            return new WP_Error('invalid_email', 'Please provide a valid email address.', array('status' => 400));
+        }
+
+        if (email_exists($email)) {
+            if (!empty($password)) {
+                $user = wp_authenticate($email, $password);
+                if (!is_wp_error($user)) {
+                    return $this->customer_login($request);
+                }
+            }
+            return new WP_Error('email_exists', 'An account with this email already exists. Please sign in.', array('status' => 409));
+        }
+
+        $username = sanitize_user(explode('@', $email)[0]);
+        if (username_exists($username)) {
+            $username .= '_' . wp_rand(100, 999);
+        }
+
+        $password_to_set = !empty($password) ? $password : wp_generate_password(12);
+        $user_id         = wp_create_user($username, $password_to_set, $email);
+
+        if (is_wp_error($user_id)) {
+            return new WP_Error('registration_failed', $user_id->get_error_message(), array('status' => 500));
+        }
+
+        wp_update_user(array(
+            'ID'           => $user_id,
+            'first_name'   => $first_name,
+            'last_name'    => $last_name,
+            'display_name' => trim($first_name . ' ' . $last_name) ?: $username,
+            'role'         => 'customer',
+        ));
+
+        if (!empty($phone)) {
+            update_user_meta($user_id, 'billing_phone', $phone);
+        }
+        update_user_meta($user_id, 'mediherbz_dosha', sanitize_text_field($params['dosha'] ?? 'Tridoshic'));
+
+        $issued_at = time();
+        $payload   = $user_id . '|' . $issued_at;
+        $secret    = defined('AUTH_KEY') ? AUTH_KEY : 'mediherbz_secret_key_2026';
+        $signature = hash_hmac('sha256', $payload, $secret);
+        $token     = base64_encode($payload . '|' . $signature);
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'token'   => $token,
+            'profile' => array(
+                'id'            => $user_id,
+                'first_name'    => $first_name ?: $username,
+                'last_name'     => $last_name,
+                'email'         => $email,
+                'phone'         => $phone,
+                'dosha'         => sanitize_text_field($params['dosha'] ?? 'Tridoshic'),
+                'member_since'  => date('F Y'),
+                'wellness_goal' => 'Holistic Herbal Wellness',
+            ),
+        ));
+    }
+
+    public function update_customer_profile(WP_REST_Request $request) {
+        $params     = $request->get_json_params() ?: $request->get_body_params();
+        $email      = sanitize_email($params['email'] ?? '');
+        $first_name = sanitize_text_field($params['first_name'] ?? '');
+        $last_name  = sanitize_text_field($params['last_name'] ?? '');
+        $phone      = sanitize_text_field($params['phone'] ?? '');
+        $dosha      = sanitize_text_field($params['dosha'] ?? '');
+
+        if ($email) {
+            $user = get_user_by('email', $email);
+            if ($user) {
+                if ($first_name || $last_name) {
+                    wp_update_user(array(
+                        'ID'         => $user->ID,
+                        'first_name' => $first_name ?: $user->first_name,
+                        'last_name'  => $last_name ?: $user->last_name,
+                    ));
+                }
+                if ($phone) {
+                    update_user_meta($user->ID, 'billing_phone', $phone);
+                }
+                if ($dosha) {
+                    update_user_meta($user->ID, 'mediherbz_dosha', $dosha);
+                }
+            }
+        }
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+        ));
+    }
+
+    public function save_customer_address(WP_REST_Request $request) {
+        $params = $request->get_json_params() ?: $request->get_body_params();
+        $email  = sanitize_email($params['email'] ?? '');
+
+        if ($email) {
+            $user = get_user_by('email', $email);
+            if ($user) {
+                if (!empty($params['first_name'])) update_user_meta($user->ID, 'billing_first_name', sanitize_text_field($params['first_name']));
+                if (!empty($params['last_name']))  update_user_meta($user->ID, 'billing_last_name', sanitize_text_field($params['last_name']));
+                if (!empty($params['phone']))      update_user_meta($user->ID, 'billing_phone', sanitize_text_field($params['phone']));
+                if (!empty($params['address_1']))  update_user_meta($user->ID, 'billing_address_1', sanitize_text_field($params['address_1']));
+                if (!empty($params['city']))       update_user_meta($user->ID, 'billing_city', sanitize_text_field($params['city']));
+                if (!empty($params['state']))      update_user_meta($user->ID, 'billing_state', sanitize_text_field($params['state']));
+                if (!empty($params['postcode']))   update_user_meta($user->ID, 'billing_postcode', sanitize_text_field($params['postcode']));
+            }
+        }
+
+        return rest_ensure_response(array(
+            'success' => true,
+            'message' => 'Address saved successfully.',
+        ));
+    }
+
     public function get_customer_orders($request) {
         $email = sanitize_email($request->get_param('email'));
         $phone = sanitize_text_field($request->get_param('phone'));
@@ -589,44 +852,82 @@ class Mediherbz_REST_API {
         }
 
         $args = array(
-            'limit'   => 20,
+            'limit'   => 50,
             'orderby' => 'date',
             'order'   => 'DESC',
         );
 
         if ($email) {
             $args['billing_email'] = $email;
+        } elseif ($phone) {
+            $args['billing_phone'] = $phone;
         }
 
-        $orders = function_exists('wc_get_orders') ? wc_get_orders($args) : array();
+        $orders    = function_exists('wc_get_orders') ? wc_get_orders($args) : array();
         $formatted = array();
 
         foreach ($orders as $o) {
             $order_num = get_post_meta($o->get_id(), '_order_number_formatted', true) ?: ('MED-' . $o->get_id());
-            $items = array();
+            $items     = array();
             foreach ($o->get_items() as $item_id => $item) {
                 $product = $item->get_product();
-                $img_id = $product ? $product->get_image_id() : 0;
-                $items[] = array(
-                    'id'       => $item_id,
-                    'name'     => $item->get_name(),
-                    'quantity' => $item->get_quantity(),
-                    'total'    => floatval($item->get_total()),
-                    'image'    => $img_id ? wp_get_attachment_url($img_id) : '',
+                $img_id  = $product ? $product->get_image_id() : 0;
+                $items[]  = array(
+                    'id'         => $item_id,
+                    'product_id' => $product ? $product->get_id() : $item_id,
+                    'name'       => $item->get_name(),
+                    'quantity'   => $item->get_quantity(),
+                    'subtotal'   => floatval($item->get_subtotal()),
+                    'total'      => floatval($item->get_total()),
+                    'image'      => $img_id ? wp_get_attachment_url($img_id) : '',
                 );
             }
+
+            $carrier  = get_post_meta($o->get_id(), '_shipping_carrier', true) ?: 'Express Air';
+            $tracking = get_post_meta($o->get_id(), '_tracking_number', true) ?: '';
 
             $formatted[] = array(
                 'id'                   => $o->get_id(),
                 'order_number'         => $order_num,
                 'status'               => $o->get_status(),
-                'total'                => floatval($o->get_total()),
                 'currency'             => $o->get_currency(),
+                'total'                => floatval($o->get_total()),
+                'subtotal'             => floatval($o->get_subtotal() ?: $o->get_total()),
+                'shipping_total'       => floatval($o->get_shipping_total()),
+                'discount_total'       => floatval($o->get_discount_total()),
+                'tax_total'            => floatval($o->get_total_tax()),
                 'date_created'         => $o->get_date_created() ? $o->get_date_created()->date('M d, Y') : '',
                 'items'                => $items,
-                'shipping_carrier'     => get_post_meta($o->get_id(), '_shipping_carrier', true) ?: 'Express Air',
-                'tracking_id'          => get_post_meta($o->get_id(), '_tracking_number', true) ?: '',
+                'shipping_carrier'     => $carrier,
+                'tracking_id'          => $tracking,
+                'tracking_url'         => 'https://mediherbz.pages.dev/track-order?order=' . urlencode($order_num),
+                'payment_method'       => $o->get_payment_method(),
                 'payment_method_title' => $o->get_payment_method_title(),
+                'is_paid'              => $o->is_paid(),
+                'billing'              => array(
+                    'first_name' => $o->get_billing_first_name(),
+                    'last_name'  => $o->get_billing_last_name(),
+                    'email'      => $o->get_billing_email(),
+                    'phone'      => $o->get_billing_phone(),
+                    'address_1'  => $o->get_billing_address_1(),
+                    'address_2'  => $o->get_billing_address_2(),
+                    'city'       => $o->get_billing_city(),
+                    'state'      => $o->get_billing_state(),
+                    'postcode'   => $o->get_billing_postcode(),
+                    'country'    => $o->get_billing_country() ?: 'India',
+                ),
+                'shipping'             => array(
+                    'first_name' => $o->get_shipping_first_name() ?: $o->get_billing_first_name(),
+                    'last_name'  => $o->get_shipping_last_name() ?: $o->get_billing_last_name(),
+                    'email'      => $o->get_billing_email(),
+                    'phone'      => $o->get_billing_phone(),
+                    'address_1'  => $o->get_shipping_address_1() ?: $o->get_billing_address_1(),
+                    'address_2'  => $o->get_shipping_address_2() ?: $o->get_billing_address_2(),
+                    'city'       => $o->get_shipping_city() ?: $o->get_billing_city(),
+                    'state'      => $o->get_shipping_state() ?: $o->get_billing_state(),
+                    'postcode'   => $o->get_shipping_postcode() ?: $o->get_billing_postcode(),
+                    'country'    => $o->get_shipping_country() ?: 'India',
+                ),
             );
         }
 

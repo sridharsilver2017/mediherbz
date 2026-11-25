@@ -9,7 +9,16 @@ interface UserStore {
   isLoggedIn: boolean;
 
   // Actions
-  login: (data: { email: string; phone?: string; first_name?: string; last_name?: string }) => void;
+  login: (data: {
+    email: string;
+    phone?: string;
+    first_name?: string;
+    last_name?: string;
+    dosha?: 'Vata' | 'Pitta' | 'Kapha' | 'Tridoshic' | 'Unknown';
+    member_since?: string;
+    wellness_goal?: string;
+    savedAddresses?: SavedAddress[];
+  }) => void;
   logout: () => void;
   updateProfile: (data: Partial<UserProfile>) => void;
   addAddress: (address: Omit<SavedAddress, 'id'>) => SavedAddress;
@@ -19,111 +28,45 @@ interface UserStore {
   getDefaultAddress: () => SavedAddress | undefined;
   addOrder: (order: Order) => void;
   setOrders: (orders: Order[]) => void;
+  syncOrders: () => Promise<void>;
 }
-
-const DEFAULT_ADDRESSES: SavedAddress[] = [
-  {
-    id: 'addr_default_1',
-    title: 'Home Address',
-    first_name: 'Rahul',
-    last_name: 'Sharma',
-    email: 'rahul.sharma@example.com',
-    phone: '9876543210',
-    address_1: 'Flat 402, Lotus Residency, Indiranagar 100ft Road',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    postcode: '560038',
-    country: 'India',
-    is_default: true,
-  },
-];
-
-const DEFAULT_ORDERS: Order[] = [
-  {
-    id: 10482,
-    order_number: 'MED-748921',
-    status: 'completed',
-    currency: 'INR',
-    total: 1250,
-    subtotal: 1250,
-    shipping_total: 0,
-    discount_total: 0,
-    tax_total: 0,
-    date_created: 'Nov 18, 2026',
-    billing: {
-      first_name: 'Rahul',
-      last_name: 'Sharma',
-      email: 'rahul.sharma@example.com',
-      phone: '9876543210',
-      address_1: 'Flat 402, Lotus Residency, Indiranagar 100ft Road',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      postcode: '560038',
-      country: 'India',
-    },
-    shipping: {
-      first_name: 'Rahul',
-      last_name: 'Sharma',
-      email: 'rahul.sharma@example.com',
-      phone: '9876543210',
-      address_1: 'Flat 402, Lotus Residency, Indiranagar 100ft Road',
-      city: 'Bengaluru',
-      state: 'Karnataka',
-      postcode: '560038',
-      country: 'India',
-    },
-    items: [
-      {
-        id: 1,
-        product_id: 17,
-        name: 'Kumkumadi Radiance Youth Elixir Serum',
-        quantity: 1,
-        subtotal: 1250,
-        total: 1250,
-        image: 'https://dev-medinerbz.pantheonsite.io/wp-content/uploads/2026/11/product-kumkumadi-radiance-elixir.jpg',
-      },
-    ],
-    shipping_carrier: 'BlueDart Express',
-    tracking_id: 'BD-847291039IN',
-    payment_method: 'razorpay',
-    payment_method_title: 'Razorpay (UPI - Google Pay)',
-    is_paid: true,
-  },
-];
 
 export const useUserStore = create<UserStore>()(
   persist(
     (set, get) => ({
-      profile: {
-        first_name: 'Rahul',
-        last_name: 'Sharma',
-        email: 'rahul.sharma@example.com',
-        phone: '9876543210',
-        dosha: 'Pitta',
-        wellness_goal: 'Radiant Skin & Deep Restorative Hair Vitality',
-      },
-      savedAddresses: DEFAULT_ADDRESSES,
-      orders: DEFAULT_ORDERS,
-      isLoggedIn: true,
+      profile: null,
+      savedAddresses: [],
+      orders: [],
+      isLoggedIn: false,
 
       login: (data) => {
-        set((state) => ({
+        const addresses = data.savedAddresses && data.savedAddresses.length > 0
+          ? data.savedAddresses
+          : get().savedAddresses;
+
+        set(() => ({
           isLoggedIn: true,
           profile: {
-            first_name: data.first_name || state.profile?.first_name || 'Ayurvedic',
-            last_name: data.last_name || state.profile?.last_name || 'Customer',
+            first_name: data.first_name || 'Ayurvedic',
+            last_name: data.last_name || '',
             email: data.email,
-            phone: data.phone || state.profile?.phone || '',
-            dosha: state.profile?.dosha || 'Tridoshic',
-            wellness_goal: state.profile?.wellness_goal || 'Holistic Herbal Wellness',
+            phone: data.phone || '',
+            dosha: (data.dosha as any) || 'Tridoshic',
+            member_since: data.member_since || new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+            wellness_goal: data.wellness_goal || 'Holistic Herbal Wellness',
           },
+          savedAddresses: addresses,
         }));
+
+        // Trigger background sync for live orders
+        get().syncOrders();
       },
 
       logout: () => {
         set({
           isLoggedIn: false,
           profile: null,
+          orders: [],
         });
       },
 
@@ -195,9 +138,24 @@ export const useUserStore = create<UserStore>()(
       setOrders: (orders) => {
         set({ orders });
       },
+
+      syncOrders: async () => {
+        const profile = get().profile;
+        if (!profile?.email && !profile?.phone) return;
+        try {
+          const { api } = await import('../api/client');
+          const liveOrders = await api.getCustomerOrders(profile.email || profile.phone);
+          if (Array.isArray(liveOrders)) {
+            set({ orders: liveOrders });
+          }
+        } catch (err) {
+          console.warn('[UserStore] Could not sync live customer orders', err);
+        }
+      },
     }),
     {
       name: 'mediherbz-customer-storage',
     }
   )
 );
+
