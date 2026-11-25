@@ -51,8 +51,8 @@ export const api = {
     try {
       const res = await fetch(`${WP_API_URL}/auth/admin-login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: username.trim(), username: username.trim(), password }),
       });
       if (res.ok) {
         const data = await res.json();

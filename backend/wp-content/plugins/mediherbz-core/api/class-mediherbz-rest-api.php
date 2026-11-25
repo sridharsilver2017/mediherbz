@@ -203,8 +203,13 @@ class Mediherbz_REST_API {
             $params = $request->get_body_params();
         }
 
-        $email_or_user = isset($params['email']) ? sanitize_text_field($params['email']) : '';
-        $password      = isset($params['password']) ? (string)$params['password'] : '';
+        $email_or_user = '';
+        if (!empty($params['email'])) {
+            $email_or_user = sanitize_text_field($params['email']);
+        } elseif (!empty($params['username'])) {
+            $email_or_user = sanitize_text_field($params['username']);
+        }
+        $password = isset($params['password']) ? (string)$params['password'] : '';
 
         if (empty($email_or_user) || empty($password)) {
             return new WP_Error('missing_fields', 'Please provide email or username and password.', array('status' => 400));
@@ -227,9 +232,10 @@ class Mediherbz_REST_API {
         $token     = base64_encode($payload . '|' . $signature);
 
         return rest_ensure_response(array(
-            'success' => true,
-            'token'   => $token,
-            'user'    => array(
+            'success'  => true,
+            'token'    => $token,
+            'username' => $user->user_login,
+            'user'     => array(
                 'id'           => $user->ID,
                 'email'        => $user->user_email,
                 'display_name' => $user->display_name ?: $user->user_login,
