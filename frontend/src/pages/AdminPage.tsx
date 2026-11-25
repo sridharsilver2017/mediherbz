@@ -447,7 +447,7 @@ export const AdminPage: React.FC = () => {
           <div className="flex items-center gap-2 sm:gap-3">
             {/* Orders App Shortcut */}
             <a
-              href="https://mediherbz-orders.pages.dev"
+              href="https://orders-mediherbz.pages.dev"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center justify-center min-h-[44px] h-11 gap-1.5 px-3.5 sm:px-4 py-2 bg-[#FAF9F2] hover:bg-[#F3EED9] text-[#12632F] border border-[#18833B]/30 rounded-xl text-xs font-bold transition-all shadow-xs shrink-0"
@@ -1184,7 +1184,7 @@ export const AdminPage: React.FC = () => {
 
                 <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                   <a
-                    href="https://mediherbz-orders.pages.dev"
+                    href="https://orders-mediherbz.pages.dev"
                     target="_blank"
                     rel="noreferrer"
                     className="px-6 py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-bold rounded-lg text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-95"
