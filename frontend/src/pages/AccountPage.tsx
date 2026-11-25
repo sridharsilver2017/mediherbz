@@ -203,6 +203,11 @@ export const AccountPage: React.FC = () => {
             is_default: true,
           });
         }
+
+        // If customer orders returned directly from login, populate immediately (0ms wait)
+        if (res.orders && Array.isArray(res.orders) && res.orders.length > 0) {
+          setOrders(res.orders);
+        }
       }
     } catch (err: any) {
       setAuthError(err.message || 'Login failed. Please verify your details or use instant email sign-in.');
@@ -872,7 +877,31 @@ export const AccountPage: React.FC = () => {
           )}
 
           {/* Orders List */}
-          {filteredOrders.length === 0 ? (
+          {syncingOrders && orders.length === 0 ? (
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white p-6 sm:p-8 rounded-3xl border border-stone-200/80 shadow-xs animate-pulse space-y-4"
+                >
+                  <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+                    <div className="space-y-1.5">
+                      <div className="h-3 w-20 bg-stone-200 rounded" />
+                      <div className="h-5 w-28 bg-emerald-100/70 rounded-md" />
+                    </div>
+                    <div className="h-6 w-24 bg-stone-200 rounded-full" />
+                  </div>
+                  <div className="flex items-center gap-4 py-2">
+                    <div className="w-16 h-16 bg-stone-100 rounded-2xl shrink-0" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 w-48 bg-stone-200 rounded" />
+                      <div className="h-3 w-24 bg-stone-100 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredOrders.length === 0 ? (
             <div className="bg-white p-8 sm:p-14 rounded-3xl border border-stone-200/80 text-center space-y-4">
               <div className="w-16 h-16 bg-stone-50 rounded-2xl flex items-center justify-center mx-auto text-stone-400">
                 <Package className="w-8 h-8" />

@@ -678,7 +678,7 @@ export const api = {
   },
 
   // Customer Authentication & Account Management
-  customerLogin: async (emailOrUser: string, password?: string): Promise<{ success: boolean; token?: string; profile: any; billing?: any }> => {
+  customerLogin: async (emailOrUser: string, password?: string): Promise<{ success: boolean; token?: string; profile: any; billing?: any; orders?: any[] }> => {
     const res = await fetch(`${WP_API_URL}/customer/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },

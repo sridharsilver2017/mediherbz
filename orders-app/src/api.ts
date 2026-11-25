@@ -79,12 +79,12 @@ export const api = {
   },
 
   // Fetch all orders & stats from WooCommerce
-  getOrders: async (options?: { status?: string; search?: string; limit?: number }): Promise<{ orders: Order[]; stats: OrdersStats }> => {
+  getOrders: async (options?: { status?: string; search?: string; limit?: number; force?: boolean }): Promise<{ orders: Order[]; stats: OrdersStats }> => {
     const params = new URLSearchParams();
     if (options?.status && options.status !== 'all') params.append('status', options.status);
     if (options?.search) params.append('search', options.search);
     if (options?.limit) params.append('limit', String(options.limit));
-    params.append('_t', String(Date.now())); // Cache buster to bypass Cloudflare edge cache
+    if (options?.force) params.append('force', '1');
 
     const url = `${WP_API_URL}/admin/orders?${params.toString()}`;
     const res = await fetch(url);

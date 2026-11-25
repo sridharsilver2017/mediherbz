@@ -16,7 +16,7 @@ class Mediherbz_REST_API {
     public function clear_orders_cache() {
         delete_transient('mediherbz_orders_stats');
         global $wpdb;
-        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_mediherbz_orders_%' OR option_name LIKE '_transient_timeout_mediherbz_orders_%'");
+        $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_mediherbz_orders_%' OR option_name LIKE '_transient_timeout_mediherbz_orders_%' OR option_name LIKE '_transient_mediherbz_cust_%' OR option_name LIKE '_transient_timeout_mediherbz_cust_%'");
     }
 
     public function prevent_dynamic_caching($served, $result, $request, $server) {
@@ -636,6 +636,8 @@ class Mediherbz_REST_API {
                     'country'    => 'India',
                 );
 
+                $cust_orders = $this->get_customer_orders_array($user->user_email, get_user_meta($user->ID, 'billing_phone', true) ?: '');
+
                 return rest_ensure_response(array(
                     'success'  => true,
                     'token'    => $token,
@@ -650,6 +652,7 @@ class Mediherbz_REST_API {
                         'wellness_goal' => get_user_meta($user->ID, 'mediherbz_goal', true) ?: 'Holistic Herbal Wellness',
                     ),
                     'billing'  => $billing_address,
+                    'orders'   => $cust_orders,
                 ));
             } else {
                 return new WP_Error('invalid_credentials', 'Invalid email or password. Please try again.', array('status' => 401));
@@ -701,6 +704,8 @@ class Mediherbz_REST_API {
             $last_name  = '';
         }
 
+        $cust_orders = $this->get_customer_orders_array($email_or_user, $phone);
+
         return rest_ensure_response(array(
             'success' => true,
             'token'   => base64_encode($email_or_user . '|' . time()),
@@ -715,6 +720,7 @@ class Mediherbz_REST_API {
                 'wellness_goal' => 'Holistic Herbal Wellness',
             ),
             'billing' => $billing,
+            'orders'  => $cust_orders,
         ));
     }
 
@@ -843,12 +849,15 @@ class Mediherbz_REST_API {
         ));
     }
 
-    public function get_customer_orders($request) {
-        $email = sanitize_email($request->get_param('email'));
-        $phone = sanitize_text_field($request->get_param('phone'));
-
+    public function get_customer_orders_array($email, $phone = '') {
         if (!$email && !$phone) {
-            return rest_ensure_response(array());
+            return array();
+        }
+
+        $cache_key = 'mediherbz_cust_' . md5(strtolower($email) . '_' . $phone);
+        $cached    = get_transient($cache_key);
+        if ($cached !== false && is_array($cached)) {
+            return $cached;
         }
 
         $args = array(
@@ -865,29 +874,39 @@ class Mediherbz_REST_API {
 
         $orders    = function_exists('wc_get_orders') ? wc_get_orders($args) : array();
         $formatted = array();
+        static $cust_img_cache = array();
 
         foreach ($orders as $o) {
-            $order_num = get_post_meta($o->get_id(), '_order_number_formatted', true) ?: ('MED-' . $o->get_id());
+            $order_id  = $o->get_id();
+            $order_num = ($o->get_meta('_order_number_formatted') ?: get_post_meta($order_id, '_order_number_formatted', true)) ?: ('MED-' . $order_id);
             $items     = array();
             foreach ($o->get_items() as $item_id => $item) {
-                $product = $item->get_product();
-                $img_id  = $product ? $product->get_image_id() : 0;
+                $product_id = $item->get_product_id();
+                $img_url    = '';
+                if ($product_id) {
+                    if (!isset($cust_img_cache[$product_id])) {
+                        $thumb_id = get_post_thumbnail_id($product_id);
+                        $cust_img_cache[$product_id] = $thumb_id ? wp_get_attachment_url($thumb_id) : '';
+                    }
+                    $img_url = $cust_img_cache[$product_id];
+                }
+
                 $items[]  = array(
                     'id'         => $item_id,
-                    'product_id' => $product ? $product->get_id() : $item_id,
+                    'product_id' => $product_id ?: $item_id,
                     'name'       => $item->get_name(),
                     'quantity'   => $item->get_quantity(),
                     'subtotal'   => floatval($item->get_subtotal()),
                     'total'      => floatval($item->get_total()),
-                    'image'      => $img_id ? wp_get_attachment_url($img_id) : '',
+                    'image'      => $img_url,
                 );
             }
 
-            $carrier  = get_post_meta($o->get_id(), '_shipping_carrier', true) ?: 'Express Air';
-            $tracking = get_post_meta($o->get_id(), '_tracking_number', true) ?: '';
+            $carrier  = ($o->get_meta('_shipping_carrier') ?: get_post_meta($order_id, '_shipping_carrier', true)) ?: 'Express Air';
+            $tracking = ($o->get_meta('_tracking_number') ?: get_post_meta($order_id, '_tracking_number', true)) ?: '';
 
             $formatted[] = array(
-                'id'                   => $o->get_id(),
+                'id'                   => $order_id,
                 'order_number'         => $order_num,
                 'status'               => $o->get_status(),
                 'currency'             => $o->get_currency(),
@@ -931,6 +950,19 @@ class Mediherbz_REST_API {
             );
         }
 
+        set_transient($cache_key, $formatted, 60);
+        return $formatted;
+    }
+
+    public function get_customer_orders($request) {
+        $email = sanitize_email($request->get_param('email'));
+        $phone = sanitize_text_field($request->get_param('phone'));
+
+        if (!$email && !$phone) {
+            return rest_ensure_response(array());
+        }
+
+        $formatted = $this->get_customer_orders_array($email, $phone);
         return rest_ensure_response($formatted);
     }
 
@@ -939,14 +971,14 @@ class Mediherbz_REST_API {
             return rest_ensure_response(array('orders' => array(), 'stats' => array('total_count' => 0, 'processing' => 0, 'completed' => 0, 'on_hold' => 0, 'cancelled' => 0, 'total_rev' => 0, 'cod_count' => 0, 'online_count' => 0)));
         }
 
-        $limit   = min(100, max(1, intval($request->get_param('limit') ?: 40)));
-        $status  = sanitize_text_field($request->get_param('status') ?: 'any');
-        $search  = sanitize_text_field($request->get_param('search') ?: '');
-        $force_t = sanitize_text_field($request->get_param('_t') ?: '');
+        $limit         = min(100, max(1, intval($request->get_param('limit') ?: 40)));
+        $status        = sanitize_text_field($request->get_param('status') ?: 'any');
+        $search        = sanitize_text_field($request->get_param('search') ?: '');
+        $force_refresh = $request->get_param('force') === '1' || $request->get_param('force') === 'true';
 
-        // 1. Smart Short Transient Cache for Unfiltered Polls (bypassed if cache buster _t passed)
+        // 1. Instant 30s Server Cache for Unfiltered Polls (sub-50ms repeat response)
         $cache_key = 'mediherbz_orders_' . md5($status . '_' . $limit . '_' . $search);
-        if (empty($search) && empty($force_t)) {
+        if (empty($search) && !$force_refresh) {
             $cached_payload = get_transient($cache_key);
             if ($cached_payload !== false && is_array($cached_payload) && !empty($cached_payload['stats']['total_count'])) {
                 return rest_ensure_response($cached_payload);
@@ -1012,18 +1044,16 @@ class Mediherbz_REST_API {
             $stats['online_count'] = intval($rev_row->online_count ?: 0);
         }
 
-        // Secondary fallback to calculate revenue from live WooCommerce orders if SQL meta was empty
-        if ($stats['total_rev'] == 0 && function_exists('wc_get_orders')) {
-            $all_recent = wc_get_orders(array('limit' => 50));
-            foreach ($all_recent as $ro) {
-                if (!in_array($ro->get_status(), array('cancelled', 'failed', 'trash'))) {
-                    $stats['total_rev'] += floatval($ro->get_total());
-                    if ($ro->get_payment_method() === 'cod') {
-                        $stats['cod_count']++;
-                    } else {
-                        $stats['online_count']++;
-                    }
-                }
+        // Secondary fallback to calculate revenue from SQL if needed
+        if ($stats['total_rev'] == 0 && $stats['total_count'] > 0) {
+            $sql_rev = $wpdb->get_var("
+                SELECT SUM(CAST(meta_value AS DECIMAL(10,2))) 
+                FROM {$wpdb->postmeta} 
+                WHERE meta_key = '_order_total' 
+                AND post_id IN (SELECT ID FROM {$wpdb->posts} WHERE post_type = 'shop_order' AND post_status NOT IN ('wc-cancelled', 'wc-failed', 'trash'))
+            ");
+            if ($sql_rev) {
+                $stats['total_rev'] = floatval($sql_rev);
             }
         }
 

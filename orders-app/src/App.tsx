@@ -71,7 +71,7 @@ export const App: React.FC = () => {
   const isInitialLoaded = useRef(Boolean(cachedData && cachedData.orders.length > 0));
 
   const fetchOrders = useCallback(
-    async (silent = false) => {
+    async (silent = false, force = false) => {
       if (!auth) return;
       if (!silent) setLoading(true);
       setError(null);
@@ -81,6 +81,7 @@ export const App: React.FC = () => {
           status: statusFilter !== 'all' ? statusFilter : undefined,
           search: searchQuery.trim() || undefined,
           limit: 40,
+          force,
         });
 
         // Detect new orders arriving after initial load
@@ -234,7 +235,7 @@ export const App: React.FC = () => {
       <Header
         adminUsername={auth.username}
         loading={loading}
-        onRefresh={() => fetchOrders(false)}
+        onRefresh={() => fetchOrders(false, true)}
         onLogout={handleLogout}
         notificationsEnabled={notificationsEnabled}
         onToggleNotifications={handleToggleNotifications}
@@ -467,14 +468,29 @@ export const App: React.FC = () => {
 
         {/* Orders Listing State */}
         {loading && orders.length === 0 ? (
-          <div className="py-24 text-center space-y-4 bg-white rounded-lg border border-stone-200/90 shadow-xs">
-            <div className="w-12 h-12 rounded-lg bg-emerald-50 text-[#18833B] flex items-center justify-center mx-auto">
-              <RefreshCw className="w-6 h-6 animate-spin" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-black text-stone-900">Synchronizing with WooCommerce</h3>
-              <p className="text-xs text-stone-400">Pulling real-time customer bookings from Pantheon...</p>
-            </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-xl border border-stone-200/80 p-4 sm:p-5 shadow-xs animate-pulse space-y-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-24 bg-stone-200 rounded-md" />
+                    <div className="h-5 w-16 bg-stone-100 rounded-md" />
+                  </div>
+                  <div className="h-6 w-20 bg-emerald-100/70 rounded-full" />
+                </div>
+                <div className="space-y-1.5 pt-1">
+                  <div className="h-4 w-40 bg-stone-200 rounded" />
+                  <div className="h-3 w-56 bg-stone-100 rounded" />
+                </div>
+                <div className="flex items-center justify-between pt-2 border-t border-stone-100">
+                  <div className="h-4 w-28 bg-stone-100 rounded" />
+                  <div className="h-5 w-16 bg-stone-200 rounded" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="py-20 text-center space-y-3 bg-white rounded-lg border border-stone-200/90 px-4 shadow-xs">
