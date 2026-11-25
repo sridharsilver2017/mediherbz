@@ -202,7 +202,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center lg:hidden shrink-0">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-1.5 sm:p-2 rounded-lg transition-colors focus:outline-hidden ${
+                className={`min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-xl transition-colors focus:outline-hidden ${
                   mobileMenuOpen
                     ? 'bg-emerald-50 text-[#18833B] ring-1 ring-emerald-200'
                     : 'text-stone-700 hover:text-[#18833B] hover:bg-stone-50'
@@ -280,14 +280,14 @@ export const Header: React.FC = () => {
             </nav>
 
             {/* Action Icons */}
-            <div className="flex items-center gap-1.5 sm:gap-4">
+            <div className="flex items-center gap-1 sm:gap-3">
               {/* Search Trigger */}
               <button
                 onClick={() => {
                   setSearchOpen(!searchOpen);
                   if (mobileMenuOpen) setMobileMenuOpen(false);
                 }}
-                className={`p-1.5 sm:p-2 rounded-lg text-stone-700 hover:text-[#18833B] transition-colors ${
+                className={`min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-xl text-stone-700 hover:text-[#18833B] hover:bg-stone-50 transition-colors focus:outline-hidden ${
                   searchOpen ? 'bg-emerald-50 text-[#18833B]' : ''
                 }`}
                 aria-label="Search herbal products"
@@ -298,12 +298,12 @@ export const Header: React.FC = () => {
               {/* Wishlist Link */}
               <Link
                 to="/wishlist"
-                className="relative p-1.5 sm:p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+                className="relative min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-xl text-stone-700 hover:text-[#18833B] hover:bg-stone-50 transition-colors"
                 aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5" />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-[#F28A13] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  <span className="absolute top-1.5 right-1.5 bg-[#F28A13] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -312,7 +312,7 @@ export const Header: React.FC = () => {
               {/* My Account Link */}
               <Link
                 to="/account"
-                className="hidden sm:inline-flex p-1.5 sm:p-2 text-stone-700 hover:text-[#18833B] transition-colors"
+                className="hidden sm:flex min-w-[44px] min-h-[44px] w-11 h-11 items-center justify-center rounded-xl text-stone-700 hover:text-[#18833B] hover:bg-stone-50 transition-colors"
                 aria-label="My Account"
                 title="My Account"
               >
@@ -323,12 +323,12 @@ export const Header: React.FC = () => {
               <button
                 type="button"
                 onClick={openCart}
-                className="relative flex items-center justify-center gap-1.5 bg-[#18833B] hover:bg-[#12632F] text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-full font-medium text-xs sm:text-sm transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
+                className="relative flex items-center justify-center gap-1.5 bg-[#18833B] hover:bg-[#12632F] text-white min-h-[44px] h-11 px-3 sm:px-4 rounded-full font-medium text-xs sm:text-sm transition-all shadow-xs hover:shadow-md cursor-pointer shrink-0"
                 aria-label="Shopping Cart"
               >
                 <ShoppingBag className="w-4 h-4" />
                 <span className="hidden sm:inline">Cart</span>
-                <span className="bg-[#A6C928] text-[#12632F] font-bold text-[11px] sm:text-xs px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full">
+                <span className="bg-[#A6C928] text-[#12632F] font-bold text-[11px] sm:text-xs px-1.5 py-0.5 rounded-full">
                   {totalCartItems}
                 </span>
               </button>

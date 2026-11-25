@@ -275,9 +275,10 @@ export const App: React.FC = () => {
           <button
             type="button"
             onClick={() => setNewOrderToast(null)}
-            className="text-white/60 hover:text-white p-1 rounded-md cursor-pointer"
+            className="text-white/70 hover:text-white hover:bg-white/10 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl cursor-pointer transition-all active:scale-95"
+            aria-label="Dismiss new order notification"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
       )}
@@ -364,11 +365,11 @@ export const App: React.FC = () => {
                   setSearchQuery('');
                   fetchOrders(false);
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg cursor-pointer active:scale-90"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl cursor-pointer active:scale-90 transition-all hover:bg-stone-100"
                 title="Clear search"
                 aria-label="Clear search"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             )}
           </div>
@@ -386,7 +387,7 @@ export const App: React.FC = () => {
                 <button
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
-                  className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-2xs ${
+                  className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-2xs ${
                     statusFilter === tab.value
                       ? 'bg-[#18833B] text-white font-black shadow-xs'
                       : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
@@ -406,14 +407,14 @@ export const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Payment Method Quick Filter Pills with 42px touch zone */}
+            {/* Payment Method Quick Filter Pills with 44px touch zone */}
             <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
               <span className="text-[11px] text-stone-400 font-bold uppercase hidden lg:inline mr-1">
                 Payment:
               </span>
               <button
                 onClick={() => setPaymentFilter('all')}
-                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
+                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                   paymentFilter === 'all'
                     ? 'bg-stone-900 text-white shadow-2xs'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -423,7 +424,7 @@ export const App: React.FC = () => {
               </button>
               <button
                 onClick={() => setPaymentFilter('cod')}
-                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                   paymentFilter === 'cod'
                     ? 'bg-amber-600 text-white shadow-2xs'
                     : 'bg-stone-100 text-amber-800 hover:bg-stone-200'
@@ -433,7 +434,7 @@ export const App: React.FC = () => {
               </button>
               <button
                 onClick={() => setPaymentFilter('prepaid')}
-                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
+                className={`min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                   paymentFilter === 'prepaid'
                     ? 'bg-emerald-700 text-white shadow-2xs'
                     : 'bg-stone-100 text-[#18833B] hover:bg-stone-200'
@@ -690,7 +691,8 @@ export const App: React.FC = () => {
               </h3>
               <button
                 onClick={() => setShowStatsModal(false)}
-                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg"
+                className="text-stone-400 hover:text-stone-700 hover:bg-stone-100 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl cursor-pointer transition-all active:scale-95"
+                aria-label="Close stats modal"
               >
                 <X className="w-5 h-5" />
               </button>

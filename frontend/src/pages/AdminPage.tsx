@@ -450,7 +450,7 @@ export const AdminPage: React.FC = () => {
               href="https://mediherbz-orders.pages.dev"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#FAF9F2] hover:bg-[#F3EED9] text-[#12632F] border border-[#18833B]/30 rounded-xl text-xs font-bold transition-all shadow-xs"
+              className="inline-flex items-center justify-center min-h-[44px] h-11 gap-1.5 px-3.5 sm:px-4 py-2 bg-[#FAF9F2] hover:bg-[#F3EED9] text-[#12632F] border border-[#18833B]/30 rounded-xl text-xs font-bold transition-all shadow-xs shrink-0"
               title="Open Standalone Mobile Orders App"
             >
               <ShoppingBag className="w-3.5 h-3.5 text-[#18833B]" />
@@ -463,7 +463,7 @@ export const AdminPage: React.FC = () => {
             <Link
               to="/"
               target="_blank"
-              className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all"
+              className="inline-flex items-center justify-center min-h-[44px] h-11 gap-1.5 px-3.5 sm:px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all shrink-0"
             >
               <Globe className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Live Store</span>
@@ -473,7 +473,7 @@ export const AdminPage: React.FC = () => {
             {/* Sign Out */}
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-stone-500 hover:text-red-600 hover:bg-red-50 rounded-xl text-xs font-bold transition-all cursor-pointer"
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] h-11 px-3 py-2 text-stone-500 hover:text-red-600 hover:bg-red-50 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0"
               title="Sign Out of Admin"
             >
               <LogOut className="w-3.5 h-3.5" />

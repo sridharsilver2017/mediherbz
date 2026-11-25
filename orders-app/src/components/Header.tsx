@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onToggleNotifications}
-            className={`min-h-[42px] min-w-[42px] px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs shrink-0 active:scale-95 ${
+            className={`min-h-[44px] min-w-[44px] h-11 px-3.5 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs shrink-0 active:scale-95 ${
               notificationsEnabled
                 ? 'bg-emerald-50 text-[#18833B] border border-emerald-300 hover:bg-emerald-100'
                 : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onTestChime}
-              className="min-h-[42px] min-w-[42px] p-2.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 active:scale-95 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 active:scale-95 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Test store audio chime & notification"
               aria-label="Test chime"
             >
@@ -101,7 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="min-h-[42px] min-w-[42px] px-3.5 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs shrink-0"
+            className="min-h-[44px] min-w-[44px] h-11 px-3.5 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs shrink-0"
             title="Pull fresh orders from database"
           >
             <RefreshCw className={`w-4 h-4 text-[#18833B] ${loading ? 'animate-spin' : ''}`} />
@@ -112,7 +112,7 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="/mediherbz-orders.apk"
             download="mediherbz-orders.apk"
-            className="hidden md:inline-flex items-center min-h-[42px] gap-1.5 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all shadow-2xs"
+            className="hidden md:inline-flex items-center min-h-[44px] h-11 gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all shadow-2xs"
             title="Download Standalone Android APK to install on phone"
           >
             <Download className="w-4 h-4 text-[#18833B]" />
@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
             href="https://mediherbz.pages.dev"
             target="_blank"
             rel="noreferrer"
-            className="hidden md:inline-flex items-center min-h-[42px] gap-1.5 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all"
+            className="hidden md:inline-flex items-center min-h-[44px] h-11 gap-1.5 px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all"
             title="View Live Storefront"
           >
             <Globe className="w-4 h-4" />
@@ -136,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Admin Avatar */}
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center text-xs font-black uppercase shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center text-xs font-black uppercase shadow-xs">
               {adminUsername.slice(0, 1) || 'A'}
             </div>
             <div className="hidden lg:block text-left">
@@ -148,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Sign Out */}
           <button
             onClick={onLogout}
-            className="min-h-[42px] min-w-[42px] p-2.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center active:scale-95"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] p-2.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center active:scale-95"
             title="Sign out of Admin Dashboard"
             aria-label="Sign out"
           >
