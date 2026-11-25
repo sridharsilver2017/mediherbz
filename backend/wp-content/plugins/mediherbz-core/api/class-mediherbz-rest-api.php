@@ -629,23 +629,24 @@ class Mediherbz_REST_API {
 
     public function get_admin_orders($request) {
         if (!function_exists('wc_get_orders')) {
-            return rest_ensure_response(array('orders' => array(), 'stats' => array()));
+            return rest_ensure_response(array('orders' => array(), 'stats' => array('total_count' => 0, 'processing' => 0, 'completed' => 0, 'on_hold' => 0, 'cancelled' => 0, 'total_rev' => 0, 'cod_count' => 0, 'online_count' => 0)));
         }
 
-        $limit  = min(100, max(1, intval($request->get_param('limit') ?: 40)));
-        $status = sanitize_text_field($request->get_param('status') ?: 'any');
-        $search = sanitize_text_field($request->get_param('search') ?: '');
+        $limit   = min(100, max(1, intval($request->get_param('limit') ?: 40)));
+        $status  = sanitize_text_field($request->get_param('status') ?: 'any');
+        $search  = sanitize_text_field($request->get_param('search') ?: '');
+        $force_t = sanitize_text_field($request->get_param('_t') ?: '');
 
-        // 1. Smart Short Transient Cache for Unfiltered Polls (bypasses heavy PHP execution)
+        // 1. Smart Short Transient Cache for Unfiltered Polls (bypassed if cache buster _t passed)
         $cache_key = 'mediherbz_orders_' . md5($status . '_' . $limit . '_' . $search);
-        if (empty($search)) {
+        if (empty($search) && empty($force_t)) {
             $cached_payload = get_transient($cache_key);
-            if ($cached_payload !== false && is_array($cached_payload)) {
+            if ($cached_payload !== false && is_array($cached_payload) && !empty($cached_payload['stats']['total_count'])) {
                 return rest_ensure_response($cached_payload);
             }
         }
 
-        // 2. High-Performance SQL Query for Order Statistics (Executes in ~2ms instead of loading 100 PHP objects)
+        // 2. High-Performance SQL Query for Global Store Order Statistics
         global $wpdb;
         $stats = array(
             'total_count' => 0,
@@ -658,47 +659,65 @@ class Mediherbz_REST_API {
             'online_count'=> 0,
         );
 
-        $cached_stats = get_transient('mediherbz_orders_stats');
-        if ($cached_stats !== false && is_array($cached_stats)) {
-            $stats = $cached_stats;
-        } else {
-            $counts = $wpdb->get_results("
-                SELECT post_status, COUNT(*) as cnt 
-                FROM {$wpdb->posts} 
-                WHERE post_type = 'shop_order' 
-                AND post_status IN ('wc-processing', 'wc-completed', 'wc-on-hold', 'wc-cancelled', 'wc-pending')
-                GROUP BY post_status
-            ");
+        $counts = $wpdb->get_results("
+            SELECT post_status, COUNT(*) as cnt 
+            FROM {$wpdb->posts} 
+            WHERE post_type = 'shop_order' 
+            AND post_status IN ('wc-processing', 'wc-completed', 'wc-on-hold', 'wc-cancelled', 'wc-pending')
+            GROUP BY post_status
+        ");
 
-            if (!empty($counts)) {
-                foreach ($counts as $row) {
-                    $raw_st = str_replace('wc-', '', $row->post_status);
-                    $c = intval($row->cnt);
-                    $stats['total_count'] += $c;
-                    if ($raw_st === 'on-hold') {
-                        $stats['on_hold'] = $c;
-                    } elseif (isset($stats[$raw_st])) {
-                        $stats[$raw_st] = $c;
+        if (!empty($counts)) {
+            foreach ($counts as $row) {
+                $raw_st = str_replace('wc-', '', $row->post_status);
+                $c = intval($row->cnt);
+                $stats['total_count'] += $c;
+                if ($raw_st === 'on-hold') {
+                    $stats['on_hold'] = $c;
+                } elseif (isset($stats[$raw_st])) {
+                    $stats[$raw_st] = $c;
+                }
+            }
+        }
+
+        // Fallback using WooCommerce built-in order counts (supports HPOS custom order tables)
+        if ($stats['total_count'] === 0 && function_exists('wc_orders_count')) {
+            $stats['processing']  = intval(wc_orders_count('processing'));
+            $stats['completed']   = intval(wc_orders_count('completed'));
+            $stats['on_hold']     = intval(wc_orders_count('on-hold'));
+            $stats['cancelled']   = intval(wc_orders_count('cancelled'));
+            $stats['total_count'] = $stats['processing'] + $stats['completed'] + $stats['on_hold'] + $stats['cancelled'];
+        }
+
+        $rev_row = $wpdb->get_row("
+            SELECT 
+                SUM(CASE WHEN p.post_status NOT IN ('wc-cancelled', 'wc-failed', 'trash') THEN CAST(pm.meta_value AS DECIMAL(10,2)) ELSE 0 END) as total_rev,
+                SUM(CASE WHEN pm_pay.meta_value = 'cod' THEN 1 ELSE 0 END) as cod_count,
+                SUM(CASE WHEN pm_pay.meta_value != 'cod' AND pm_pay.meta_value IS NOT NULL THEN 1 ELSE 0 END) as online_count
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key = '_order_total')
+            LEFT JOIN {$wpdb->postmeta} pm_pay ON (p.ID = pm_pay.post_id AND pm_pay.meta_key = '_payment_method')
+            WHERE p.post_type = 'shop_order'
+        ");
+        if ($rev_row) {
+            $stats['total_rev']    = floatval($rev_row->total_rev ?: 0);
+            $stats['cod_count']    = intval($rev_row->cod_count ?: 0);
+            $stats['online_count'] = intval($rev_row->online_count ?: 0);
+        }
+
+        // Secondary fallback to calculate revenue from live WooCommerce orders if SQL meta was empty
+        if ($stats['total_rev'] == 0 && function_exists('wc_get_orders')) {
+            $all_recent = wc_get_orders(array('limit' => 50));
+            foreach ($all_recent as $ro) {
+                if (!in_array($ro->get_status(), array('cancelled', 'failed', 'trash'))) {
+                    $stats['total_rev'] += floatval($ro->get_total());
+                    if ($ro->get_payment_method() === 'cod') {
+                        $stats['cod_count']++;
+                    } else {
+                        $stats['online_count']++;
                     }
                 }
             }
-
-            $rev_row = $wpdb->get_row("
-                SELECT 
-                    SUM(CASE WHEN p.post_status NOT IN ('wc-cancelled', 'wc-failed', 'trash') THEN CAST(pm.meta_value AS DECIMAL(10,2)) ELSE 0 END) as total_rev,
-                    SUM(CASE WHEN pm_pay.meta_value = 'cod' THEN 1 ELSE 0 END) as cod_count,
-                    SUM(CASE WHEN pm_pay.meta_value != 'cod' AND pm_pay.meta_value IS NOT NULL THEN 1 ELSE 0 END) as online_count
-                FROM {$wpdb->posts} p
-                LEFT JOIN {$wpdb->postmeta} pm ON (p.ID = pm.post_id AND pm.meta_key = '_order_total')
-                LEFT JOIN {$wpdb->postmeta} pm_pay ON (p.ID = pm_pay.post_id AND pm_pay.meta_key = '_payment_method')
-                WHERE p.post_type = 'shop_order'
-            ");
-            if ($rev_row) {
-                $stats['total_rev']    = floatval($rev_row->total_rev ?: 0);
-                $stats['cod_count']    = intval($rev_row->cod_count ?: 0);
-                $stats['online_count'] = intval($rev_row->online_count ?: 0);
-            }
-            set_transient('mediherbz_orders_stats', $stats, 60);
         }
 
         // 3. Optimized Orders Fetching
@@ -796,6 +815,12 @@ class Mediherbz_REST_API {
                 'is_paid'              => $o->is_paid(),
                 'customer_note'        => $o->get_customer_note(),
             );
+        }
+
+        // Safeguard: If stats total_count is 0 but orders exist in database, reflect actual count
+        if ($stats['total_count'] === 0 && !empty($formatted)) {
+            $stats['total_count'] = count($formatted);
+            $stats['processing']  = count($formatted);
         }
 
         $response_data = array(

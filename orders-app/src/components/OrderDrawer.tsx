@@ -220,13 +220,13 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
           
-          {/* Quick Action Contact Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {/* Quick Action Contact Bar with Ergonomic 44px+ Hitboxes */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             <a
               href={getWhatsAppLink()}
               target="_blank"
               rel="noreferrer"
-              className="py-2.5 px-3.5 bg-[#18833B] hover:bg-[#12632F] text-white rounded-lg font-bold flex items-center justify-center gap-2 shadow-xs transition-colors active:scale-95"
+              className="min-h-[46px] py-3 px-4 bg-[#18833B] hover:bg-[#12632F] text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95"
             >
               <MessageCircle className="w-4 h-4" />
               <span>WhatsApp</span>
@@ -235,7 +235,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
             {order.customer.phone && (
               <a
                 href={`tel:${order.customer.phone}`}
-                className="py-2.5 px-3.5 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-2xs"
+                className="min-h-[46px] py-3 px-4 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-2xs"
               >
                 <Phone className="w-4 h-4 text-[#18833B]" />
                 <span>Call Customer</span>
@@ -244,7 +244,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
 
             <button
               onClick={() => onPrint(order)}
-              className="col-span-2 sm:col-span-1 py-2.5 px-3.5 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-2xs cursor-pointer"
+              className="col-span-2 sm:col-span-1 min-h-[46px] py-3 px-4 bg-white hover:bg-stone-100 text-stone-800 border border-stone-200 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-2xs cursor-pointer"
             >
               <Printer className="w-4 h-4 text-stone-600" />
               <span>Print Slip</span>
@@ -377,9 +377,9 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
                 <button
                   type="submit"
                   disabled={savingTracking}
-                  className="w-full sm:w-auto px-6 py-2.5 bg-[#18833B] hover:bg-[#12632F] text-white font-black rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
+                  className="w-full sm:w-auto min-h-[46px] px-6 py-3 bg-[#18833B] hover:bg-[#12632F] text-white font-black rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer disabled:opacity-50"
                 >
-                  <Save className="w-3.5 h-3.5" />
+                  <Save className="w-4 h-4" />
                   <span>{savingTracking ? 'Saving...' : 'Save & Update Tracking'}</span>
                 </button>
               </div>
@@ -387,7 +387,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
           </div>
 
           {/* Status Workflow Segmented Buttons */}
-          <div className="p-4 rounded-lg bg-white border border-stone-200/90 shadow-xs space-y-2.5">
+          <div className="p-4 rounded-xl bg-white border border-stone-200/90 shadow-xs space-y-2.5">
             <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider block">
               Quick Status Changer
             </span>
@@ -395,7 +395,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
               <button
                 disabled={updatingStatus || currentStatus === 'processing'}
                 onClick={() => handleStatusChange('processing')}
-                className={`py-2 px-2 rounded-lg font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
+                className={`min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
                   currentStatus === 'processing'
                     ? 'bg-amber-100 text-amber-900 border border-amber-300 font-black shadow-xs'
                     : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/70'
@@ -406,7 +406,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
               <button
                 disabled={updatingStatus || currentStatus === 'completed'}
                 onClick={() => handleStatusChange('completed')}
-                className={`py-2 px-2 rounded-lg font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
+                className={`min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
                   currentStatus === 'completed'
                     ? 'bg-emerald-100 text-[#18833B] border border-emerald-300 font-black shadow-xs'
                     : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/70'
@@ -417,7 +417,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
               <button
                 disabled={updatingStatus || currentStatus === 'on-hold'}
                 onClick={() => handleStatusChange('on-hold')}
-                className={`py-2 px-2 rounded-lg font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
+                className={`min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
                   currentStatus === 'on-hold'
                     ? 'bg-purple-100 text-purple-900 border border-purple-300 font-black shadow-xs'
                     : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/70'
@@ -428,7 +428,7 @@ export const OrderDrawer: React.FC<OrderDrawerProps> = ({ order, onClose, onUpda
               <button
                 disabled={updatingStatus || currentStatus === 'cancelled'}
                 onClick={() => handleStatusChange('cancelled')}
-                className={`py-2 px-2 rounded-lg font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
+                className={`min-h-[44px] py-2.5 px-3 rounded-xl font-bold text-xs cursor-pointer transition-all active:scale-95 text-center ${
                   currentStatus === 'cancelled'
                     ? 'bg-red-100 text-red-900 border border-red-300 font-black shadow-xs'
                     : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border border-stone-200/70'

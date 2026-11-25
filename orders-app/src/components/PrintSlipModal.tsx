@@ -39,7 +39,7 @@ export const PrintSlipModal: React.FC<PrintSlipModalProps> = ({ order, onClose }
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2 bg-[#18833B] hover:bg-[#12632F] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+              className="min-h-[44px] px-4 py-2.5 bg-[#18833B] hover:bg-[#12632F] text-white text-xs sm:text-sm font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs active:scale-95"
             >
               <Printer className="w-4 h-4" /> Print Label
             </button>
@@ -49,8 +49,9 @@ export const PrintSlipModal: React.FC<PrintSlipModalProps> = ({ order, onClose }
                 e.stopPropagation();
                 onClose();
               }}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-stone-500 hover:text-stone-900 bg-stone-200 hover:bg-stone-300 transition-colors cursor-pointer"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-stone-500 hover:text-stone-900 bg-stone-200 hover:bg-stone-300 transition-all cursor-pointer active:scale-90"
               title="Close"
+              aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>

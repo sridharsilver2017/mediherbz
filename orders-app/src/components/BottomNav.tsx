@@ -10,21 +10,21 @@ interface BottomNavProps {
 
 export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onTabChange, stats }) => {
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200/90 shadow-lg px-2 py-1.5 flex items-center justify-around safe-area-pb">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-stone-200/90 shadow-lg px-2 py-2 flex items-center justify-around safe-area-pb">
       <button
         onClick={() => onTabChange('all')}
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all cursor-pointer ${
-          currentTab === 'all' ? 'text-[#18833B] font-bold' : 'text-stone-500 font-medium'
+        className={`flex-1 min-h-[50px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all cursor-pointer active:scale-95 ${
+          currentTab === 'all' ? 'text-[#18833B] font-black bg-emerald-50/60' : 'text-stone-500 font-medium hover:bg-stone-50'
         }`}
       >
         <Package className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px]">All ({stats.total_count})</span>
+        <span className="text-[11px] leading-tight">All ({stats.total_count})</span>
       </button>
 
       <button
         onClick={() => onTabChange('processing')}
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all relative cursor-pointer ${
-          currentTab === 'processing' ? 'text-amber-600 font-bold' : 'text-stone-500 font-medium'
+        className={`flex-1 min-h-[50px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all relative cursor-pointer active:scale-95 ${
+          currentTab === 'processing' ? 'text-amber-600 font-black bg-amber-50/60' : 'text-stone-500 font-medium hover:bg-stone-50'
         }`}
       >
         <div className="relative">
@@ -35,27 +35,27 @@ export const BottomNav: React.FC<BottomNavProps> = ({ currentTab, onTabChange, s
             </span>
           )}
         </div>
-        <span className="text-[10px]">To Dispatch</span>
+        <span className="text-[11px] leading-tight">To Fulfill</span>
       </button>
 
       <button
         onClick={() => onTabChange('completed')}
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all cursor-pointer ${
-          currentTab === 'completed' ? 'text-[#18833B] font-bold' : 'text-stone-500 font-medium'
+        className={`flex-1 min-h-[50px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all cursor-pointer active:scale-95 ${
+          currentTab === 'completed' ? 'text-[#18833B] font-black bg-emerald-50/60' : 'text-stone-500 font-medium hover:bg-stone-50'
         }`}
       >
         <CheckCircle2 className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px]">Delivered ({stats.completed})</span>
+        <span className="text-[11px] leading-tight">Delivered ({stats.completed})</span>
       </button>
 
       <button
         onClick={() => onTabChange('stats')}
-        className={`flex flex-col items-center justify-center py-1 px-3 rounded-xl transition-all cursor-pointer ${
-          currentTab === 'stats' ? 'text-stone-900 font-bold' : 'text-stone-500 font-medium'
+        className={`flex-1 min-h-[50px] flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all cursor-pointer active:scale-95 ${
+          currentTab === 'stats' ? 'text-stone-900 font-black bg-stone-100' : 'text-stone-500 font-medium hover:bg-stone-50'
         }`}
       >
         <TrendingUp className="w-5 h-5 mb-0.5" />
-        <span className="text-[10px]">₹{(stats.total_rev / 1000).toFixed(1)}k</span>
+        <span className="text-[11px] leading-tight">₹{(stats.total_rev / 1000).toFixed(1)}k</span>
       </button>
     </nav>
   );

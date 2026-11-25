@@ -99,7 +99,29 @@ export const App: React.FC = () => {
         isInitialLoaded.current = true;
 
         setOrders(data.orders);
-        setStats(data.stats);
+        setStats((prev) => {
+          const remoteStats = data.stats;
+          if (remoteStats && remoteStats.total_count > 0) {
+            return remoteStats;
+          }
+          // Safeguard: If remote total_count is 0 but we have orders or previous stats, preserve count
+          const fallbackTotal = data.orders.length;
+          const fallbackProcessing = data.orders.filter((o) => o.status === 'processing').length;
+          const fallbackCompleted = data.orders.filter((o) => o.status === 'completed').length;
+          const fallbackOnHold = data.orders.filter((o) => o.status === 'on-hold').length;
+          const fallbackCancelled = data.orders.filter((o) => o.status === 'cancelled').length;
+
+          return {
+            total_count: Math.max(prev.total_count, fallbackTotal, remoteStats?.total_count || 0),
+            processing: remoteStats?.processing || fallbackProcessing || prev.processing,
+            completed: remoteStats?.completed || fallbackCompleted || prev.completed,
+            on_hold: remoteStats?.on_hold || fallbackOnHold || prev.on_hold,
+            cancelled: remoteStats?.cancelled || fallbackCancelled || prev.cancelled,
+            total_rev: remoteStats?.total_rev || prev.total_rev || data.orders.reduce((acc, o) => acc + (o.total || 0), 0),
+            cod_count: remoteStats?.cod_count || prev.cod_count,
+            online_count: remoteStats?.online_count || prev.online_count,
+          };
+        });
 
         // Keep selected order in sync if currently open
         setSelectedOrder((prev) => (prev ? data.orders.find((o) => o.id === prev.id) || prev : null));
@@ -266,14 +288,14 @@ export const App: React.FC = () => {
           <StatsCards stats={stats} />
         </div>
 
-        {/* Mobile Mini KPI Bar */}
-        <div className="sm:hidden grid grid-cols-3 gap-2">
+        {/* Mobile Mini KPI Bar with High Ergonomic Tap Zones */}
+        <div className="sm:hidden grid grid-cols-3 gap-2.5">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+            className={`min-h-[66px] p-3 rounded-xl border text-center transition-all cursor-pointer active:scale-95 flex flex-col justify-between ${
               statusFilter === 'all'
-                ? 'bg-[#18833B] text-white border-[#18833B] shadow-xs'
-                : 'bg-white text-stone-900 border-stone-200/90 shadow-2xs'
+                ? 'bg-[#18833B] text-white border-[#18833B] shadow-md shadow-emerald-900/10'
+                : 'bg-white text-stone-900 border-stone-200/90 shadow-2xs hover:bg-stone-50'
             }`}
           >
             <span
@@ -283,15 +305,15 @@ export const App: React.FC = () => {
             >
               All Orders
             </span>
-            <span className="text-lg font-black tracking-tight">{stats.total_count}</span>
+            <span className="text-xl font-black tracking-tight">{stats.total_count}</span>
           </button>
 
           <button
             onClick={() => setStatusFilter('processing')}
-            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+            className={`min-h-[66px] p-3 rounded-xl border text-center transition-all cursor-pointer active:scale-95 flex flex-col justify-between ${
               statusFilter === 'processing'
-                ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
-                : 'bg-white text-amber-700 border-stone-200/90 shadow-2xs'
+                ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-900/10'
+                : 'bg-white text-amber-700 border-stone-200/90 shadow-2xs hover:bg-stone-50'
             }`}
           >
             <span
@@ -301,15 +323,15 @@ export const App: React.FC = () => {
             >
               To Fulfill
             </span>
-            <span className="text-lg font-black tracking-tight">{stats.processing}</span>
+            <span className="text-xl font-black tracking-tight">{stats.processing}</span>
           </button>
 
           <button
             onClick={() => setStatusFilter('completed')}
-            className={`p-2.5 rounded-lg border text-center transition-all cursor-pointer ${
+            className={`min-h-[66px] p-3 rounded-xl border text-center transition-all cursor-pointer active:scale-95 flex flex-col justify-between ${
               statusFilter === 'completed'
-                ? 'bg-[#18833B] text-white border-[#18833B] shadow-xs'
-                : 'bg-white text-[#18833B] border-stone-200/90 shadow-2xs'
+                ? 'bg-[#18833B] text-white border-[#18833B] shadow-md shadow-emerald-900/10'
+                : 'bg-white text-[#18833B] border-stone-200/90 shadow-2xs hover:bg-stone-50'
             }`}
           >
             <span
@@ -319,13 +341,13 @@ export const App: React.FC = () => {
             >
               Delivered
             </span>
-            <span className="text-lg font-black tracking-tight">{stats.completed}</span>
+            <span className="text-xl font-black tracking-tight">{stats.completed}</span>
           </button>
         </div>
 
         {/* Search, Status Tabs & Payment Filter Bar */}
-        <div className="bg-white p-3.5 sm:p-5 rounded-lg border border-stone-200/90 shadow-xs space-y-3">
-          {/* Search Input with Instant Clear */}
+        <div className="bg-white p-3.5 sm:p-5 rounded-xl border border-stone-200/90 shadow-xs space-y-3.5">
+          {/* Search Input with Instant Clear (min-h-[46px]) */}
           <div className="relative">
             <Search className="w-4 h-4 text-stone-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
@@ -334,7 +356,7 @@ export const App: React.FC = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchOrders(false)}
               placeholder="Search by Order #, Customer, Phone, or City..."
-              className="w-full pl-11 pr-10 py-2.5 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-lg text-xs sm:text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-2 focus:ring-[#18833B]/10 transition-all"
+              className="w-full pl-11 pr-11 py-3 bg-stone-50 hover:bg-stone-50/80 focus:bg-white border border-stone-200 rounded-xl text-xs sm:text-sm font-medium text-stone-900 placeholder:text-stone-400 focus:outline-hidden focus:border-[#18833B] focus:ring-2 focus:ring-[#18833B]/10 transition-all min-h-[46px]"
             />
             {searchQuery && (
               <button
@@ -342,17 +364,18 @@ export const App: React.FC = () => {
                   setSearchQuery('');
                   fetchOrders(false);
                 }}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 p-1 rounded-md cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg cursor-pointer active:scale-90"
                 title="Clear search"
+                aria-label="Clear search"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
           </div>
 
-          {/* Status Tabs Carousel */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+          {/* Status Tabs Carousel with Ergonomic Touch Targets */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
               {[
                 { label: 'All Orders', value: 'all', count: stats.total_count },
                 { label: 'To Fulfill', value: 'processing', count: stats.processing },
@@ -363,18 +386,18 @@ export const App: React.FC = () => {
                 <button
                   key={tab.value}
                   onClick={() => setStatusFilter(tab.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shadow-2xs ${
+                  className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all active:scale-95 cursor-pointer flex items-center gap-2 shadow-2xs ${
                     statusFilter === tab.value
-                      ? 'bg-[#18833B] text-white font-black'
-                      : 'bg-stone-100 hover:bg-stone-200 text-stone-600'
+                      ? 'bg-[#18833B] text-white font-black shadow-xs'
+                      : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
                   }`}
                 >
                   <span>{tab.label}</span>
                   <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                       statusFilter === tab.value
                         ? 'bg-white/20 text-white'
-                        : 'bg-stone-200/80 text-stone-700'
+                        : 'bg-stone-200/90 text-stone-800'
                     }`}
                   >
                     {tab.count}
@@ -383,14 +406,14 @@ export const App: React.FC = () => {
               ))}
             </div>
 
-            {/* Payment Method Quick Filter Pills */}
+            {/* Payment Method Quick Filter Pills with 42px touch zone */}
             <div className="flex items-center gap-1.5 self-start sm:self-auto shrink-0">
               <span className="text-[11px] text-stone-400 font-bold uppercase hidden lg:inline mr-1">
                 Payment:
               </span>
               <button
                 onClick={() => setPaymentFilter('all')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                   paymentFilter === 'all'
                     ? 'bg-stone-900 text-white shadow-2xs'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -400,7 +423,7 @@ export const App: React.FC = () => {
               </button>
               <button
                 onClick={() => setPaymentFilter('cod')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                   paymentFilter === 'cod'
                     ? 'bg-amber-600 text-white shadow-2xs'
                     : 'bg-stone-100 text-amber-800 hover:bg-stone-200'
@@ -410,7 +433,7 @@ export const App: React.FC = () => {
               </button>
               <button
                 onClick={() => setPaymentFilter('prepaid')}
-                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                className={`min-h-[42px] px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 active:scale-95 ${
                   paymentFilter === 'prepaid'
                     ? 'bg-emerald-700 text-white shadow-2xs'
                     : 'bg-stone-100 text-[#18833B] hover:bg-stone-200'

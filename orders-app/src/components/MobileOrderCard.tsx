@@ -119,17 +119,18 @@ export const MobileOrderCard: React.FC<MobileOrderCardProps> = ({ order, onSelec
           </div>
         </div>
 
-        {/* 1-Tap Touch Targets */}
-        <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+        {/* 1-Tap Touch Targets (High Ergonomic 44px Hitboxes) */}
+        <div className="flex items-center gap-2.5 shrink-0" onClick={(e) => e.stopPropagation()}>
           {order.customer.phone && (
             <>
               {/* Call */}
               <a
                 href={`tel:${order.customer.phone}`}
-                className="w-9 h-9 rounded-full bg-emerald-50 text-[#18833B] border border-emerald-200/80 flex items-center justify-center hover:bg-emerald-100 active:scale-90 transition-transform shadow-2xs"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-emerald-50 text-[#18833B] border border-emerald-200/90 flex items-center justify-center hover:bg-emerald-100 active:scale-90 transition-all shadow-2xs"
                 title={`Call ${order.customer.name}`}
+                aria-label={`Call ${order.customer.name}`}
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-5 h-5" />
               </a>
 
               {/* WhatsApp */}
@@ -137,10 +138,11 @@ export const MobileOrderCard: React.FC<MobileOrderCardProps> = ({ order, onSelec
                 href={getWhatsAppLink({ stopPropagation: () => {} } as any)}
                 target="_blank"
                 rel="noreferrer"
-                className="w-9 h-9 rounded-full bg-[#18833B] text-white flex items-center justify-center hover:bg-[#12632F] active:scale-90 transition-transform shadow-xs"
+                className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-[#18833B] text-white flex items-center justify-center hover:bg-[#12632F] active:scale-90 transition-all shadow-xs"
                 title="Send WhatsApp dispatch notification"
+                aria-label="WhatsApp customer"
               >
-                <MessageCircle className="w-4 h-4" />
+                <MessageCircle className="w-5 h-5" />
               </a>
             </>
           )}
@@ -148,10 +150,11 @@ export const MobileOrderCard: React.FC<MobileOrderCardProps> = ({ order, onSelec
           {/* Print Slip */}
           <button
             onClick={() => onPrint(order)}
-            className="w-9 h-9 rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 active:scale-90 flex items-center justify-center transition-transform"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 active:scale-90 flex items-center justify-center transition-all shadow-2xs cursor-pointer"
             title="Print Thermal Packing Slip"
+            aria-label="Print Packing Slip"
           >
-            <Printer className="w-4 h-4" />
+            <Printer className="w-5 h-5" />
           </button>
         </div>
       </div>

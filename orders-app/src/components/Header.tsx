@@ -32,35 +32,35 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="bg-white/95 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-30 shadow-xs w-full max-w-full pt-[env(safe-area-inset-top,0px)]">
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between gap-1.5 sm:gap-2 w-full">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2 w-full">
         {/* Brand Left */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-linear-to-tr from-[#12632F] to-[#18833B] flex items-center justify-center text-white shadow-md shadow-emerald-900/15 shrink-0">
-            <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#12632F] to-[#18833B] flex items-center justify-center text-white shadow-md shadow-emerald-900/15 shrink-0">
+            <Package className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <h1 className="font-serif font-black text-stone-900 text-sm sm:text-base tracking-tight truncate">
+              <h1 className="font-serif font-black text-stone-900 text-base sm:text-lg tracking-tight truncate">
                 Mediherbz
               </h1>
-              <span className="w-2 h-2 rounded-full bg-[#18833B] animate-pulse shrink-0" title="Live orders sync" />
-              <span className="hidden sm:inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-[#18833B] shadow-2xs">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#18833B] animate-pulse shrink-0" title="Live orders sync" />
+              <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-100 text-[#18833B] shadow-2xs">
                 Live Hub
               </span>
             </div>
             <p className="text-[11px] text-stone-500 hidden sm:block font-medium">
-              Headless Orders Management &amp; Dispatch Terminal
+              Orders Management &amp; Dispatch Terminal
             </p>
           </div>
         </div>
 
-        {/* Actions Right */}
-        <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Actions Right - High-accessibility Touch Targets */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Notification Alert Toggle */}
           <button
             type="button"
             onClick={onToggleNotifications}
-            className={`p-1.5 sm:px-3 sm:py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs shrink-0 ${
+            className={`min-h-[42px] min-w-[42px] px-3 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs shrink-0 active:scale-95 ${
               notificationsEnabled
                 ? 'bg-emerald-50 text-[#18833B] border border-emerald-300 hover:bg-emerald-100'
                 : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -73,12 +73,12 @@ export const Header: React.FC<HeaderProps> = ({
           >
             {notificationsEnabled ? (
               <>
-                <BellRing className="w-3.5 h-3.5 text-[#18833B] animate-bounce shrink-0" />
+                <BellRing className="w-4 h-4 text-[#18833B] animate-bounce shrink-0" />
                 <span className="hidden sm:inline">Alerts On</span>
               </>
             ) : (
               <>
-                <Bell className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                <Bell className="w-4 h-4 text-stone-500 shrink-0" />
                 <span className="hidden sm:inline">Alerts</span>
               </>
             )}
@@ -89,10 +89,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onTestChime}
-              className="p-1.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition-all cursor-pointer flex items-center justify-center shrink-0"
+              className="min-h-[42px] min-w-[42px] p-2.5 text-stone-500 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 active:scale-95 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
               title="Test store audio chime & notification"
+              aria-label="Test chime"
             >
-              <Volume2 className="w-3.5 h-3.5 text-[#18833B]" />
+              <Volume2 className="w-4 h-4 text-[#18833B]" />
             </button>
           )}
 
@@ -100,10 +101,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-1.5 sm:px-3 sm:py-1.5 text-xs font-bold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs shrink-0"
-            title="Pull fresh orders from WooCommerce database"
+            className="min-h-[42px] min-w-[42px] px-3.5 py-2 text-xs font-bold text-stone-700 hover:text-stone-900 bg-stone-100 hover:bg-stone-200 rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-2xs shrink-0"
+            title="Pull fresh orders from database"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#18833B] ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 text-[#18833B] ${loading ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">{loading ? 'Syncing...' : 'Sync'}</span>
           </button>
 
@@ -111,10 +112,10 @@ export const Header: React.FC<HeaderProps> = ({
           <a
             href="/mediherbz-orders.apk"
             download="mediherbz-orders.apk"
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold transition-all shadow-2xs"
+            className="hidden md:inline-flex items-center min-h-[42px] gap-1.5 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all shadow-2xs"
             title="Download Standalone Android APK to install on phone"
           >
-            <Download className="w-3.5 h-3.5 text-[#18833B]" />
+            <Download className="w-4 h-4 text-[#18833B]" />
             <span>APK</span>
           </a>
 
@@ -123,19 +124,19 @@ export const Header: React.FC<HeaderProps> = ({
             href="https://mediherbz.pages.dev"
             target="_blank"
             rel="noreferrer"
-            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg text-xs font-bold transition-all"
+            className="hidden md:inline-flex items-center min-h-[42px] gap-1.5 px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-xl text-xs font-bold transition-all"
             title="View Live Storefront"
           >
-            <Globe className="w-3.5 h-3.5" />
-            <span>Storefront</span>
+            <Globe className="w-4 h-4" />
+            <span>Store</span>
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
 
-          <div className="h-5 w-px bg-stone-200 mx-0.5" />
+          <div className="h-6 w-px bg-stone-200 mx-0.5 hidden sm:block" />
 
           {/* Admin Avatar */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center text-xs font-black uppercase shadow-xs">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-[#12632F] to-[#18833B] text-white flex items-center justify-center text-xs font-black uppercase shadow-xs">
               {adminUsername.slice(0, 1) || 'A'}
             </div>
             <div className="hidden lg:block text-left">
@@ -147,10 +148,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Sign Out */}
           <button
             onClick={onLogout}
-            className="p-1 sm:p-1.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer shrink-0"
+            className="min-h-[42px] min-w-[42px] p-2.5 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all cursor-pointer shrink-0 flex items-center justify-center active:scale-95"
             title="Sign out of Admin Dashboard"
+            aria-label="Sign out"
           >
-            <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <LogOut className="w-4 h-4" />
           </button>
         </div>
       </div>
