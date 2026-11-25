@@ -27,6 +27,7 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  CloudCheck,
 } from 'lucide-react';
 import { useUserStore } from '../store/userStore';
 import { useCartStore } from '../store/cartStore';
@@ -52,12 +53,19 @@ export const AccountPage: React.FC = () => {
   } = useUserStore();
 
   const { addItem } = useCartStore();
-  const { items: wishlistItems, removeItem: removeWishlist } = useWishlistStore();
+  const {
+    items: wishlistItems,
+    removeItem: removeWishlist,
+    moveAllToCart: moveAllWishlistToCart,
+    isSyncing: wishlistSyncing,
+    syncWithCloud,
+  } = useWishlistStore();
 
   // Navigation tab
   const [activeTab, setActiveTab] = useState<'orders' | 'addresses' | 'wishlist' | 'profile'>('orders');
   const [orderFilter, setOrderFilter] = useState<'all' | 'processing' | 'completed' | 'cancelled'>('all');
   const [syncingOrders, setSyncingOrders] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Auth screen state (when not logged in)
   const [authMode, setAuthMode] = useState<'signin' | 'register' | 'track'>('signin');
@@ -119,10 +127,11 @@ export const AccountPage: React.FC = () => {
     }
   }, [profile]);
 
-  // Sync orders dynamically from WordPress whenever email is present
+  // Sync orders & wishlist dynamically from WordPress whenever email is present
   useEffect(() => {
     if (isLoggedIn && profile?.email) {
       handleSyncOrders();
+      syncWithCloud(profile.email);
     }
   }, [isLoggedIn, profile?.email]);
 
@@ -720,6 +729,13 @@ export const AccountPage: React.FC = () => {
   // =========================================================================
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 sm:right-6 z-50 bg-[#122A1E] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs font-bold border border-emerald-500/30 animate-fadeIn">
+          <Sparkles className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
       {/* Top Profile Banner with Dynamic Data */}
       <div className="bg-gradient-to-r from-[#18833B] to-[#12632F] text-white p-5 sm:p-8 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full blur-2xl pointer-events-none" />
@@ -1263,7 +1279,44 @@ export const AccountPage: React.FC = () => {
       {/* TAB 3: WISHLIST                                                       */}
       {/* ===================================================================== */}
       {activeTab === 'wishlist' && (
-        <div className="space-y-4">
+        <div className="space-y-5">
+          {/* Wishlist Header & Sync Status */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-stone-200/80 gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-base text-[#26352A]">Saved Herbal Formulations</h3>
+                <span className="bg-emerald-100 text-[#18833B] text-[10px] font-black px-2 py-0.5 rounded-full">
+                  {wishlistItems.length}
+                </span>
+                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                  <CloudCheck className="w-3 h-3 text-[#18833B]" /> Cloud Synced
+                </span>
+              </div>
+              <p className="text-xs text-stone-500 mt-0.5">
+                Automatically synchronized with your WooCommerce customer account across all devices
+              </p>
+            </div>
+
+            {wishlistItems.length > 0 && (
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const moved = moveAllWishlistToCart();
+                    if (moved > 0) {
+                      setToastMessage(`Moved ${moved} in-stock item${moved > 1 ? 's' : ''} to your cart!`);
+                      setTimeout(() => setToastMessage(null), 3500);
+                    }
+                  }}
+                  className="px-3.5 py-2 bg-[#18833B] hover:bg-[#12632F] text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
+                >
+                  <ShoppingBag className="w-3.5 h-3.5" />
+                  <span>Move All In-Stock to Cart</span>
+                </button>
+              </div>
+            )}
+          </div>
+
           {wishlistItems.length === 0 ? (
             <div className="bg-white p-10 sm:p-14 rounded-3xl border border-stone-200/80 text-center space-y-4">
               <div className="w-16 h-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-400">
@@ -1283,49 +1336,78 @@ export const AccountPage: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {wishlistItems.map((prod) => (
-                <div
-                  key={prod.id}
-                  className="bg-white p-4 rounded-3xl border border-stone-200/80 shadow-xs flex flex-col justify-between space-y-3 hover:border-emerald-200/80 transition-all"
-                >
-                  <div className="flex gap-3">
-                    <img
-                      src={prod.images[0]?.src}
-                      alt={prod.name}
-                      className="w-20 h-20 object-cover rounded-2xl bg-stone-50 shrink-0 border border-stone-100"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-bold text-xs sm:text-sm text-[#26352A] line-clamp-1">{prod.name}</h4>
-                      <p className="text-sm font-black text-[#18833B] mt-0.5">₹{prod.price}</p>
-                      {prod.herbal_fields?.botanical_name && (
-                        <p className="text-[10px] text-stone-400 italic line-clamp-1 mt-1">
-                          {prod.herbal_fields.botanical_name}
-                        </p>
-                      )}
+              {wishlistItems.map((prod) => {
+                const inStock = prod.in_stock !== false;
+                return (
+                  <div
+                    key={prod.id}
+                    className="bg-white p-4 rounded-3xl border border-stone-200/80 shadow-xs flex flex-col justify-between space-y-3 hover:border-emerald-200/80 transition-all"
+                  >
+                    <div className="flex gap-3">
+                      <Link to={`/product/${prod.slug}`} className="shrink-0">
+                        <img
+                          src={prod.images && prod.images.length > 0 ? prod.images[0].src : '/placeholder.jpg'}
+                          alt={prod.name}
+                          className="w-20 h-20 object-cover rounded-2xl bg-stone-50 border border-stone-100"
+                        />
+                      </Link>
+                      <div className="min-w-0 flex-1">
+                        <span
+                          className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full inline-block mb-1 ${
+                            inStock ? 'bg-emerald-100 text-[#18833B]' : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                        <Link to={`/product/${prod.slug}`}>
+                          <h4 className="font-bold text-xs sm:text-sm text-[#26352A] hover:text-[#18833B] transition-colors line-clamp-1">
+                            {prod.name}
+                          </h4>
+                        </Link>
+                        <div className="flex items-baseline gap-1.5 mt-0.5">
+                          <span className="text-sm font-black text-[#18833B]">₹{prod.price}</span>
+                          {prod.regular_price > prod.price && (
+                            <span className="text-[10px] text-stone-400 line-through">₹{prod.regular_price}</span>
+                          )}
+                        </div>
+                        {prod.herbal_fields?.botanical_name && (
+                          <p className="text-[10px] text-stone-400 italic line-clamp-1 mt-0.5">
+                            {prod.herbal_fields.botanical_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2 border-t border-stone-100">
+                      <button
+                        onClick={() => {
+                          if (!inStock) return;
+                          addItem(prod);
+                          removeWishlist(prod.id);
+                          setToastMessage(`Added "${prod.name}" to cart.`);
+                          setTimeout(() => setToastMessage(null), 3000);
+                        }}
+                        disabled={!inStock}
+                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-98 shadow-2xs ${
+                          inStock
+                            ? 'bg-[#18833B] hover:bg-[#12632F] text-white cursor-pointer'
+                            : 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                        }`}
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>{inStock ? 'Move to Cart' : 'Out of Stock'}</span>
+                      </button>
+                      <button
+                        onClick={() => removeWishlist(prod.id)}
+                        className="p-2.5 text-stone-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-colors cursor-pointer"
+                        aria-label="Remove from wishlist"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-
-                  <div className="flex gap-2 pt-2 border-t border-stone-100">
-                    <button
-                      onClick={() => {
-                        addItem(prod);
-                        removeWishlist(prod.id);
-                      }}
-                      className="flex-1 py-2.5 bg-[#18833B] hover:bg-[#12632F] text-white rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 active:scale-98 shadow-2xs"
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>Move to Cart</span>
-                    </button>
-                    <button
-                      onClick={() => removeWishlist(prod.id)}
-                      className="p-2.5 text-stone-400 hover:text-red-500 rounded-xl hover:bg-red-50 transition-colors cursor-pointer"
-                      aria-label="Remove from wishlist"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

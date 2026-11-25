@@ -58,8 +58,11 @@ export const useUserStore = create<UserStore>()(
           savedAddresses: addresses,
         }));
 
-        // Trigger background sync for live orders
+        // Trigger background sync for live orders and cloud wishlist
         get().syncOrders();
+        import('./wishlistStore').then(({ useWishlistStore }) => {
+          useWishlistStore.getState().syncWithCloud(data.email);
+        });
       },
 
       logout: () => {

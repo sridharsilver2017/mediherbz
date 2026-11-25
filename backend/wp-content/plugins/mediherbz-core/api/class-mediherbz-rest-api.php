@@ -24,7 +24,8 @@ class Mediherbz_REST_API {
         if (
             strpos($route, '/mediherbz/v1/admin/orders') !== false ||
             strpos($route, '/mediherbz/v1/orders/track') !== false ||
-            strpos($route, '/mediherbz/v1/customer/orders') !== false
+            strpos($route, '/mediherbz/v1/customer/orders') !== false ||
+            strpos($route, '/mediherbz/v1/customer/wishlist') !== false
         ) {
             header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
             header('Pragma: no-cache');
@@ -127,6 +128,20 @@ class Mediherbz_REST_API {
             'methods'             => 'POST',
             'callback'            => array($this, 'save_customer_address'),
             'permission_callback' => '__return_true',
+        ));
+
+        // Customer Wishlist (Cloud Sync)
+        register_rest_route($this->namespace, '/customer/wishlist', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array($this, 'get_customer_wishlist'),
+                'permission_callback' => '__return_true',
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => array($this, 'save_customer_wishlist'),
+                'permission_callback' => '__return_true',
+            ),
         ));
 
         // Admin Orders list
@@ -637,6 +652,8 @@ class Mediherbz_REST_API {
                 );
 
                 $cust_orders = $this->get_customer_orders_array($user->user_email, get_user_meta($user->ID, 'billing_phone', true) ?: '');
+                $raw_wishlist = get_user_meta($user->ID, 'mediherbz_wishlist', true);
+                $wishlist_ids = is_array($raw_wishlist) ? array_values(array_map('intval', $raw_wishlist)) : array();
 
                 return rest_ensure_response(array(
                     'success'  => true,
@@ -653,6 +670,7 @@ class Mediherbz_REST_API {
                     ),
                     'billing'  => $billing_address,
                     'orders'   => $cust_orders,
+                    'wishlist' => $wishlist_ids,
                 ));
             } else {
                 return new WP_Error('invalid_credentials', 'Invalid email or password. Please try again.', array('status' => 401));
@@ -705,11 +723,13 @@ class Mediherbz_REST_API {
         }
 
         $cust_orders = $this->get_customer_orders_array($email_or_user, $phone);
+        $raw_wishlist = $existing_user ? get_user_meta($existing_user->ID, 'mediherbz_wishlist', true) : array();
+        $wishlist_ids = is_array($raw_wishlist) ? array_values(array_map('intval', $raw_wishlist)) : array();
 
         return rest_ensure_response(array(
-            'success' => true,
-            'token'   => base64_encode($email_or_user . '|' . time()),
-            'profile' => array(
+            'success'  => true,
+            'token'    => base64_encode($email_or_user . '|' . time()),
+            'profile'  => array(
                 'id'            => $existing_user ? $existing_user->ID : 0,
                 'first_name'    => $first_name ?: 'Ayurvedic',
                 'last_name'     => $last_name ?: '',
@@ -719,8 +739,9 @@ class Mediherbz_REST_API {
                 'member_since'  => $existing_user ? date('F Y', strtotime($existing_user->user_registered)) : date('F Y'),
                 'wellness_goal' => 'Holistic Herbal Wellness',
             ),
-            'billing' => $billing,
-            'orders'  => $cust_orders,
+            'billing'  => $billing,
+            'orders'   => $cust_orders,
+            'wishlist' => $wishlist_ids,
         ));
     }
 
@@ -846,6 +867,69 @@ class Mediherbz_REST_API {
         return rest_ensure_response(array(
             'success' => true,
             'message' => 'Address saved successfully.',
+        ));
+    }
+
+    public function get_customer_wishlist(WP_REST_Request $request) {
+        $email = sanitize_email($request->get_param('email'));
+        if (!$email) {
+            return rest_ensure_response(array('success' => true, 'product_ids' => array(), 'items' => array()));
+        }
+
+        $user = get_user_by('email', $email) ?: get_user_by('login', $email);
+        $product_ids = array();
+        if ($user) {
+            $raw = get_user_meta($user->ID, 'mediherbz_wishlist', true);
+            if (is_array($raw)) {
+                $product_ids = array_values(array_unique(array_filter(array_map('intval', $raw))));
+            }
+        }
+        if (empty($product_ids)) {
+            $raw = get_option('mediherbz_wishlist_' . md5(strtolower($email)), array());
+            if (is_array($raw)) {
+                $product_ids = array_values(array_unique(array_filter(array_map('intval', $raw))));
+            }
+        }
+
+        // Format live product data from WooCommerce
+        $items = array();
+        if (!empty($product_ids) && function_exists('wc_get_product')) {
+            foreach ($product_ids as $pid) {
+                $product = wc_get_product(intval($pid));
+                if ($product && $product->exists() && $product->get_status() === 'publish') {
+                    $items[] = $this->format_wc_product($product);
+                }
+            }
+        }
+
+        return rest_ensure_response(array(
+            'success'     => true,
+            'product_ids' => $product_ids,
+            'items'       => $items,
+        ));
+    }
+
+    public function save_customer_wishlist(WP_REST_Request $request) {
+        $params      = $request->get_json_params() ?: $request->get_body_params();
+        $email       = sanitize_email($params['email'] ?? '');
+        $product_ids = isset($params['product_ids']) && is_array($params['product_ids']) 
+            ? array_values(array_unique(array_filter(array_map('intval', $params['product_ids'])))) 
+            : array();
+
+        if ($email) {
+            $user = get_user_by('email', $email) ?: get_user_by('login', $email);
+            if ($user) {
+                update_user_meta($user->ID, 'mediherbz_wishlist', $product_ids);
+            }
+            // Always persist to options fallback keyed by email so guest and customer sessions never lose it
+            update_option('mediherbz_wishlist_' . md5(strtolower($email)), $product_ids);
+        }
+
+        return rest_ensure_response(array(
+            'success'     => true,
+            'count'       => count($product_ids),
+            'product_ids' => $product_ids,
+            'message'     => 'Wishlist saved to cloud account successfully.',
         ));
     }
 

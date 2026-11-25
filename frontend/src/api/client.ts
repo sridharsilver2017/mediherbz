@@ -678,7 +678,7 @@ export const api = {
   },
 
   // Customer Authentication & Account Management
-  customerLogin: async (emailOrUser: string, password?: string): Promise<{ success: boolean; token?: string; profile: any; billing?: any; orders?: any[] }> => {
+  customerLogin: async (emailOrUser: string, password?: string): Promise<{ success: boolean; token?: string; profile: any; billing?: any; orders?: any[]; wishlist?: number[] }> => {
     const res = await fetch(`${WP_API_URL}/customer/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
@@ -738,6 +738,34 @@ export const api = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  // Customer Wishlist (Cloud Sync)
+  getCustomerWishlist: async (email: string): Promise<{ product_ids: number[]; items: Product[] }> => {
+    try {
+      const res = await fetch(`${WP_API_URL}/customer/wishlist?email=${encodeURIComponent(email)}`);
+      if (!res.ok) return { product_ids: [], items: [] };
+      const data = await res.json();
+      return {
+        product_ids: data.product_ids || [],
+        items: data.items || [],
+      };
+    } catch {
+      return { product_ids: [], items: [] };
+    }
+  },
+
+  saveCustomerWishlist: async (email: string, product_ids: number[]): Promise<boolean> => {
+    try {
+      const res = await fetch(`${WP_API_URL}/customer/wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, product_ids }),
       });
       return res.ok;
     } catch {
