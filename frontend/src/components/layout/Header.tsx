@@ -38,7 +38,19 @@ export const Header: React.FC = () => {
   const [headerHeight, setHeaderHeight] = useState<number>(0);
 
   const headerRef = useRef<HTMLElement>(null);
+  const categoryRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Close categories dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Prevent background body scroll when mobile menu is open
   useEffect(() => {
@@ -170,7 +182,7 @@ export const Header: React.FC = () => {
       {/* Header Container - Always stays pinned at top */}
       <header
         ref={headerRef}
-        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full max-w-full overflow-x-hidden ${
+        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-transform duration-300 ease-in-out w-full max-w-full overflow-visible ${
           showHeader || mobileMenuOpen ? 'translate-y-0' : '-translate-y-full'
         } ${isScrolled || mobileMenuOpen ? 'shadow-md' : 'shadow-xs'}`}
       >
@@ -234,39 +246,57 @@ export const Header: React.FC = () => {
               
               {/* Category Dropdown */}
               <div
+                ref={categoryRef}
                 className="relative"
                 onMouseEnter={() => setCategoryDropdown(true)}
                 onMouseLeave={() => setCategoryDropdown(false)}
               >
-                <button className="flex items-center gap-1 hover:text-[#18833B] transition-colors py-2 cursor-pointer">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setCategoryDropdown((prev) => !prev);
+                  }}
+                  aria-expanded={categoryDropdown}
+                  aria-haspopup="true"
+                  className="flex items-center gap-1 hover:text-[#18833B] transition-colors py-2 cursor-pointer focus:outline-hidden"
+                >
                   <span>Categories</span>
-                  <ChevronDown className={`w-4 h-4 transition-transform ${categoryDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${categoryDropdown ? 'rotate-180 text-[#18833B]' : ''}`} />
                 </button>
 
                 {categoryDropdown && (
-                  <div className="absolute top-full -left-4 w-72 bg-white rounded-xl shadow-xl border border-stone-100 py-3 z-50 animate-fadeIn">
-                    <div className="px-4 py-2 border-b border-stone-100 text-xs font-bold text-stone-400 uppercase tracking-wider">
-                      Herbal Collections
-                    </div>
-                    {categories.map((cat) => (
-                      <Link
-                        key={cat.id}
-                        to={`/shop?category=${cat.slug}`}
-                        className="flex items-center justify-between px-4 py-2.5 text-sm text-stone-700 hover:bg-[#FAF9F2] hover:text-[#18833B] transition-colors"
-                        onClick={() => setCategoryDropdown(false)}
-                      >
-                        <span>{cat.name}</span>
-                        <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full">{cat.count}</span>
-                      </Link>
-                    ))}
-                    <div className="p-3 border-t border-stone-100 mt-2 bg-[#FAF9F2]/60">
-                      <Link
-                        to="/shop"
-                        className="block text-center text-xs font-bold text-[#18833B] hover:underline"
-                        onClick={() => setCategoryDropdown(false)}
-                      >
-                        View All Products →
-                      </Link>
+                  <div className="absolute top-full -left-4 w-72 pt-2 z-50 animate-fadeIn">
+                    <div className="bg-white rounded-xl shadow-xl border border-stone-100 py-3 overflow-hidden">
+                      <div className="px-4 py-2 border-b border-stone-100 text-xs font-bold text-stone-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Herbal Collections</span>
+                        <span className="text-[10px] font-medium text-stone-400">({categories.length})</span>
+                      </div>
+                      <div className="max-h-[60vh] overflow-y-auto py-1">
+                        {categories.map((cat) => (
+                          <Link
+                            key={cat.id}
+                            to={`/shop?category=${cat.slug}`}
+                            className="flex items-center justify-between px-4 py-2.5 text-sm text-stone-700 hover:bg-[#FAF9F2] hover:text-[#18833B] transition-colors group"
+                            onClick={() => setCategoryDropdown(false)}
+                          >
+                            <span className="group-hover:font-medium">{cat.name}</span>
+                            <span className="text-xs text-stone-400 bg-stone-100 px-2 py-0.5 rounded-full group-hover:bg-emerald-100 group-hover:text-[#18833B] transition-colors">
+                              {cat.count}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                      <div className="p-3 border-t border-stone-100 mt-1 bg-[#FAF9F2]/60">
+                        <Link
+                          to="/shop"
+                          className="block text-center text-xs font-bold text-[#18833B] hover:underline"
+                          onClick={() => setCategoryDropdown(false)}
+                        >
+                          View All Products →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )}
