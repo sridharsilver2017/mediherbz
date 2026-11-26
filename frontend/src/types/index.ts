@@ -61,6 +61,18 @@ export interface Product {
   new_arrival?: boolean;
 }
 
+export interface ProductReview {
+  id: string | number;
+  product_id: number;
+  reviewer_name: string;
+  rating: number;
+  title?: string;
+  review: string;
+  date: string;
+  verified: boolean;
+  helpful_count?: number;
+}
+
 export interface ProductCategory {
   id: number;
   name: string;
